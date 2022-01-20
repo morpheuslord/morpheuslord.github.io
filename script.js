@@ -55,7 +55,7 @@ class TextScramble {
 const phrases = [
 'MORPHEUSLORD,',
 'cqrCyber / cc',
-'Articles \related to Cyber',
+'Articles related to Cyber',
 'Security',
 '&',
 'Computer / Science',
