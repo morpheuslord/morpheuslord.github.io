@@ -10,7 +10,9 @@ import Learining from './components/learning/Learining'
 import Testimonials from './components/testimonials/Testimonials'
 import Research from './components/research/Research'
 import Certs from './components/certifications/Certs'
-import Tech from './components/tech/Tech'
+import Tech from './components/Tech/Tech'
+
+// For some stupid reason this works? Why does have to Tech/Tech and not tech/Tech need to debug
 
 const App = () => {
     return (
