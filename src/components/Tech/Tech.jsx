@@ -1,7 +1,15 @@
-import React from 'react'
-import { Radar } from 'react-chartjs-2';
-import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
-import './tech.css';
+import React from "react";
+import { Radar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import "./tech.css";
 
 ChartJS.register(
   RadialLinearScale,
@@ -14,59 +22,59 @@ ChartJS.register(
 
 const skillGraphs = [
   {
-    header: 'Programming & Scripting',
+    header: "Programming & Scripting",
     captions: [
-      'Python',
-      'Latex',
-      'Shell Scripting',
-      'Docker Compose',
-      'Terraform AWS',
-      'C/C++/Java',
-      'Python Flask',
-      'Python Qt5',
-      'MCP & Agentic AI'
+      "Python",
+      "Latex",
+      "Shell Scripting",
+      "Docker Compose",
+      "Terraform AWS",
+      "C/C++/Java",
+      "Python Flask",
+      "Python Qt5",
+      "MCP & Agentic AI",
     ],
-    values: [0.9, 0.9, 0.7, 0.7, 0.7, 0.5, 0.5, 0.5, 0.7]
+    values: [0.9, 0.9, 0.7, 0.7, 0.7, 0.5, 0.5, 0.5, 0.7],
   },
   {
-    header: 'Technologies & Tools',
+    header: "Technologies & Tools",
     captions: [
-      'Nmap',
-      'Wireshark',
-      'Metasploit',
-      'Burp Suite',
-      'TexStudio',
-      'Docker Compose',
-      'Terraform',
-      'AWS',
-      'Git'
+      "Nmap",
+      "Wireshark",
+      "Metasploit",
+      "Burp Suite",
+      "TexStudio",
+      "Docker Compose",
+      "Terraform",
+      "AWS",
+      "Git",
     ],
-    values: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.7, 0.7, 0.9]
+    values: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.7, 0.7, 0.9],
   },
   {
-    header: 'AI & Agentic Design',
+    header: "AI & Agentic Design",
     captions: [
-      'LLM (ChatGPT, LLama2)',
-      'RAG & Agentic AI',
-      'LangChain',
-      'Prompt Engineering',
-      'RAG Ops'
+      "LLM (ChatGPT, LLama2)",
+      "RAG & Agentic AI",
+      "LangChain",
+      "Prompt Engineering",
+      "RAG Ops",
     ],
-    values: [0.7, 0.7, 0.6, 0.6, 0.6]
+    values: [0.7, 0.7, 0.6, 0.6, 0.6],
   },
   {
-    header: 'Research & Supporting Skills',
+    header: "Research & Supporting Skills",
     captions: [
-      'LaTeX',
-      'TexStudio',
-      'Ontologies',
-      'GitHub',
-      'Documentation',
-      'Scientific Writing',
-      'Zotero'
+      "LaTeX",
+      "TexStudio",
+      "Ontologies",
+      "GitHub",
+      "Documentation",
+      "Scientific Writing",
+      "Zotero",
     ],
-    values: [0.9, 0.9, 0.6, 0.8, 0.9, 0.8, 0.7]
-  }
+    values: [0.9, 0.9, 0.6, 0.8, 0.9, 0.8, 0.7],
+  },
 ];
 
 const TechGraph = () => {
@@ -80,13 +88,13 @@ const TechGraph = () => {
             datasets: [
               {
                 label: set.header,
-                data: set.values.map(v => v * 100),
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                data: set.values.map((v) => v * 100),
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
                 borderWidth: 2,
-                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-              }
-            ]
+                pointBackgroundColor: "rgba(54, 162, 235, 1)",
+              },
+            ],
           };
 
           const options = {
@@ -95,26 +103,26 @@ const TechGraph = () => {
                 min: 0,
                 max: 100,
                 ticks: {
-                  display: false
+                  display: false,
                 },
                 grid: {
-                  color: '#444'
+                  color: "#444",
                 },
                 pointLabels: {
                   font: {
-                    size: 14
+                    size: 14,
                   },
-                  color: '#fff'
-                }
-              }
+                  color: "#fff",
+                },
+              },
             },
             plugins: {
               legend: {
                 labels: {
-                  color: '#fff'
-                }
-              }
-            }
+                  color: "#fff",
+                },
+              },
+            },
           };
 
           return (

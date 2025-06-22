@@ -19,8 +19,6 @@
 .about__me-image {
     border-radius: 2rem;
     overflow: hidden;
-    /** độ nghiên ảnh about*/
-    /* transform: rotate(9deg); */
     transition: var(--transition);
 }
 
@@ -35,19 +33,20 @@
 }
 
 .about__card {
-    background: var(--color-bg-variant);
-    border: 1px solid transparent;
+    background: transparent;
+    border: 2px solid var(--color-primary); 
     border-radius: 1rem;
     padding: 2rem;
     text-align: center;
     transition: var(--transition);
+    color: var(--color-light);
 }
 
 .about__card:hover {
-    background: transparent;
-    border-color: var(--color-primary--variant);
+    background: var(--color-bg-variant);
     cursor: default;
 }
+
 
 .about__icon {
     color: var(--color-primary);
