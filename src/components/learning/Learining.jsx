@@ -1,16 +1,15 @@
 import React from 'react'
-import './services.css'
+import './learining.css'
 import { BsCheckLg } from 'react-icons/bs'
 
-const Services = () => {
+const Learining = () => {
     return (
         <section id='services'>
             <h5>What I Know</h5>
             <h2>Learning and Achievement</h2>
 
             <div className="container services__containter">
-                {/* start Mô tả chi tiết */}
-                <article className="service">
+                <article className="service service--cyber">
                     <div className="service__head">
                         <h3>Cybersecurity Skills</h3>
                     </div>
@@ -37,10 +36,7 @@ const Services = () => {
                         </li>
                     </ul>
                 </article>
-                {/* End of ui/ux */}
-
-                {/* start Mô tả chi tiết */}
-                <article className="service">
+                <article className="service service--achieve">
                     <div className="service__head">
                         <h3>Achieve</h3>
                     </div>
@@ -63,10 +59,7 @@ const Services = () => {
                         </li>
                     </ul>
                 </article>
-                {/* End of ui/ux */}
-
-                {/* Mô tả chi tiết */}
-                <article className="service">
+                <article className="service service--research">
                     <div className="service__head">
                         <h3>Research Platform</h3>
                     </div>
@@ -89,11 +82,9 @@ const Services = () => {
                         </li>
                     </ul>
                 </article>
-                {/* End of ui/ux */}
-
             </div>
         </section>
     )
 }
 
-export default Services
+export default Learining

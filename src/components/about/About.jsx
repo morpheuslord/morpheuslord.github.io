@@ -1,7 +1,5 @@
-import React from 'react'
 import './about.css'
 import ME from '../../assets/me-about.png'
-import { FaAward } from 'react-icons/fa'
 import { TbCertificate } from 'react-icons/tb'
 import { VscFolderLibrary } from 'react-icons/vsc'
 

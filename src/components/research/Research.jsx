@@ -27,7 +27,7 @@ const data = [
     },
     {
         id: 4,
-        image: IMG4,
+        image: IMG3,
         title: 'Using Autoencoder for malware detection: A deeper study into auto encoders and their use in cybersecurity.',
         github: 'https://www.fmdbpub.com/uploads/articles/174600650419444.%20FTSIN-292-2024.pdf',
     },

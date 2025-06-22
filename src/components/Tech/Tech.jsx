@@ -1,193 +1,130 @@
-import React from 'react';
+import { Radar } from 'react-chartjs-2';
+import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import './tech.css';
-import { BsPatchCheckFill } from 'react-icons/bs';
 
-const Tech = () => {
-    return (
-        <section id='experience'>
-            <h2>Tech I have worked on</h2>
-            <div className="container experience__container">
-                {/* Programming Languages */}
-                <div className="experience__section">
-                    <h3>Programming & Scripting Languages</h3>
-                    <div className="experience__content">
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Python</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
 
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Latex</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
+const skillGraphs = [
+  {
+    header: 'Programming & Scripting',
+    captions: [
+      'Python',
+      'Latex',
+      'Shell Scripting',
+      'Docker Compose',
+      'Terraform AWS',
+      'C/C++/Java',
+      'Python Flask',
+      'Python Qt5',
+      'MCP & Agentic AI'
+    ],
+    values: [0.9, 0.9, 0.7, 0.7, 0.7, 0.5, 0.5, 0.5, 0.7]
+  },
+  {
+    header: 'Technologies & Tools',
+    captions: [
+      'Nmap',
+      'Wireshark',
+      'Metasploit',
+      'Burp Suite',
+      'TexStudio',
+      'Docker Compose',
+      'Terraform',
+      'AWS',
+      'Git'
+    ],
+    values: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.7, 0.7, 0.9]
+  },
+  {
+    header: 'AI & Agentic Design',
+    captions: [
+      'LLM (ChatGPT, LLama2)',
+      'RAG & Agentic AI',
+      'LangChain',
+      'Prompt Engineering',
+      'RAG Ops'
+    ],
+    values: [0.7, 0.7, 0.6, 0.6, 0.6]
+  },
+  {
+    header: 'Research & Supporting Skills',
+    captions: [
+      'LaTeX',
+      'TexStudio',
+      'Ontologies',
+      'GitHub',
+      'Documentation',
+      'Scientific Writing',
+      'Zotero'
+    ],
+    values: [0.9, 0.9, 0.6, 0.8, 0.9, 0.8, 0.7]
+  }
+];
 
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Shell Scripting - Bash and Batch</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
+const TechGraph = () => {
+  return (
+    <section id="tech-graph">
+      <h2>My Skill Graphs</h2>
+      <div className="graph__container">
+        {skillGraphs.map((set, index) => {
+          const data = {
+            labels: set.captions,
+            datasets: [
+              {
+                label: set.header,
+                data: set.values.map(v => v * 100),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+              }
+            ]
+          };
 
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Docker, Docker-compose</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
+          const options = {
+            scales: {
+              r: {
+                min: 0,
+                max: 100,
+                ticks: {
+                  display: false
+                },
+                grid: {
+                  color: '#444'
+                },
+                pointLabels: {
+                  font: {
+                    size: 14
+                  },
+                  color: '#fff'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#fff'
+                }
+              }
+            }
+          };
 
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Terraform AWS</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>C, C++, Java</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Python Flask</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Python Qt5</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Python Qt5</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>MCP & Agentic AI Design</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-
-                {/* Technologies and Tools */}
-                <div className="experience__section">
-                    <h3>Technologies and Tools</h3>
-                    <div className="experience__content">
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Nmap</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Wireshark</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Metasploit</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Burp Suite</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>TexStudio</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Docker, Docker-compose</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Terraform</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>AWS</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>LLM - ChatGPT, LLama2</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Git</h4>
-                                <small className='text-light'>Advanced</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>Ontologies</h4>
-                                <small className='text-light'>Beginner</small>
-                            </div>
-                        </article>
-                        <article className='experience__details'>
-                            <BsPatchCheckFill className='experience__details-icon' />
-                            <div>
-                                <h4>RAG & Agentic AI</h4>
-                                <small className='text-light'>Intermediate</small>
-                            </div>
-                        </article>
-                    </div>
-                </div>
+          return (
+            <div key={index} className="graph__item">
+              <Radar data={data} options={options} />
             </div>
-        </section>
-    )
-}
+          );
+        })}
+      </div>
+    </section>
+  );
+};
 
-export default Tech;
+export default TechGraph;
