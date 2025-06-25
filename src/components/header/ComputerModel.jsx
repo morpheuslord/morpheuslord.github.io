@@ -1,37 +1,75 @@
-// ComputerModel.jsx
-import React, { useEffect } from 'react';
+// Original ComputerModel with Cursor Control - No Buttons
+import React, { useEffect, useRef, useState } from 'react';
 import './computerModel.css';
 
 const ComputerModel = () => {
-  useEffect(() => {
-    const computerElement = document.querySelector('#computer');
-    const rotatey = document.querySelector("#rotatey");
-    const rotatex = document.querySelector("#rotatex");
+  const computerRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-    const rotate = () => {
-      let valuey = rotatey.value;
-      let valuex = rotatex.value;
-      computerElement.style.transform = `rotatex(${valuex}deg) rotatey(${valuey}deg)`;
+  useEffect(() => {
+    const computerElement = computerRef.current;
+    const container = containerRef.current;
+
+    const handleMouseMove = (e) => {
+      if (!isDragging || !container || !computerElement) return;
+      
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      // Calculate rotation based on mouse position relative to center
+      const deltaX = e.clientX - centerX;
+      const deltaY = e.clientY - centerY;
+      
+      // Convert to rotation values (adjust sensitivity)
+      const rotationY = (deltaX / rect.width) * 180;
+      const rotationX = -(deltaY / rect.height) * 180;
+      
+      // Clamp values to reasonable ranges
+      const clampedX = Math.max(-90, Math.min(90, rotationX));
+      const clampedY = Math.max(-180, Math.min(180, rotationY));
+      
+      computerElement.style.transform = `rotatex(${clampedX}deg) rotatey(${clampedY}deg)`;
     };
 
-    rotatey.addEventListener("change", rotate);
-    rotatex.addEventListener("change", rotate);
+    const handleMouseDown = (e) => {
+      setIsDragging(true);
+      handleMouseMove(e);
+    };
 
-    rotatey.addEventListener("input", rotate);
-    rotatex.addEventListener("input", rotate);
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    // Add event listeners
+    if (container) {
+      container.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
 
     return () => {
-      rotatey.removeEventListener("change", rotate);
-      rotatex.removeEventListener("change", rotate);
-
-      rotatey.removeEventListener("input", rotate);
-      rotatex.removeEventListener("input", rotate);
+      if (container) {
+        container.removeEventListener("mousedown", handleMouseDown);
+      }
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [isDragging]);
 
   return (
-    <>
-      <div className="computer" id="computer">
+    <div ref={containerRef} style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: '50vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: isDragging ? 'grabbing' : 'grab'
+    }}>
+      
+      <div className="computer" ref={computerRef}>
         <div className="screen">
           <div className="front square"></div>
           <div className="back square"></div>
@@ -101,11 +139,7 @@ const ComputerModel = () => {
           <div className="bottom6 square"></div>
         </div>
       </div>
-      <form className="ui">
-        <input type="range" min="-360" max="360" value="45" id="rotatey" />
-        <input type="range" min="-360" max="360" value="-30" id="rotatex" />
-      </form>
-    </>
+    </div>
   );
 };
 

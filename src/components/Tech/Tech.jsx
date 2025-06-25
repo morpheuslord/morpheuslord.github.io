@@ -79,7 +79,7 @@ const skillGraphs = [
 
 const TechGraph = () => {
   return (
-    <section id="tech-graph">
+    <section id="tech_graph">
       <h2>My Skill Graphs</h2>
       <div className="graph__container">
         {skillGraphs.map((set, index) => {

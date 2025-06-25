@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import "./experience.css";
+import "./experience.css"; // Import the CSS file above
 import { BsPatchCheckFill } from "react-icons/bs";
 
 const roles = [
   {
     title: "Cybersecurity Engineer Intern – Averlon/Avercyber",
-    date: "5/2023",
+    startDate: "May 2023",
+    endDate: "Jul 2023",
+    duration: "3 months",
     meta: "UNI Overlap",
     content: (
       <>
@@ -72,8 +74,10 @@ const roles = [
   },
   {
     title: "Offensive Security Engineer Intern – Averlon/Avercyber",
-    date: "7/2023",
-    meta: "UNI Overlap/ Promotion",
+    startDate: "Jul 2023",
+    endDate: "Mar 2024",
+    duration: "8 months",
+    meta: "UNI Overlap/Promotion",
     content: (
       <>
         <div className="experience__section">
@@ -157,7 +161,9 @@ const roles = [
   },
   {
     title: "Freelance Researcher & Developer",
-    date: "3/2024",
+    startDate: "Mar 2024",
+    endDate: "Oct 2024",
+    duration: "7 months",
     meta: "Buffer",
     content: (
       <>
@@ -197,7 +203,9 @@ const roles = [
   },
   {
     title: "CyberSecurity Engineer – Cygne Noir Cyber",
-    date: "10/2024",
+    startDate: "Oct 2024",
+    endDate: "Present",
+    duration: "8+ months",
     meta: "Present Working",
     content: (
       <>
@@ -291,7 +299,6 @@ const roles = [
   }
 ];
 
-
 const Experience = () => {
   const container = useRef(null);
 
@@ -317,6 +324,7 @@ const Experience = () => {
     function onStepClick(e) {
       const step = e.target.closest(`.${DOM.step}`);
       if (!step) return;
+      
       Array.from(stepper.children).forEach((s) =>
         s.classList.remove(DOM.active)
       );
@@ -325,7 +333,28 @@ const Experience = () => {
       const idx = Array.from(stepper.children).indexOf(step);
       slides.forEach((s) => s.classList.remove(DOM.slideActive));
       slides[idx].classList.add(DOM.slideActive);
+
+      // Update progress line
+      updateProgressLine(idx);
     }
+
+    function updateProgressLine(activeIndex) {
+      const progressWidth = ((activeIndex + 1) / roles.length) * 100;
+      const stepperAfter = document.createElement('style');
+      stepperAfter.textContent = `.timeline__stepper::after { width: ${progressWidth}% !important; }`;
+      
+      // Remove previous style if exists
+      const existingStyle = document.getElementById('progress-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      stepperAfter.id = 'progress-style';
+      document.head.appendChild(stepperAfter);
+    }
+
+    // Initialize progress line
+    updateProgressLine(0);
 
     return () => {
       stepper.removeEventListener("click", onStepClick);
@@ -339,25 +368,27 @@ const Experience = () => {
 
       <div ref={container} className="timeline">
         <div className="timeline__stepper">
-          {roles.map((r, i) => (
+          {roles.map((role, i) => (
             <div key={i} className="timeline__step">
-              <div className="timeline__step-dot" /> {/* This is the indicator ball */}
-              <div className="timeline__step-date">{r.date}</div>
-              {r.meta && (
-                <div className="timeline__step-meta">{r.meta}</div>
+              <div className="timeline__step-dot" />
+              <div className="timeline__step-dates">
+                <span className="timeline__step-start-date">{role.startDate}</span>
+                <span className="timeline__step-end-date">{role.endDate}</span>
+                <span className="timeline__step-duration">{role.duration}</span>
+              </div>
+              {role.meta && (
+                <div className="timeline__step-meta">{role.meta}</div>
               )}
-              <p className="timeline__step-title">
-                {r.title}
-              </p>
+              <p className="timeline__step-title">{role.title}</p>
             </div>
           ))}
         </div>
 
         <div className="timeline__slides">
-          {roles.map((r, i) => (
+          {roles.map((role, i) => (
             <div key={i} className="timeline__slide">
-              <h3 className="timeline__slide-title">{r.title}</h3>
-              <div className="timeline__slide-content">{r.content}</div>
+              <h3 className="timeline__slide-title">{role.title}</h3>
+              <div className="timeline__slide-content">{role.content}</div>
             </div>
           ))}
         </div>

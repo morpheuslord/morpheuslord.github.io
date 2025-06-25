@@ -1,8 +1,4 @@
-/* computerModel.css */
-body {
-    margin: 0;
-    background-color: #F6C3BA;
-}
+/* Original Computer Model with Cursor Control - No Background Override */
 
 .computer {
     z-index: 1;
@@ -10,10 +6,11 @@ body {
     height: 180px;
     position: absolute;
     left: calc(50% - 75px);
-    top: calc(50vh - 90px);
+    top: calc(50% - 90px);
     transform-style: preserve-3d;
     transform-origin: center center;
     transform: rotatex(-30deg) rotatey(45deg);
+    transition: transform 0.1s ease;
 }
 
 .screen,
@@ -105,6 +102,13 @@ body {
     position: absolute;
     top: 0;
     left: 0;
+    animation: progressPulse 3s infinite;
+}
+
+@keyframes progressPulse {
+    0% { width: 50%; }
+    50% { width: 70%; }
+    100% { width: 60%; }
 }
 
 .back1,
@@ -193,6 +197,17 @@ body {
     transform: translateY(160px) translateX(-110px) translateZ(45px);
 }
 
+/* Add default styling for all keyboard surfaces */
+.front2, .back2, .top2, .left2, .right2, .bottom2,
+.front4, .front5, .front6,
+.back4, .back5, .back6,
+.top4, .top5, .top6,
+.left4, .left5, .left6,
+.right4, .right5, .right6,
+.bottom4, .bottom5, .bottom6 {
+    background-color: #8b7355;
+}
+
 .brownpart {
     position: absolute;
     width: 130px;
@@ -209,39 +224,33 @@ body {
     top: calc(50% - 2.5px);
     height: 5px;
     background-color: #282828;
+    animation: discPulse 3s infinite;
 }
 
-.ui {
+@keyframes discPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Hover effects */
+.computer:hover .progressbar:after {
+    animation-duration: 1.5s;
+}
+
+.computer:hover .disc {
+    animation-duration: 1.5s;
+}
+
+/* Instruction text */
+.computer-instruction {
     position: absolute;
-    left: calc(50% - 250px);
-    top: calc(50% - 200px);
-    z-index: 9999;
-    width: 500px;
-    height: 400px;
-}
-
-#rotatex {
-    position: absolute;
-    right: -150px;
-    top: 50%;
-    transform: rotate(270deg);
-}
-
-#rotatey {
-    position: absolute;
-    left: calc(50% - 150px);
-}
-
-input[type="range"] {
-    -webkit-appearance: none;
-    cursor: pointer;
-    width: 300px;
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
-    background-color: #565656;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-primary);
+    font-size: 0.9rem;
+    text-align: center;
+    z-index: 1000;
+    opacity: 0.8;
 }

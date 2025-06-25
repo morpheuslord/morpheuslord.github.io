@@ -1,75 +1,293 @@
+/* Enhanced About Section with Cosmic Blackhole Effects */
+
 .about__container {
     display: grid;
     grid-template-columns: 35% 50%;
     gap: 15%;
 }
 
+/* Add header styling to match learning section */
+.about h5 {
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+#about h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #b19cd9, #c8a2c8, #d4a4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Enhanced profile image container with cosmic effects */
 .about__me {
     width: 100%;
     aspect-ratio: 1/1;
     border-radius: 2rem;
     background: linear-gradient(45deg,
-            transparent,
-            var(--color-primary),
-            transparent);
+        transparent,
+        rgba(108, 92, 231, 0.8),
+        #6c5ce7,
+        rgba(108, 92, 231, 0.8),
+        transparent);
     display: grid;
     place-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(108, 92, 231, 0.3);
+    transition: all 0.4s ease;
+}
+
+/* Cosmic glow effect */
+.about__me::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        transparent,
+        rgba(108, 92, 231, 0.1),
+        transparent,
+        rgba(195, 183, 198, 0.1),
+        transparent
+    );
+    animation: cosmicRotation 8s linear infinite;
+    z-index: 1;
+}
+
+/* Rotating cosmic border animation */
+@keyframes cosmicRotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.about__me:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        0 0 50px rgba(108, 92, 231, 0.5),
+        inset 0 0 30px rgba(108, 92, 231, 0.2);
 }
 
 .about__me-image {
     border-radius: 2rem;
     overflow: hidden;
-    transition: var(--transition);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    height: 90%;
 }
 
 .about__me-image:hover {
-    transform: rotate(0);
+    transform: rotate(0deg) scale(1.1);
+    filter: brightness(1.1) contrast(1.1);
+    box-shadow: 0 0 25px rgba(108, 92, 231, 0.4);
 }
 
+/* Enhanced card grid */
 .about__cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
 }
 
+/* Enhanced about cards with cosmic background */
 .about__card {
-    background: transparent;
-    border: 2px solid var(--color-primary); 
-    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(40, 40, 40, 0.8));
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    border-radius: 15px;
     padding: 2rem;
     text-align: center;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     color: var(--color-light);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Sliding gradient overlay for cards */
+.about__card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(108, 92, 231, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+    z-index: 1;
+}
+
+/* Enhanced card hover effects */
 .about__card:hover {
-    background: var(--color-bg-variant);
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(50, 50, 50, 0.9));
+    border-color: #6c5ce7;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 15px 40px rgba(108, 92, 231, 0.3),
+        0 0 0 1px rgba(108, 92, 231, 0.2);
     cursor: default;
 }
 
+/* Activate sliding effect on hover */
+.about__card:hover::before {
+    transform: translateX(100%);
+}
 
+/* Ensure card content stays above overlay */
+.about__card * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Enhanced icon with glow effect */
 .about__icon {
-    color: var(--color-primary);
-    font-size: 1.4rem;
+    color: #6c5ce7;
+    font-size: 1.6rem;
     margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.3));
+}
+
+.about__card:hover .about__icon {
+    transform: scale(1.2);
+    color: #8b7cf6;
+    filter: drop-shadow(0 0 15px rgba(108, 92, 231, 0.6));
 }
 
 .about__card h5 {
     font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.about__card:hover h5 {
+    color: #6c5ce7;
+    text-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
 }
 
 .about__card small {
     font-size: 0.7rem;
     color: var(--color-light);
+    transition: all 0.3s ease;
 }
 
+.about__card:hover small {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Enhanced content paragraph */
 .about__content p {
     margin: 2rem 0 2.6rem;
     color: var(--color-light);
+    line-height: 1.8;
+    position: relative;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.6), rgba(40, 40, 40, 0.4));
+    border-radius: 12px;
+    border: 1px solid rgba(108, 92, 231, 0.2);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
 }
 
+.about__content p:hover {
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.8), rgba(50, 50, 50, 0.6));
+    border-color: rgba(108, 92, 231, 0.4);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.2);
+}
 
-/* ================== Media Queries (Medium Devices ==============*/
+/* Loading animations */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply staggered animations */
+.about__me {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.about__content {
+    animation: slideInRight 0.8s ease-out 0.2s both;
+}
+
+.about__card:nth-child(1) { 
+    animation: slideInUp 0.6s ease-out 0.1s both; 
+}
+.about__card:nth-child(2) { 
+    animation: slideInUp 0.6s ease-out 0.2s both; 
+}
+.about__card:nth-child(3) { 
+    animation: slideInUp 0.6s ease-out 0.3s both; 
+}
+
+/* Special pulsing effect for featured cards */
+.about__card.featured {
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(30, 30, 30, 0.9));
+    border-color: #6c5ce7;
+    animation: cosmicPulse 3s infinite;
+}
+
+@keyframes cosmicPulse {
+    0% { 
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(108, 92, 231, 0.2);
+    }
+    50% { 
+        box-shadow: 
+            0 15px 40px rgba(108, 92, 231, 0.3),
+            0 0 30px rgba(108, 92, 231, 0.4);
+    }
+    100% { 
+        box-shadow: 
+            0 10px 30px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(108, 92, 231, 0.2);
+    }
+}
+
+/* Enhanced responsive design */
 @media screen and (max-width: 1024px) {
     .about__container {
         grid-template-columns: 1fr;
@@ -84,19 +302,29 @@
     .about__content {
         margin: 1rem 0 1.5rem;
     }
+    
+    .about__card {
+        padding: 1.5rem;
+    }
+    
+    .about__card:hover {
+        transform: translateY(-5px) scale(1.01);
+    }
 }
 
-
-/* ================== Media Queries (Medium Devices ==============*/
 @media screen and (max-width: 600px) {
     .about__me {
         width: 65%;
         margin: 0 auto 3rem;
     }
 
-    .about__card {
+    .about__cards {
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
+    }
+    
+    .about__card {
+        padding: 1.3rem;
     }
 
     .about__content {
@@ -104,6 +332,17 @@
     }
 
     .about__content p {
-        margin: 1.5rem 0
+        margin: 1.5rem 0;
+        padding: 1rem;
+    }
+    
+    /* Reduce hover effects on mobile */
+    .about__card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+    }
+    
+    .about__me:hover {
+        transform: scale(1.02);
     }
 }

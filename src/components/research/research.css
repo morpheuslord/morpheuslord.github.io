@@ -1,3 +1,23 @@
+.research h5 {
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+#research h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #b19cd9, #c8a2c8, #d4a4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+
 .portfolio__container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
