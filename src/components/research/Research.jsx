@@ -2,8 +2,10 @@ import React from 'react'
 import './research.css'
 import IMG1 from '../../assets/research1.jpg'
 import IMG2 from '../../assets/research2.jpg'
-import IMG3 from '../../assets/research3.jpg'
 import IMG4 from '../../assets/research4.jpg'
+import IMG5 from '../../assets/research5.jpg'
+import IMG6 from '../../assets/research6.jpg'
+import IMG7 from '../../assets/research7.jpg'
 
 //Do not use the images in production
 const data = [
@@ -27,15 +29,21 @@ const data = [
     },
     {
         id: 4,
-        image: IMG3,
+        image: IMG5,
         title: 'Using Autoencoder for malware detection: A deeper study into auto encoders and their use in cybersecurity.',
         github: 'https://www.fmdbpub.com/uploads/articles/174600650419444.%20FTSIN-292-2024.pdf',
     },
     {
         id: 5,
-        image: IMG4,
+        image: IMG6,
         title: 'Docker Based Decentralized Vulnerability Assessment with Port Scanning Powered by Artificial Intelligence',
         github: 'https://www.fmdbpub.com/uploads/articles/174595000296104.%20FTSIN-290-2024.pdf',
+    },
+    {
+        id: 6,
+        image: IMG7,
+        title: 'Docker Based Decentralized Vulnerability Assessment with Port Scanning Powered by Artificial Intelligence',
+        github: 'https://link.springer.com/chapter/10.1007/978-3-031-85008-0_6',
     }
 ]
 
