@@ -1,396 +1,418 @@
-:root {
-  --color-accent-light: #c3b7c6;
-  --color-secondary: #888;
-  --text-color-light: #eee;
-  --color-heading: #fff;
-  --transition-duration: .3s;
-  --timeline-active: #6c5ce7;
-  --timeline-inactive: #2d3436;
+/* Interactive Tech Skills CSS */
+
+.interactive-tech-skills {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  padding: 2rem;
 }
 
-/* Enhanced Tech Section with Cosmic Blackhole Effects */
-
-.tech__container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2.5rem;
-    justify-content: center;
+.tech-skills-container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Enhanced tech cards with cosmic background */
-.tech__container > div {
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(40, 40, 40, 0.8));
-    padding: 2.5rem 3rem;
-    border-radius: 20px;
-    border: 1px solid rgba(108, 92, 231, 0.3);
-    transition: all 0.4s ease;
-    flex: 1 1 45%;
-    max-width: 45%;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+.skills-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  background: linear-gradient(45deg, #b19cd9, #c8a2c8, #d4a4aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 3rem;
+  text-align: center;
 }
 
-.tech_graph h5 {
-    color: var(--color-primary);
-    font-size: 1rem;
-    font-weight: 400;
-    margin-bottom: 0.5rem;
-    text-align: center;
+.graph-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 
-#tech_graph h2 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    background: linear-gradient(45deg, #b19cd9, #c8a2c8, #d4a4aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 2rem;
-    text-align: center;
+.skill-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(40, 40, 40, 0.8));
+  border: 2px solid rgba(108, 92, 231, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
 }
 
-/* Sliding gradient overlay for tech cards */
-.tech__container > div::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, transparent, rgba(108, 92, 231, 0.1), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.8s ease;
-    z-index: 1;
+.skill-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(108, 92, 231, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+  z-index: 1;
 }
 
-/* Enhanced hover effects for tech cards */
-.tech__container > div:hover {
-    background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(50, 50, 50, 0.9));
-    border-color: #6c5ce7;
-    transform: translateY(-10px) scale(1.03);
-    box-shadow: 
-        0 20px 50px rgba(108, 92, 231, 0.4),
-        0 0 0 2px rgba(108, 92, 231, 0.3),
-        inset 0 0 30px rgba(108, 92, 231, 0.1);
-    cursor: default;
+.skill-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  border-color: #6c5ce7;
+  box-shadow: 
+    0 25px 60px rgba(108, 92, 231, 0.4),
+    0 0 0 3px rgba(108, 92, 231, 0.3);
 }
 
-/* Activate sliding effect on hover */
-.tech__container > div:hover::before {
-    transform: translateX(100%);
+.skill-card:hover::before {
+  transform: translateX(100%);
 }
 
-/* Ensure content stays above overlay */
-.tech__container > div * {
-    position: relative;
-    z-index: 2;
+.skill-card-content {
+  position: relative;
+  z-index: 2;
+  height: 400px;
 }
 
-/* Enhanced tech card titles */
-.tech__container > div h3 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #6c5ce7;
-    font-size: 1.4rem;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    background: linear-gradient(45deg, #6c5ce7, #8b7cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.3));
+.skill-header {
+  color: #6c5ce7;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #6c5ce7, #8b7cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.tech__container > div:hover h3 {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 15px rgba(108, 92, 231, 0.6));
+.click-hint {
+  text-align: center;
+  color: #8b7cf6;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
 }
 
-/* Enhanced skills branch styling */
-.skills__branch {
-    text-align: center;
-    margin-top: -0.5rem;
-    margin-bottom: 2.5rem;
-    color: #8b7cf6;
-    font-weight: 600;
-    font-size: 1.2rem;
-    letter-spacing: 0.8px;
-    opacity: 0.9;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    background: rgba(108, 92, 231, 0.1);
-    border-radius: 25px;
-    border: 1px solid rgba(108, 92, 231, 0.2);
-    display: inline-block;
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
 }
 
-.skills__branch::before {
-    content: "↳";
-    margin-right: 0.8rem;
-    font-size: 1.4rem;
-    color: #6c5ce7;
-    transition: all 0.3s ease;
+.modal-content {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(40, 40, 40, 0.9));
+  border: 2px solid #6c5ce7;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 25px 60px rgba(108, 92, 231, 0.5);
 }
 
-.tech__container > div:hover .skills__branch {
-    background: rgba(108, 92, 231, 0.2);
-    border-color: #6c5ce7;
-    transform: scale(1.02);
-    color: #a78bfa;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(108, 92, 231, 0.3);
+  padding-bottom: 1rem;
 }
 
-.tech__container > div:hover .skills__branch::before {
-    transform: rotate(90deg);
-    color: #8b7cf6;
+.modal-title {
+  color: #6c5ce7;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #6c5ce7, #8b7cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.tech__content {
-    display: grid;
-    grid-template-columns: 1fr 0.75fr;
-    row-gap: 1.5rem;
-    column-gap: 2rem;
+.close-button {
+  background: rgba(108, 92, 231, 0.2);
+  border: 1px solid #6c5ce7;
+  color: #6c5ce7;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.tech__details {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-    padding: 0.8rem;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    background: rgba(108, 92, 231, 0.05);
-    border: 1px solid rgba(108, 92, 231, 0.1);
+.close-button:hover {
+  background: rgba(108, 92, 231, 0.4);
+  transform: scale(1.1);
 }
 
-.tech__details:hover {
-    background: rgba(108, 92, 231, 0.1);
-    border-color: rgba(108, 92, 231, 0.3);
-    transform: translateX(5px);
-    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.2);
+.derivation-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
 }
 
-.tech__details-icon {
-    margin-top: 6px;
-    color: #6c5ce7;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 0 5px rgba(108, 92, 231, 0.3));
+.chart-section {
+  background: rgba(20, 20, 20, 0.5);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(108, 92, 231, 0.2);
 }
 
-.tech__details:hover .tech__details-icon {
-    transform: scale(1.2) rotate(360deg);
-    color: #8b7cf6;
-    filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.6));
+.chart-title {
+  color: #8b7cf6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
-/* Enhanced graph container */
-.graph__container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2.5rem;
-    justify-content: center;
-    margin-top: 3rem;
+.experience-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* Enhanced graph items with cosmic styling */
-.graph__item {
-    width: 400px;
-    height: 400px;
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(20, 20, 20, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(108, 92, 231, 0.1);
+  transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+  background: rgba(108, 92, 231, 0.1);
+  border-color: rgba(108, 92, 231, 0.3);
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  min-width: 20px;
+}
+
+.legend-text {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.legend-period {
+  color: #8b7cf6;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .graph-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    padding: 1rem;
+    margin: 1rem;
+  }
+  
+  .skill-card {
     padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(40, 40, 40, 0.8));
-    border: 1px solid rgba(108, 92, 231, 0.3);
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(15px);
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
+  }
+  
+  .skill-card:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+  
+  .skills-title {
+    font-size: 2rem;
+  }
+  
+  .modal-title {
+    font-size: 1.4rem;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+  }
 }
 
-/* Graph item overlay effect */
-.graph__item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, transparent, rgba(108, 92, 231, 0.1), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.8s ease;
-    z-index: 1;
-}
-
-.graph__item:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: #6c5ce7;
-    box-shadow: 
-        0 20px 50px rgba(108, 92, 231, 0.3),
-        0 0 0 2px rgba(108, 92, 231, 0.2);
-}
-
-.graph__item:hover::before {
-    transform: translateX(100%);
-}
-
-/* Ensure graph content stays above overlay */
-.graph__item * {
-    position: relative;
-    z-index: 2;
-}
-
-/* Special featured tech card */
-.tech__container > div.featured {
-    background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(30, 30, 30, 0.9));
-    border-color: #6c5ce7;
-    animation: cosmicPulse 4s infinite;
-}
-
-@keyframes cosmicPulse {
-    0% { 
-        box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.5),
-            0 0 20px rgba(108, 92, 231, 0.2);
-    }
-    50% { 
-        box-shadow: 
-            0 20px 50px rgba(108, 92, 231, 0.4),
-            0 0 30px rgba(108, 92, 231, 0.4);
-    }
-    100% { 
-        box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.5),
-            0 0 20px rgba(108, 92, 231, 0.2);
-    }
+@media (max-width: 480px) {
+  .interactive-tech-skills {
+    padding: 1rem;
+  }
+  
+  .skill-card {
+    padding: 1rem;
+  }
+  
+  .skill-card-content {
+    height: 350px;
+  }
+  
+  .skills-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  
+  .modal-content {
+    padding: 0.8rem;
+    margin: 0.5rem;
+    max-width: 95vw;
+  }
+  
+  .modal-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .close-button {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
 }
 
 /* Loading animations */
 @keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Apply staggered animations */
-.tech__container > div:nth-child(1) { 
-    animation: slideInUp 0.8s ease-out 0.1s both; 
-}
-.tech__container > div:nth-child(2) { 
-    animation: slideInUp 0.8s ease-out 0.2s both; 
-}
-.tech__container > div:nth-child(3) { 
-    animation: slideInUp 0.8s ease-out 0.3s both; 
-}
-.tech__container > div:nth-child(4) { 
-    animation: slideInUp 0.8s ease-out 0.4s both; 
+.skill-card:nth-child(1) { 
+  animation: slideInUp 0.8s ease-out 0.1s both; 
 }
 
-.graph__item:nth-child(1) { 
-    animation: slideInScale 0.8s ease-out 0.5s both; 
-}
-.graph__item:nth-child(2) { 
-    animation: slideInScale 0.8s ease-out 0.6s both; 
-}
-.graph__item:nth-child(3) { 
-    animation: slideInScale 0.8s ease-out 0.7s both; 
+.skill-card:nth-child(2) { 
+  animation: slideInUp 0.8s ease-out 0.2s both; 
 }
 
-/* Enhanced responsive design */
-@media screen and (max-width: 1024px) {
-    .tech__container {
-        flex-direction: column;
-        align-items: center;
-        gap: 2rem;
-    }
-
-    .tech__container > div {
-        width: 85%;
-        max-width: 85%;
-        padding: 2rem;
-    }
-
-    .tech__container > div:hover {
-        transform: translateY(-5px) scale(1.01);
-    }
-
-    .tech__content {
-        padding: 1rem;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .graph__container {
-        gap: 2rem;
-    }
+.skill-card:nth-child(3) { 
+  animation: slideInUp 0.8s ease-out 0.3s both; 
 }
 
-@media screen and (max-width: 1200px) {
-    .graph__item {
-        width: 350px;
-        height: 350px;
-    }
-    
-    .graph__item:hover {
-        transform: translateY(-5px) scale(1.01);
-    }
+.skill-card:nth-child(4) { 
+  animation: slideInUp 0.8s ease-out 0.4s both; 
 }
 
-@media screen and (max-width: 600px) {
-    .tech__container {
-        gap: 1.5rem;
-    }
+/* Modal entrance animation */
+.modal-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
 
-    .tech__container > div {
-        width: 100%;
-        max-width: 100%;
-        padding: 1.5rem;
-    }
+.modal-content {
+  animation: slideInScale 0.4s ease-out;
+}
 
-    .tech__content {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .graph__item {
-        width: 300px;
-        height: 300px;
-        padding: 1rem;
-    }
-    
-    .skills__branch {
-        font-size: 1rem;
-        padding: 0.4rem 0.8rem;
-    }
-    
-    /* Reduce hover effects on mobile */
-    .tech__container > div:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(108, 92, 231, 0.2);
-    }
-    
-    .graph__item:hover {
-        transform: translateY(-3px);
-    }
-    
-    .tech__details:hover {
-        transform: translateX(3px);
-    }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Smooth scrollbar for modal */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(108, 92, 231, 0.1);
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(108, 92, 231, 0.5);
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 92, 231, 0.7);
+}
+
+/* Enhanced cosmic effects */
+.skill-card.featured {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(30, 30, 30, 0.9));
+  border-color: #6c5ce7;
+  animation: cosmicPulse 4s infinite;
+}
+
+@keyframes cosmicPulse {
+  0% { 
+    box-shadow: 
+      0 15px 35px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(108, 92, 231, 0.2);
+  }
+  50% { 
+    box-shadow: 
+      0 20px 50px rgba(108, 92, 231, 0.4),
+      0 0 30px rgba(108, 92, 231, 0.4);
+  }
+  100% { 
+    box-shadow: 
+      0 15px 35px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(108, 92, 231, 0.2);
+  }
+}
+
+/* Focus states for accessibility */
+.skill-card:focus {
+  outline: 2px solid #6c5ce7;
+  outline-offset: 2px;
+}
+
+.close-button:focus {
+  outline: 2px solid #6c5ce7;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .interactive-tech-skills {
+    background: #1b1b1e;
+    color: black;
+  }
+  
+  .modal-overlay {
+    display: none;
+  }
+  
+  .skill-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    background: white;
+  }
 }
