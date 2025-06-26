@@ -20,7 +20,7 @@ import {
 const learningData = {
   cybersecurity: {
     title: "Cybersecurity Arsenal",
-    subtitle: "Elite Security Expertise",
+    subtitle: "Security Expertise",
     icon: <BsShieldCheck />,
     gradient: "cyber",
     skills: [
