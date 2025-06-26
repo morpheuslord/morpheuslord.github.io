@@ -8,51 +8,126 @@ const experiences = [
     period: "May 2023 - Jul 2023",
     color: "#ff6b6b",
     skills: {
-      "Python": 0.3,
-      "AWS": 0.4,
-      "Nmap": 0.5,
-      "Wireshark": 0.4,
-      "Metasploit": 0.4,
-      "Burp Suite": 0.4,
-      "LLM (ChatGPT, LLama2)": 0.3,
-      "RAG & Agentic AI": 0.2,
-      "Docker Compose": 0.2,
-      "Terraform": 0.3,
+      // Programming & Development
+      "Python": 0.95,
+      "Shell Scripting/Bash": 0.85,
+      "SQL": 0.7,
+      "Git/GitHub": 0.9,
+      "VS Code": 0.9,
+      
+      // Cybersecurity & Penetration Testing
+      "Nmap": 0.9,
+      "Wireshark": 0.85,
+      "Metasploit": 0.75,
+      "Burp Suite": 0.9,
+      "OWASP": 0.8,
+      "Vulnerability Assessment": 0.85,
+      "Penetration Testing": 0.8,
+      "OSINT": 0.75,
+      "Network Security": 0.85,
+      "Risk Assessment": 0.75,
+      
+      // Cloud & Infrastructure
+      "AWS": 0.8,
+      "Linux Administration": 0.9,
+      "Docker/Docker Compose": 0.85,
+      "Terraform": 0.8,
+      
+      // AI & Machine Learning
+      "LLM (ChatGPT, Claude, LLama2)": 0.9,
+      "RAG & Agentic AI": 0.9,
+      
+      // Research & Documentation
+      "Technical Documentation": 0.95,
+      "LaTeX/TexStudio": 0.95,
+      
+      // Tools & Collaboration
+      "Postman": 0.7,
+      "Slack": 0.9,
+      "Jira": 0.7,
     }
   },
   {
-    title: "Offensive Security Engineer Intern – Averlon/Avercyber", 
+    title: "Offensive Security Engineer Intern – Averlon/Avercyber",
     period: "Jul 2023 - Mar 2024",
     color: "#4ecdc4",
     skills: {
-      "Python": 0.4,
-      "AWS": 0.3,
-      "Shell Scripting": 0.5,
-      "Docker Compose": 0.4,
-      "Terraform AWS": 0.4,
-      "Terraform": 0.4,
+      // Programming & Development
+      "Python": 0.95,
+      "Shell Scripting/Bash": 0.85,
       "C/C++/Java": 0.3,
-      "Git": 0.4,
-      "Nmap": 0.2,
-      "Wireshark": 0.2,
-      "Metasploit": 0.3,
-      "Burp Suite": 0.3,
+      "Git/GitHub": 0.9,
+      "VS Code": 0.9,
+      "API Development": 0.7,
+      
+      // Cybersecurity & Penetration Testing
+      "Nmap": 0.9,
+      "Wireshark": 0.85,
+      "Metasploit": 0.75,
+      "Burp Suite": 0.9,
+      "OSINT": 0.75,
+      "Penetration Testing": 0.8,
+      "Network Security": 0.85,
+      "NIST Framework": 0.7,
+      "MITRE ATT&CK": 0.7,
+      
+      // Cloud & Infrastructure
+      "AWS": 0.8,
+      "Linux Administration": 0.9,
+      "Docker/Docker Compose": 0.85,
+      "Terraform": 0.8,
+      "Infrastructure as Code": 0.7,
+      "CI/CD": 0.6,
+      
+      // AI & Machine Learning
+      "Prompt Engineering": 0.9,
+      "LLM (ChatGPT, Claude, LLama2)": 0.9,
+      
+      // Research & Documentation
+      "Technical Documentation": 0.95,
+      "LaTeX/TexStudio": 0.95,
+      
+      // Tools & Collaboration
+      "Project Management": 0.8,
+      "Postman": 0.7,
+      "Slack": 0.9,
+      "Jira": 0.7,
     }
   },
   {
     title: "Freelance Researcher & Developer",
-    period: "Mar 2024 - Oct 2024", 
+    period: "Mar 2024 - Oct 2024",
     color: "#45b7d1",
     skills: {
-      "Python": 0.2,
-      "Latex": 0.4,
-      "TexStudio": 0.4,
-      "Documentation": 0.4,
-      "Scientific Writing": 0.4,
-      "GitHub": 0.3,
-      "Git": 0.3,
-      "LaTeX": 0.4,
-      "Zotero": 0.3,
+      // Programming & Development
+      "Python": 0.95,
+      "Git/GitHub": 0.9,
+      "VS Code": 0.9,
+      "HTML/CSS": 0.8,
+      
+      // AI & Machine Learning
+      "LLM (ChatGPT, Claude, LLama2)": 0.9,
+      "Prompt Engineering": 0.9,
+      "RAG & Agentic AI": 0.9,
+      
+      // Research & Documentation
+      "LaTeX/TexStudio": 0.95,
+      "Scientific Writing": 0.9,
+      "Technical Documentation": 0.95,
+      "Academic Writing": 0.85,
+      "Literature Review": 0.8,
+      "Research Methodology": 0.8,
+      "Zotero": 0.85,
+      "Data Analysis": 0.7,
+      "Pandas/NumPy": 0.7,
+      "Jupyter Notebooks": 0.8,
+      
+      // Cloud & Infrastructure
+      "Linux Administration": 0.9,
+      
+      // Tools & Collaboration
+      "Project Management": 0.8,
+      "Slack": 0.9,
     }
   },
   {
@@ -60,84 +135,164 @@ const experiences = [
     period: "Oct 2024 - Present",
     color: "#6c5ce7",
     skills: {
-      "Python": 0.3,
-      "Python Flask": 0.5,
-      "Python Qt5": 0.5,
-      "MCP & Agentic AI": 0.7,
-      "LLM (ChatGPT, LLama2)": 0.4,
-      "RAG & Agentic AI": 0.5,
-      "LangChain": 0.6,
-      "Prompt Engineering": 0.6,
-      "RAG Ops": 0.6,
-      "Docker Compose": 0.3,
-      "AWS": 0.3,
-      "Git": 0.2,
-      "GitHub": 0.2,
-      "Documentation": 0.3,
-      "Ontologies": 0.6,
+      // Programming & Development
+      "Python": 0.95,
+      "Python Flask": 0.8,
+      "FastAPI": 0.7,
+      "Python Qt5": 0.8,
+      "JavaScript": 0.7,
+      "HTML/CSS": 0.8,
+      "Git/GitHub": 0.9,
+      "VS Code": 0.9,
+      "API Development": 0.7,
+      
+      // Cybersecurity & Penetration Testing
+      "OWASP": 0.8,
+      "Network Security": 0.85,
+      "Risk Assessment": 0.75,
+      
+      // Cloud & Infrastructure
+      "AWS": 0.8,
+      "Docker/Docker Compose": 0.85,
+      "Linux Administration": 0.9,
+      "CI/CD": 0.6,
+      "MongoDB": 0.7,
+      "Azure": 0.5,
+      "NIST Framework": 0.7,
+      "MITRE ATT&CK": 0.7,
+
+      // AI & Machine Learning
+      "RAG & Agentic AI": 0.9,
+      "LLM (ChatGPT, Claude, LLama2)": 0.9,
+      "LangChain/LangGraph": 0.8,
+      "Prompt Engineering": 0.9,
+      "RAG Ops": 0.8,
+      "MCP": 0.85,
+      "Vector Databases": 0.7,
+      "OpenAI API": 0.75,
+      "Anthropic Claude API": 0.6,
+      "Knowledge Graphs": 0.8,
+      "Chroma": 0.6,
+      
+      // Research & Documentation
+      "Technical Documentation": 0.95,
+      "Ontologies": 0.8,
+      "LaTeX/TexStudio": 0.95,
+      "Data Analysis": 0.7,
+      "Pandas/NumPy": 0.7,
+      
+      // Tools & Collaboration
+      "Project Management": 0.8,
+      "Postman": 0.7,
+      "Jira": 0.7,
+      "Slack": 0.9,
+      "Confluence": 0.6,
     }
   }
 ];
 
 const skillGraphs = [
   {
-    header: "Programming & Scripting",
+    header: "Programming & Development",
     captions: [
       "Python",
-      "Latex", 
-      "Shell Scripting",
-      "Docker Compose",
-      "Terraform AWS",
+      "Shell Scripting/Bash",
+      "JavaScript",
       "C/C++/Java",
       "Python Flask",
+      "FastAPI",
       "Python Qt5",
-      "MCP & Agentic AI",
+      "SQL",
+      "HTML/CSS",
+      "Git/GitHub",
+      "VS Code",
+      "API Development"
     ],
-    values: [0.9, 0.9, 0.7, 0.7, 0.7, 0.5, 0.5, 0.5, 0.7],
+    values: [0.95, 0.85, 0.7, 0.3, 0.8, 0.7, 0.8, 0.7, 0.8, 0.9, 0.9, 0.7],
     color: "#6c5ce7"
   },
   {
-    header: "Technologies & Tools",
+    header: "Cybersecurity & Penetration Testing",
     captions: [
       "Nmap",
-      "Wireshark", 
+      "Wireshark",
       "Metasploit",
       "Burp Suite",
-      "TexStudio",
-      "Docker Compose",
-      "Terraform",
-      "AWS",
-      "Git",
+      "OWASP",
+      "Vulnerability Assessment",
+      "Penetration Testing",
+      "OSINT",
+      "Network Security",
+      "NIST Framework",
+      "MITRE ATT&CK",
+      "Risk Assessment"
     ],
-    values: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.7, 0.7, 0.9],
-    color: "#4ecdc4"
-  },
-  {
-    header: "AI & Agentic Design",
-    captions: [
-      "LLM (ChatGPT, LLama2)",
-      "RAG & Agentic AI",
-      "LangChain",
-      "Prompt Engineering", 
-      "RAG Ops",
-    ],
-    values: [0.7, 0.7, 0.6, 0.6, 0.6],
+    values: [0.9, 0.85, 0.75, 0.9, 0.8, 0.85, 0.8, 0.75, 0.85, 0.7, 0.8, 0.75],
     color: "#ff6b6b"
   },
   {
-    header: "Research & Supporting Skills",
+    header: "Cloud & Infrastructure",
     captions: [
-      "LaTeX",
-      "TexStudio",
-      "Ontologies",
-      "GitHub",
-      "Documentation",
-      "Scientific Writing",
-      "Zotero",
+      "AWS",
+      "Docker/Docker Compose",
+      "Terraform",
+      "Linux Administration",
+      "Azure",
+      "CI/CD",
+      "Infrastructure as Code",
+      "MongoDB",
     ],
-    values: [0.9, 0.9, 0.6, 0.8, 0.9, 0.8, 0.7],
+    values: [0.8, 0.85, 0.8, 0.9, 0.5,  0.6, 0.7, 0.7],
+    color: "#4ecdc4"
+  },
+  {
+    header: "AI & Machine Learning",
+    captions: [
+      "LLM (ChatGPT, Claude, LLama2)",
+      "RAG & Agentic AI",
+      "LangChain/LangGraph",
+      "Prompt Engineering",
+      "RAG Ops",
+      "MCP",
+      "Vector Databases",
+      "OpenAI API",
+      "Anthropic Claude API",
+      "Knowledge Graphs",
+      "Chroma",
+    ],
+    values: [0.9, 0.9, 0.8, 0.9, 0.8, 0.85, 0.7, 0.75, 0.6, 0.8, 0.6],
     color: "#45b7d1"
   },
+  {
+    header: "Research & Documentation",
+    captions: [
+      "LaTeX/TexStudio",
+      "Scientific Writing",
+      "Technical Documentation",
+      "Academic Writing",
+      "Literature Review",
+      "Research Methodology",
+      "Zotero",
+      "Ontologies",
+      "Data Analysis",
+      "Pandas/NumPy",
+      "Jupyter Notebooks",
+    ],
+    values: [0.95, 0.9, 0.95, 0.85, 0.8, 0.8, 0.85, 0.8, 0.7, 0.7, 0.8],
+    color: "#48dbfb"
+  },
+  {
+    header: "Tools & Collaboration",
+    captions: [
+      "Postman",
+      "Jira",
+      "Confluence",
+      "Slack",
+      "Project Management"
+    ],
+    values: [0.6, 0.7, 0.6, 0.9, 0.8],
+    color: "#ff9ff3"
+  }
 ];
 
 // Custom Radar Chart Component
@@ -145,38 +300,38 @@ const RadarChart = ({ data, color, size = 300 }) => {
   const center = size / 2;
   const radius = (size / 2) - 40;
   const levels = 5;
-  
+
   const angleStep = (2 * Math.PI) / data.labels.length;
-  
+
   const polarToCartesian = (angle, r) => ({
     x: center + r * Math.cos(angle - Math.PI / 2),
     y: center + r * Math.sin(angle - Math.PI / 2)
   });
-  
+
   const createGridPath = (level) => {
     const r = (radius * level) / levels;
     const points = data.labels.map((_, i) => {
       const angle = i * angleStep;
       return polarToCartesian(angle, r);
     });
-    
-    return `M ${points[0].x} ${points[0].y} ` + 
-           points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') + 
-           ' Z';
+
+    return `M ${points[0].x} ${points[0].y} ` +
+      points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
+      ' Z';
   };
-  
+
   const createDataPath = () => {
     const points = data.values.map((value, i) => {
       const angle = i * angleStep;
       const r = (radius * value) / 100;
       return polarToCartesian(angle, r);
     });
-    
-    return `M ${points[0].x} ${points[0].y} ` + 
-           points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') + 
-           ' Z';
+
+    return `M ${points[0].x} ${points[0].y} ` +
+      points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
+      ' Z';
   };
-  
+
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
       <svg width={size} height={size} style={{ overflow: 'visible' }}>
@@ -191,7 +346,7 @@ const RadarChart = ({ data, color, size = 300 }) => {
             opacity="0.5"
           />
         ))}
-        
+
         {/* Axis lines */}
         {data.labels.map((_, i) => {
           const angle = i * angleStep;
@@ -209,7 +364,7 @@ const RadarChart = ({ data, color, size = 300 }) => {
             />
           );
         })}
-        
+
         {/* Data area */}
         <path
           d={createDataPath()}
@@ -217,7 +372,7 @@ const RadarChart = ({ data, color, size = 300 }) => {
           stroke={color}
           strokeWidth="2"
         />
-        
+
         {/* Data points */}
         {data.values.map((value, i) => {
           const angle = i * angleStep;
@@ -235,7 +390,7 @@ const RadarChart = ({ data, color, size = 300 }) => {
             />
           );
         })}
-        
+
         {/* Labels */}
         {data.labels.map((label, i) => {
           const angle = i * angleStep;
@@ -268,7 +423,7 @@ const MindmapChart = ({ skillSet }) => {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [containerSize, setContainerSize] = useState({ width: 900, height: 600 });
-  
+
   useEffect(() => {
     if (!skillSet || !svgRef.current) return;
 
@@ -351,13 +506,13 @@ const MindmapChart = ({ skillSet }) => {
 
     // Create SVG with zoom behavior
     svg.attr('width', width).attr('height', height);
-    
+
     const zoomBehavior = d3.zoom()
       .scaleExtent([0.1, 3])
       .on('zoom', (event) => {
         container.attr('transform', event.transform);
       });
-    
+
     svg.call(zoomBehavior);
 
     // Main container group
@@ -365,7 +520,7 @@ const MindmapChart = ({ skillSet }) => {
 
     // Add definitions for gradients and filters
     const defs = svg.append('defs');
-    
+
     // Glow filter
     const filter = defs.append('filter')
       .attr('id', `glow-${skillSet.header.replace(/\s+/g, '')}`)
@@ -373,11 +528,11 @@ const MindmapChart = ({ skillSet }) => {
       .attr('y', '-50%')
       .attr('width', '200%')
       .attr('height', '200%');
-    
+
     filter.append('feGaussianBlur')
       .attr('stdDeviation', '3')
       .attr('result', 'coloredBlur');
-    
+
     const feMerge = filter.append('feMerge');
     feMerge.append('feMergeNode').attr('in', 'coloredBlur');
     feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
@@ -390,8 +545,8 @@ const MindmapChart = ({ skillSet }) => {
         .strength(0.6))
       .force('charge', d3.forceManyBody()
         .strength(d => {
-          const baseStrength = d.type === 'center' ? -1500 : 
-                              d.type === 'skill' ? -800 : -400;
+          const baseStrength = d.type === 'center' ? -1500 :
+            d.type === 'skill' ? -800 : -400;
           return baseStrength * zoomLevel;
         }))
       .force('center', d3.forceCenter(centerX, centerY))
@@ -436,17 +591,17 @@ const MindmapChart = ({ skillSet }) => {
 
     // Add drag behavior
     const dragBehavior = d3.drag()
-      .on('start', function(event, d) {
+      .on('start', function (event, d) {
         if (!simulationRef.current) return;
         if (!event.active) simulationRef.current.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
       })
-      .on('drag', function(event, d) {
+      .on('drag', function (event, d) {
         d.fx = event.x;
         d.fy = event.y;
       })
-      .on('end', function(event, d) {
+      .on('end', function (event, d) {
         if (!simulationRef.current) return;
         if (!event.active) simulationRef.current.alphaTarget(0);
         if (d.type !== 'center') {
@@ -467,9 +622,9 @@ const MindmapChart = ({ skillSet }) => {
       .style('opacity', d => d.type === 'center' ? 1 : 0.9);
 
     // Add improved labels with better spacing
-    nodeElements.each(function(d) {
+    nodeElements.each(function (d) {
       const node = d3.select(this);
-      
+
       if (d.type === 'center') {
         node.append('text')
           .attr('text-anchor', 'middle')
@@ -481,7 +636,7 @@ const MindmapChart = ({ skillSet }) => {
       } else {
         // Create better spacing for labels
         const labelOffset = d.radius + (30 * zoomLevel);
-        
+
         // Background for better text readability
         const textBg = node.append('rect')
           .attr('fill', 'rgba(0,0,0,0.8)')
@@ -489,19 +644,19 @@ const MindmapChart = ({ skillSet }) => {
           .attr('ry', 6 * zoomLevel)
           .attr('stroke', d.color)
           .attr('stroke-width', 1 * zoomLevel);
-        
+
         const text = node.append('text')
           .attr('text-anchor', 'middle')
           .attr('fill', '#fff')
           .attr('font-size', `${(d.type === 'skill' ? 11 : 9) * zoomLevel}px`)
           .attr('font-weight', d.type === 'skill' ? 'bold' : 'normal');
-        
+
         // Improved text wrapping
         const words = d.name.split(' ');
         const maxChars = d.type === 'skill' ? 15 : 12;
         let lines = [];
         let currentLine = '';
-        
+
         words.forEach(word => {
           if ((currentLine + word).length > maxChars && currentLine.length > 0) {
             lines.push(currentLine.trim());
@@ -510,11 +665,11 @@ const MindmapChart = ({ skillSet }) => {
             currentLine += word + ' ';
           }
         });
-        
+
         if (currentLine.trim()) {
           lines.push(currentLine.trim());
         }
-        
+
         // Add text lines
         lines.forEach((line, i) => {
           text.append('tspan')
@@ -522,25 +677,25 @@ const MindmapChart = ({ skillSet }) => {
             .attr('dy', i === 0 ? `-${labelOffset}px` : `${14 * zoomLevel}px`)
             .text(line);
         });
-        
+
         // Add contribution percentage for experience nodes
-        if (d.type === 'experience') {
-          text.append('tspan')
-            .attr('x', 0)
-            .attr('dy', `${14 * zoomLevel}px`)
-            .attr('fill', '#8b7cf6')
-            .attr('font-size', `${8 * zoomLevel}px`)
-            .attr('font-weight', 'bold')
-            .text(`${(d.contribution * 100).toFixed(0)}%`);
-        }
-        
+        // if (d.type === 'experience') {
+        //   text.append('tspan')
+        //     .attr('x', 0)
+        //     .attr('dy', `${14 * zoomLevel}px`)
+        //     .attr('fill', '#8b7cf6')
+        //     .attr('font-size', `${8 * zoomLevel}px`)
+        //     .attr('font-weight', 'bold')
+        //     .text(`${(d.contribution * 100).toFixed(0)}%`);
+        // }
+
         // Update background size safely
         try {
           const bbox = text.node().getBBox();
           const padding = 6 * zoomLevel;
           textBg
             .attr('x', bbox.x - padding)
-            .attr('y', bbox.y - padding/2)
+            .attr('y', bbox.y - padding / 2)
             .attr('width', bbox.width + (padding * 2))
             .attr('height', bbox.height + padding);
         } catch (e) {
@@ -548,8 +703,8 @@ const MindmapChart = ({ skillSet }) => {
           const fallbackWidth = d.name.length * 8 * zoomLevel;
           const fallbackHeight = 20 * zoomLevel;
           textBg
-            .attr('x', -fallbackWidth/2)
-            .attr('y', -labelOffset - fallbackHeight/2)
+            .attr('x', -fallbackWidth / 2)
+            .attr('y', -labelOffset - fallbackHeight / 2)
             .attr('width', fallbackWidth)
             .attr('height', fallbackHeight);
         }
@@ -557,13 +712,13 @@ const MindmapChart = ({ skillSet }) => {
     });
 
     nodeElements
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         if (!simulationRef.current) return;
         setHoveredNode(d.id);
-        
+
         const connectedNodes = new Set();
         const connectedLinks = new Set();
-        
+
         links.forEach(link => {
           if (link.source.id === d.id || link.target.id === d.id) {
             connectedNodes.add(link.source.id);
@@ -571,14 +726,14 @@ const MindmapChart = ({ skillSet }) => {
             connectedLinks.add(link);
           }
         });
-        
+
         // Dim non-connected elements
         nodeElements
           .style('opacity', node => connectedNodes.has(node.id) ? 1 : 0.2);
-        
+
         linkElements
           .style('opacity', link => connectedLinks.has(link) ? 1 : 0.1);
-        
+
         // Scale up hovered node
         const circle = d3.select(this).select('circle');
         if (circle.node()) {
@@ -589,16 +744,16 @@ const MindmapChart = ({ skillSet }) => {
             .attr('stroke-width', 4 * zoomLevel);
         }
       })
-      .on('mouseout', function(event, d) {
+      .on('mouseout', function (event, d) {
         setHoveredNode(null);
-        
+
         // Restore all elements
         nodeElements
           .style('opacity', node => node.type === 'center' ? 1 : 0.9);
-        
+
         linkElements
           .style('opacity', 0.7);
-        
+
         // Scale down node
         const circle = d3.select(this).select('circle');
         if (circle.node()) {
@@ -609,7 +764,7 @@ const MindmapChart = ({ skillSet }) => {
             .attr('stroke-width', 2 * zoomLevel);
         }
       })
-      .on('click', function(event, d) {
+      .on('click', function (event, d) {
         // Add click ripple effect
         const ripple = d3.select(this)
           .append('circle')
@@ -618,13 +773,13 @@ const MindmapChart = ({ skillSet }) => {
           .attr('stroke', d.color)
           .attr('stroke-width', 3 * zoomLevel)
           .attr('opacity', 1);
-        
+
         ripple
           .transition()
           .duration(600)
           .attr('r', d.radius * 2.5)
           .attr('opacity', 0)
-          .on('end', function() {
+          .on('end', function () {
             ripple.remove();
           });
       });
@@ -639,7 +794,7 @@ const MindmapChart = ({ skillSet }) => {
     // Update positions on simulation tick
     simulation.on('tick', () => {
       if (!svgRef.current) return;
-      
+
       linkElements
         .attr('x1', d => d.source.x || 0)
         .attr('y1', d => d.source.y || 0)
@@ -652,16 +807,16 @@ const MindmapChart = ({ skillSet }) => {
 
     // Add title
     svg.append('text')
-    .attr('x', width / 2)
-    .attr('y', 30)
-    .attr('text-anchor', 'middle')
-    .attr('fill', skillSet.color)
-    .attr('font-size', `${18 * Math.min(zoomLevel, 1.5)}px`)
-    .attr('font-weight', 'bold')
-    .style('opacity', 0)
-    .transition()
-    .duration(1000)
-    .style('opacity', 1);
+      .attr('x', width / 2)
+      .attr('y', 30)
+      .attr('text-anchor', 'middle')
+      .attr('fill', skillSet.color)
+      .attr('font-size', `${18 * Math.min(zoomLevel, 1.5)}px`)
+      .attr('font-weight', 'bold')
+      .style('opacity', 0)
+      .transition()
+      .duration(1000)
+      .style('opacity', 1);
 
     // Cleanup function
     return () => {
@@ -692,10 +847,10 @@ const MindmapChart = ({ skillSet }) => {
   };
 
   return (
-    <div style={{ 
-      width: '100%', 
-      height: '100%', 
-      display: 'flex', 
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
       flexDirection: 'column',
       background: 'rgba(10, 10, 10, 0.5)',
       borderRadius: '10px',
@@ -774,18 +929,18 @@ const MindmapChart = ({ skillSet }) => {
       </div>
 
       {/* SVG Container */}
-      <div style={{ 
-        width: '100%', 
-        height: '100%', 
-        display: 'flex', 
-        justifyContent: 'center', 
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden'
       }}>
-        <svg 
+        <svg
           ref={svgRef}
-          style={{ 
-            maxWidth: '100%', 
+          style={{
+            maxWidth: '100%',
             maxHeight: '100%',
             border: `1px solid ${skillSet?.color || '#6c5ce7'}40`,
             borderRadius: '8px'
@@ -810,7 +965,7 @@ const MindmapChart = ({ skillSet }) => {
           animation: 'fadeIn 0.3s ease-out',
           border: '1px solid #6c5ce7'
         }}>
-         Drag nodes to rearrange • Use zoom controls to explore
+          Drag nodes to rearrange • Use zoom controls to explore
         </div>
       )}
     </div>
@@ -818,113 +973,113 @@ const MindmapChart = ({ skillSet }) => {
 };
 
 const Tech = () => {
- const [selectedSkillSet, setSelectedSkillSet] = useState(null);
- const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSkillSet, setSelectedSkillSet] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
- const openModal = (skillSet) => {
-   setSelectedSkillSet(skillSet);
-   setIsModalOpen(true);
- };
+  const openModal = (skillSet) => {
+    setSelectedSkillSet(skillSet);
+    setIsModalOpen(true);
+  };
 
- const closeModal = () => {
-   setIsModalOpen(false);
-   setSelectedSkillSet(null);
- };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedSkillSet(null);
+  };
 
- return (
-   <div className="interactive-tech-skills" style={{ background: '#1b1b1e' }}>
-     <div className="tech-skills-container">
-       
-       <h2 className="skills-title">My Skill Graphs</h2>
-       
-       <div className="graph-grid">
-         {skillGraphs.map((skillSet, index) => {
-           const data = {
-             labels: skillSet.captions,
-             values: skillSet.values.map((v) => v * 100),
-           };
+  return (
+    <div className="interactive-tech-skills" style={{ background: '#1b1b1e' }}>
+      <div className="tech-skills-container">
 
-           return (
-             <div 
-               key={index} 
-               className="skill-card"
-               onClick={() => openModal(skillSet)}
-               style={{ borderColor: `${skillSet.color}50` }}
-             >
-               <div className="skill-card-content">
-                 <h3 className="skill-header" style={{ color: skillSet.color }}>
-                   {skillSet.header}
-                 </h3>
-                 <p className="click-hint">Click to explore skill origins →</p>
-                 <div style={{ height: '300px' }}>
-                   <RadarChart data={data} color={skillSet.color} size={280} />
-                 </div>
-               </div>
-             </div>
-           );
-         })}
-       </div>
-     </div>
+        <h2 className="skills-title">My Skill Graphs</h2>
 
-     {isModalOpen && selectedSkillSet && (
-       <div className="modal-overlay" onClick={closeModal}>
-         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-           <div className="modal-header">
-             <h3 className="modal-title">
-               {selectedSkillSet.header} - Skill Development Journey
-             </h3>
-             <button className="close-button" onClick={closeModal}>
-               ×
-             </button>
-           </div>
-           
-           <div className="derivation-content">
-             <div className="chart-section">
-               <h4 className="chart-title">Skill Development Network</h4>
-               <div style={{ height: '500px' }}>
-                 <MindmapChart skillSet={selectedSkillSet} />
-               </div>
-             </div>
-             
-             <div className="chart-section">
-               <h4 className="chart-title">Experience Timeline & Legend</h4>
-               <div className="experience-legend">
-                 {experiences.map((exp, idx) => (
-                   <div key={idx} className="legend-item">
-                     <div 
-                       className="legend-color" 
-                       style={{ backgroundColor: exp.color }}
-                     />
-                     <div>
-                       <div className="legend-text">{exp.title.split(' – ')[0]}</div>
-                       <div className="legend-period">{exp.period}</div>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-               
-               <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(108, 92, 231, 0.1)', borderRadius: '10px' }}>
-                 <h5 style={{ color: '#8b7cf6', marginBottom: '1rem' }}>About This Network</h5>
-                 <p style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                   This mindmap visualizes how each skill in <strong>{selectedSkillSet.header}</strong> was 
-                   developed through your professional experiences. The network shows:
-                 </p>
-                 <ul style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6', marginTop: '0.5rem', paddingLeft: '1rem' }}>
-                   <li><strong>Center:</strong> The skill category</li>
-                   <li><strong>Inner Ring:</strong> Individual skills</li>
-                   <li><strong>Outer Nodes:</strong> Contributing experiences</li>
-                   <li><strong>Link Thickness:</strong> Contribution strength</li>
-                   <li><strong>Zoom Controls:</strong> Use +/- buttons to expand/contract view</li>
-                   <li><strong>Interactive:</strong> Drag nodes to rearrange the network</li>
-                 </ul>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-     )}
-   </div>
- );
+        <div className="graph-grid">
+          {skillGraphs.map((skillSet, index) => {
+            const data = {
+              labels: skillSet.captions,
+              values: skillSet.values.map((v) => v * 100),
+            };
+
+            return (
+              <div
+                key={index}
+                className="skill-card"
+                onClick={() => openModal(skillSet)}
+                style={{ borderColor: `${skillSet.color}50` }}
+              >
+                <div className="skill-card-content">
+                  <h3 className="skill-header" style={{ color: skillSet.color }}>
+                    {skillSet.header}
+                  </h3>
+                  <p className="click-hint">Click to explore skill origins →</p>
+                  <div style={{ height: '300px' }}>
+                    <RadarChart data={data} color={skillSet.color} size={280} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {isModalOpen && selectedSkillSet && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {selectedSkillSet.header} - Skill Development Journey
+              </h3>
+              <button className="close-button" onClick={closeModal}>
+                ×
+              </button>
+            </div>
+
+            <div className="derivation-content">
+              <div className="chart-section">
+                <h4 className="chart-title">Skill Development Network</h4>
+                <div style={{ height: '500px' }}>
+                  <MindmapChart skillSet={selectedSkillSet} />
+                </div>
+              </div>
+
+              <div className="chart-section">
+                <h4 className="chart-title">Experience Timeline & Legend</h4>
+                <div className="experience-legend">
+                  {experiences.map((exp, idx) => (
+                    <div key={idx} className="legend-item">
+                      <div
+                        className="legend-color"
+                        style={{ backgroundColor: exp.color }}
+                      />
+                      <div>
+                        <div className="legend-text">{exp.title.split(' – ')[0]}</div>
+                        <div className="legend-period">{exp.period}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(108, 92, 231, 0.1)', borderRadius: '10px' }}>
+                  <h5 style={{ color: '#8b7cf6', marginBottom: '1rem' }}>About This Network</h5>
+                  <p style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    This mindmap visualizes how each skill in <strong>{selectedSkillSet.header}</strong> was
+                    developed through your professional experiences. The network shows:
+                  </p>
+                  <ul style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6', marginTop: '0.5rem', paddingLeft: '1rem' }}>
+                    <li><strong>Center:</strong> The skill category</li>
+                    <li><strong>Inner Ring:</strong> Individual skills</li>
+                    <li><strong>Outer Nodes:</strong> Contributing experiences</li>
+                    <li><strong>Link Thickness:</strong> Contribution strength</li>
+                    <li><strong>Zoom Controls:</strong> Use +/- buttons to expand/contract view</li>
+                    <li><strong>Interactive:</strong> Drag nodes to rearrange the network</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 
