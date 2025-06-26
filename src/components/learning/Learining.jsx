@@ -14,7 +14,9 @@ import {
   BsGithub,
   BsGear,
   BsTerminal,
-  BsBoxArrowUpRight
+  BsBoxArrowUpRight,
+  BsStar,
+  BsStarFill
 } from 'react-icons/bs';
 
 const learningData = {
@@ -28,36 +30,41 @@ const learningData = {
         icon: <BsShieldCheck />,
         title: "Advanced Network Security",
         description: "Deep packet inspection, network forensics, and intrusion detection",
-        level: 95,
-        category: "Network"
+        rating: 5,
+        category: "Network",
+        tools: ["Wireshark", "Nmap", "Snort"]
       },
       {
         icon: <BsCloudArrowUp />,
         title: "Cloud Infrastructure Security",
         description: "AWS & Azure security architecture and compliance frameworks",
-        level: 88,
-        category: "Cloud"
+        rating: 4,
+        category: "Cloud",
+        tools: ["AWS", "Azure", "Terraform"]
       },
       {
         icon: <BsBug />,
         title: "Red Team Tactics & Penetration Testing",
         description: "Advanced exploitation techniques and security assessment",
-        level: 92,
-        category: "Offensive"
+        rating: 5,
+        category: "Offensive",
+        tools: ["Metasploit", "Burp Suite", "Kali Linux"]
       },
       {
         icon: <BsCode />,
         title: "Ethical Hacking",
         description: "Web application security testing and vulnerability research",
-        level: 90,
-        category: "Testing"
+        rating: 4,
+        category: "Testing",
+        tools: ["OWASP ZAP", "SQLMap", "Nikto"]
       },
       {
         icon: <BsEye />,
         title: "Incident Response & Threat Hunting",
         description: "Real-time threat detection and incident management",
-        level: 85,
-        category: "Defense"
+        rating: 4,
+        category: "Defense",
+        tools: ["Splunk", "ELK Stack", "YARA"]
       }
     ]
   },
@@ -70,34 +77,38 @@ const learningData = {
       {
         icon: <BsAward />,
         title: "Professional Certifications",
-        details: "CEH V12, CND V2",
         description: "Certified Ethical Hacker and Network Defense specialist",
+        badge: "CEH V12, CND V2",
         year: "2024",
-        type: "certification"
+        type: "certification",
+        priority: "high"
       },
       {
         icon: <BsBookmark />,
         title: "TryHackMe Elite",
-        details: "Level Max, 140+ rooms completed",
         description: "Top-tier cybersecurity challenges and practical experience",
+        badge: "Level Legend",
         year: "2023-2024",
-        type: "platform"
+        type: "platform",
+        priority: "medium"
       },
       {
         icon: <BsLightbulb />,
         title: "Research Scholar",
-        details: "4+ Published Research Papers",
         description: "Contributing to cybersecurity knowledge and innovation",
+        badge: "4+ Papers",
         year: "2023-2024",
-        type: "research"
+        type: "research",
+        priority: "high"
       },
       {
         icon: <BsGithub />,
         title: "Open Source Contributor",
-        details: "7+ Security Projects",
         description: "Building tools that strengthen the security ecosystem",
+        badge: "7+ Projects",
         year: "2022-2024",
-        type: "projects"
+        type: "projects",
+        priority: "medium"
       }
     ]
   },
@@ -113,6 +124,7 @@ const learningData = {
         description: "Developing intelligent automation frameworks for threat response",
         status: "Active",
         impact: "High",
+        progress: 85,
         tech: ["Python", "Machine Learning", "API Integration"]
       },
       {
@@ -121,6 +133,7 @@ const learningData = {
         description: "Machine learning models for advanced persistent threat identification",
         status: "Research",
         impact: "Critical",
+        progress: 60,
         tech: ["TensorFlow", "Neural Networks", "Pattern Recognition"]
       },
       {
@@ -129,7 +142,8 @@ const learningData = {
         description: "Kernel-level security enhancements and performance optimization",
         status: "Development",
         impact: "Medium",
-        tech: ["Python", "SBOM", "Kernel Modules", "System Calls"]
+        progress: 40,
+        tech: ["Python", "SBOM", "Kernel Modules"]
       },
       {
         icon: <BsBoxArrowUpRight />,
@@ -137,6 +151,7 @@ const learningData = {
         description: "Contributing to community-driven security tools and frameworks",
         status: "Ongoing",
         impact: "Community",
+        progress: 75,
         tech: ["Various", "Collaboration", "Documentation"]
       }
     ]
@@ -152,23 +167,45 @@ const Learning = () => {
     setIsVisible(true);
   }, []);
 
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <span key={index} className="star">
+        {index < rating ? <BsStarFill /> : <BsStar />}
+      </span>
+    ));
+  };
 
   const renderCybersecurity = () => (
-    <div className="section-content cybersecurity-content">
-      <div className="skills-grid">
+    <div className="section-content">
+      <div className="cards-grid">
         {learningData.cybersecurity.skills.map((skill, index) => (
           <div 
             key={index}
-            className={`skill-card ${hoveredItem === `cyber-${index}` ? 'hovered' : ''}`}
+            className={`universal-card skill-variant ${hoveredItem === `cyber-${index}` ? 'hovered' : ''}`}
             onMouseEnter={() => setHoveredItem(`cyber-${index}`)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <div className="skill-header">
-              <div className="skill-icon">{skill.icon}</div>
-              <div className="skill-category">{skill.category}</div>
+            <div className="card-header">
+              <div className="card-icon">{skill.icon}</div>
+              <div className="card-badge category-badge">{skill.category}</div>
             </div>
-            <h4 className="skill-title">{skill.title}</h4>
-            <p className="skill-description">{skill.description}</p>
+            
+            <div className="card-content">
+              <h4 className="card-title">{skill.title}</h4>
+              <p className="card-description">{skill.description}</p>
+              
+              {/* <div className="skill-rating">
+                {renderStars(skill.rating)}
+              </div> */}
+              
+              <div className="card-tags">
+                {skill.tools.map((tool, toolIndex) => (
+                  <span key={toolIndex} className="card-tag">{tool}</span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="card-glow"></div>
           </div>
         ))}
       </div>
@@ -176,25 +213,27 @@ const Learning = () => {
   );
 
   const renderAchievements = () => (
-    <div className="section-content achievements-content">
-      <div className="achievements-grid">
+    <div className="section-content">
+      <div className="cards-grid">
         {learningData.achievements.accomplishments.map((achievement, index) => (
           <div 
             key={index}
-            className={`achievement-card ${achievement.type} ${hoveredItem === `achieve-${index}` ? 'hovered' : ''}`}
+            className={`universal-card achievement-variant ${achievement.priority} ${hoveredItem === `achieve-${index}` ? 'hovered' : ''}`}
             onMouseEnter={() => setHoveredItem(`achieve-${index}`)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <div className="achievement-icon">{achievement.icon}</div>
-            <div className="achievement-content">
-              <div className="achievement-header">
-                <h4 className="achievement-title">{achievement.title}</h4>
-                <span className="achievement-year">{achievement.year}</span>
-              </div>
-              <div className="achievement-details">{achievement.details}</div>
-              <p className="achievement-description">{achievement.description}</p>
+            <div className="card-header">
+              <div className="card-icon">{achievement.icon}</div>
+              <div className="card-badge year-badge">{achievement.year}</div>
             </div>
-            <div className="achievement-glow"></div>
+            
+            <div className="card-content">
+              <h4 className="card-title">{achievement.title}</h4>
+              <div className="achievement-badge">{achievement.badge}</div>
+              <p className="card-description">{achievement.description}</p>
+            </div>
+            
+            <div className="card-glow"></div>
           </div>
         ))}
       </div>
@@ -202,33 +241,49 @@ const Learning = () => {
   );
 
   const renderResearch = () => (
-    <div className="section-content research-content">
-      <div className="projects-grid">
+    <div className="section-content">
+      <div className="cards-grid">
         {learningData.research.projects.map((project, index) => (
           <div 
             key={index}
-            className={`project-card ${hoveredItem === `research-${index}` ? 'hovered' : ''}`}
+            className={`universal-card research-variant ${hoveredItem === `research-${index}` ? 'hovered' : ''}`}
             onMouseEnter={() => setHoveredItem(`research-${index}`)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <div className="project-header">
-              <div className="project-icon">{project.icon}</div>
-              <div className="project-status">
-                <span className={`status-badge ${project.status.toLowerCase()}`}>
+            <div className="card-header">
+              <div className="card-icon">{project.icon}</div>
+              <div className="card-badges">
+                <div className={`card-badge status-badge ${project.status.toLowerCase()}`}>
                   {project.status}
-                </span>
-                <span className={`impact-badge ${project.impact.toLowerCase()}`}>
-                  {project.impact} Impact
-                </span>
+                </div>
+                <div className={`card-badge impact-badge ${project.impact.toLowerCase()}`}>
+                  {project.impact}
+                </div>
               </div>
             </div>
-            <h4 className="project-title">{project.title}</h4>
-            <p className="project-description">{project.description}</p>
-            <div className="project-tech">
-              {project.tech.map((tech, techIndex) => (
-                <span key={techIndex} className="tech-tag">{tech}</span>
-              ))}
+            
+            <div className="card-content">
+              <h4 className="card-title">{project.title}</h4>
+              <p className="card-description">{project.description}</p>
+              
+              {/* <div className="progress-section">
+                <div className="progress-label">Progress: {project.progress}%</div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${project.progress}%` }}
+                  ></div>
+                </div>
+              </div> */}
+              
+              <div className="card-tags">
+                {project.tech.map((tech, techIndex) => (
+                  <span key={techIndex} className="card-tag">{tech}</span>
+                ))}
+              </div>
             </div>
+            
+            <div className="card-glow"></div>
           </div>
         ))}
       </div>
@@ -240,8 +295,8 @@ const Learning = () => {
   return (
     <section id='learning' className={`learning-section ${isVisible ? 'visible' : ''}`}>
       <div className="learning-header">
-        <h5>What I Know</h5>
-        <h2>My Learning & Achievements</h2>
+        <h5 className="section-subtitle">What I Know</h5>
+        <h2 className="section-title">My Learning & Achievements</h2>
       </div>
 
       <div className="container learning__container">
@@ -260,6 +315,7 @@ const Learning = () => {
                   <span className="tab-title">{data.title}</span>
                   <span className="tab-subtitle">{data.subtitle}</span>
                 </div>
+                <div className="tab-glow"></div>
               </button>
             );
           })}
