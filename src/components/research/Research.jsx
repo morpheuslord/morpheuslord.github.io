@@ -42,7 +42,7 @@ const data = [
     {
         id: 6,
         image: IMG7,
-        title: 'Docker Based Decentralized Vulnerability Assessment with Port Scanning Powered by Artificial Intelligence',
+        title: 'ML-Driven Secure Communication for Next-Generation 6G Networks',
         github: 'https://link.springer.com/chapter/10.1007/978-3-031-85008-0_6',
     }
 ]
