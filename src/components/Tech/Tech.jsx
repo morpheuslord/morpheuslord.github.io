@@ -160,6 +160,8 @@ const experiences = [
       "Azure": 0.5,
       "NIST Framework": 0.7,
       "MITRE ATT&CK": 0.7,
+      "Wazuh": 0.8,
+      "EDR & XDR":0.8,
 
       // AI & Machine Learning
       "RAG & Agentic AI": 0.9,
@@ -225,9 +227,11 @@ const skillGraphs = [
       "Network Security",
       "NIST Framework",
       "MITRE ATT&CK",
-      "Risk Assessment"
+      "Risk Assessment",
+      "Wazuh",
+      "EDR & XDR"
     ],
-    values: [0.9, 0.85, 0.75, 0.9, 0.8, 0.85, 0.8, 0.75, 0.85, 0.7, 0.8, 0.75],
+    values: [0.9, 0.85, 0.75, 0.9, 0.8, 0.85, 0.8, 0.75, 0.85, 0.7, 0.8, 0.75, 0.8, 0.8],
     color: "#ff6b6b"
   },
   {
