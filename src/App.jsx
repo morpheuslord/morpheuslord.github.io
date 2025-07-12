@@ -11,7 +11,7 @@ import Testimonials from './components/testimonials/Testimonials'
 import Research from './components/research/Research'
 import Certs from './components/certifications/Certs'
 import Tech from './components/Tech/Tech'
-
+import Blogs from './components/blogs/blogs'
 
 const App = () => {
     return (
@@ -25,6 +25,7 @@ const App = () => {
             <Certs />
             <Portfolio />
             <Research />
+            <Blogs/>
             <Testimonials/>
             <Contact />
             <Footer />

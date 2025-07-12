@@ -9,7 +9,7 @@ import ComputerModel from './ComputerModel'; // Import the new component
 const Header = () => {
   return (
     <header>
-      <div className="container header__container">
+      <div className="container header__container" id="home">
         <div className="upper-header">
           <h5>Hello I'm</h5>
           <AnimatedText />
