@@ -117,7 +117,6 @@ const experiences = [
       "Academic Writing": 0.85,
       "Literature Review": 0.8,
       "Research Methodology": 0.8,
-      "Zotero": 0.85,
       "Data Analysis": 0.7,
       "Pandas/NumPy": 0.7,
       "Jupyter Notebooks": 0.8,
@@ -185,7 +184,6 @@ const experiences = [
       
       // Tools & Collaboration
       "Project Management": 0.8,
-      "Postman": 0.7,
       "Jira": 0.7,
       "Slack": 0.9,
       "Confluence": 0.6,
@@ -276,25 +274,23 @@ const skillGraphs = [
       "Academic Writing",
       "Literature Review",
       "Research Methodology",
-      "Zotero",
       "Ontologies",
       "Data Analysis",
       "Pandas/NumPy",
       "Jupyter Notebooks",
     ],
-    values: [0.95, 0.9, 0.95, 0.85, 0.8, 0.8, 0.85, 0.8, 0.7, 0.7, 0.8],
+    values: [0.95, 0.9, 0.95, 0.85, 0.8, 0.8, 0.8, 0.7, 0.7, 0.8],
     color: "#48dbfb"
   },
   {
     header: "Tools & Collaboration",
     captions: [
-      "Postman",
       "Jira",
       "Confluence",
       "Slack",
       "Project Management"
     ],
-    values: [0.6, 0.7, 0.6, 0.9, 0.8],
+    values: [0.6, 0.6, 0.9, 0.8],
     color: "#ff9ff3"
   }
 ];
