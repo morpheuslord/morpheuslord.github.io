@@ -319,15 +319,10 @@ const Experience = () => {
       return;
     }
     
-    // Calculate progress width for horizontal timeline
-    // The line spans from center of first dot to center of last dot
-    const stepWidth = 100 / totalSteps; // Each step takes this percentage
-    const startOffset = stepWidth / 2; // Offset to center of first dot
-    const endOffset = stepWidth / 2; // Offset from center of last dot
-    const totalLineWidth = 100 - startOffset - endOffset; // Available line width
-    
-    // Progress goes from 0 to totalLineWidth based on active index
-    const progressPercentage = (activeIndex / (totalSteps - 1)) * totalLineWidth;
+    // Calculate progress width to reach center of active dot
+    // Line goes from 0% to 100%, dots are centered within their grid columns
+    // For 4 dots: positions are at 12.5%, 37.5%, 62.5%, 87.5%
+    const dotCenterPosition = ((activeIndex * 2 + 1) / (totalSteps * 2)) * 100;
     
     // Remove previous style if exists
     const existingStyle = document.getElementById('progress-style');
@@ -335,11 +330,14 @@ const Experience = () => {
       existingStyle.remove();
     }
     
-    // Create new style
+    // Create new style with smoother animation
     const stepperAfter = document.createElement('style');
     stepperAfter.textContent = `
       .timeline__stepper { --timeline-steps: ${totalSteps}; }
-      .timeline__stepper::after { width: ${progressPercentage}% !important; }
+      .timeline__stepper::after { 
+        width: ${dotCenterPosition}% !important;
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
     `;
     stepperAfter.id = 'progress-style';
     document.head.appendChild(stepperAfter);
