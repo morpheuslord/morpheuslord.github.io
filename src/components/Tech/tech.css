@@ -1,4 +1,4 @@
-/* Interactive Tech Skills CSS */
+/* Interactive Tech Skills CSS - Improved Responsive Version */
 
 .interactive-tech-skills {
   min-height: 100vh;
@@ -10,6 +10,15 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+
+.skills-subtitle {
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
 
 .skills-title {
   font-size: 2.5rem;
@@ -93,6 +102,7 @@
   opacity: 0.8;
 }
 
+/* Improved Modal Styles with Better Responsiveness */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -105,6 +115,7 @@
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
@@ -112,12 +123,14 @@
   border: 2px solid #6c5ce7;
   border-radius: 20px;
   padding: 2rem;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 75vw; /* Reduced from 90vw for thinner modal */
+  max-height: 80vh; /* Reduced from 90vh */
+  width: fit-content;
   overflow-y: auto;
   position: relative;
   backdrop-filter: blur(20px);
   box-shadow: 0 25px 60px rgba(108, 92, 231, 0.5);
+  animation: slideInScale 0.4s ease-out;
 }
 
 .modal-header {
@@ -137,6 +150,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
 }
 
 .close-button {
@@ -181,6 +195,90 @@
   text-align: center;
 }
 
+/* Mindmap Container Styles - LARGER SIZING */
+.mindmap-wrapper {
+  height: 600px; /* Increased from 450px for much better visibility */
+}
+
+.mindmap-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flexDirection: column;
+  background: rgba(10, 10, 10, 0.5);
+  border-radius: 10px;
+  position: relative;
+  border: 2px solid #6c5ce7;
+  overflow: hidden;
+}
+
+.zoom-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.zoom-button {
+  background: rgba(108, 92, 231, 0.8);
+  border: 1px solid #6c5ce7;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.zoom-button:hover {
+  background: rgba(108, 92, 231, 1);
+}
+
+.zoom-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  border: 1px solid #6c5ce7;
+}
+
+.svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.mindmap-svg {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+}
+
+.interactive-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(108, 92, 231, 0.9);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  pointer-events: none;
+  animation: fadeIn 0.3s ease-out;
+  border: 1px solid #6c5ce7;
+}
+
 .experience-legend {
   display: flex;
   flex-direction: column;
@@ -221,13 +319,47 @@
   opacity: 0.8;
 }
 
-/* Responsive Design */
+.about-network {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #1b1b1e;
+  border-radius: 10px;
+}
+
+.about-title {
+  color: #8b7cf6;
+  margin-bottom: 1rem;
+}
+
+.about-description {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.about-list {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .modal-content {
+    max-width: 85vw;
+  }
+}
+
 @media (max-width: 768px) {
   .graph-grid {
     grid-template-columns: 1fr;
   }
   
   .modal-content {
+    max-width: 90vw;
+    max-height: 85vh;
     padding: 1rem;
     margin: 1rem;
   }
@@ -251,6 +383,10 @@
   .chart-title {
     font-size: 1rem;
   }
+  
+  .mindmap-wrapper {
+    height: 400px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -272,9 +408,10 @@
   }
   
   .modal-content {
+    max-width: 95vw;
+    max-height: 90vh;
     padding: 0.8rem;
     margin: 0.5rem;
-    max-width: 95vw;
   }
   
   .modal-header {
@@ -287,6 +424,18 @@
     width: 35px;
     height: 35px;
     font-size: 1rem;
+  }
+  
+  .mindmap-wrapper {
+    height: 350px;
+  }
+  
+  .derivation-content {
+    gap: 1rem;
+  }
+  
+  .chart-section {
+    padding: 1rem;
   }
 }
 
@@ -313,6 +462,15 @@
   }
 }
 
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
 /* Apply staggered animations */
 .skill-card:nth-child(1) { 
   animation: slideInUp 0.8s ease-out 0.1s both; 
@@ -330,18 +488,12 @@
   animation: slideInUp 0.8s ease-out 0.4s both; 
 }
 
-/* Modal entrance animation */
-.modal-overlay {
-  animation: fadeIn 0.3s ease-out;
+.skill-card:nth-child(5) { 
+  animation: slideInUp 0.8s ease-out 0.5s both; 
 }
 
-.modal-content {
-  animation: slideInScale 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.skill-card:nth-child(6) { 
+  animation: slideInUp 0.8s ease-out 0.6s both; 
 }
 
 /* Smooth scrollbar for modal */
@@ -394,7 +546,8 @@
   outline-offset: 2px;
 }
 
-.close-button:focus {
+.close-button:focus,
+.zoom-button:focus {
   outline: 2px solid #6c5ce7;
   outline-offset: 2px;
 }
@@ -403,7 +556,6 @@
 @media print {
   .interactive-tech-skills {
     background: #1b1b1e;
-    color: black;
   }
   
   .modal-overlay {
@@ -414,5 +566,40 @@
     break-inside: avoid;
     border: 1px solid #000;
     background: white;
+  }
+}
+
+/* High DPI display support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .zoom-button,
+  .close-button {
+    border-width: 0.5px;
+  }
+  
+  .mindmap-svg {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode specific improvements */
+@media (prefers-color-scheme: dark) {
+  .interactive-tech-skills {
+    background: linear-gradient(135deg, #1b1b1e, #1b1b1e);
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .skill-card,
+  .modal-content,
+  .zoom-button,
+  .close-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .skill-card:hover {
+    transform: none;
   }
 }

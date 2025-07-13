@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './blogs.css';
 import blogsData from '../../assets/stats.json';
 import { TbRobot, TbShield, TbCode, TbBook } from 'react-icons/tb';
+import * as Chart from 'chart.js';
 
 const Blogs = () => {
   const [activeModal, setActiveModal] = useState(null);
+  const chartRef = useRef(null);
 
   // Define broad categories
   const broadCategories = {
@@ -82,6 +84,119 @@ const Blogs = () => {
 
   const stats = calculateStats();
 
+  // Create 3D-style Chart with Chart.js
+  useEffect(() => {
+    if (chartRef.current && stats.broadCategoryDistribution.length > 0) {
+      // Register Chart.js components
+      const { Chart: ChartJS, ArcElement, Tooltip, Legend, DoughnutController } = Chart;
+      
+      ChartJS.register(ArcElement, Tooltip, Legend, DoughnutController);
+
+      const ctx = chartRef.current.getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (chartRef.current.chartInstance) {
+        chartRef.current.chartInstance.destroy();
+      }
+
+      const labels = stats.broadCategoryDistribution.map(([category]) => category);
+      const values = stats.broadCategoryDistribution.map(([, count]) => count);
+      const colors = ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981'];
+      const shadowColors = ['#7c3aed', '#2563eb', '#0891b2', '#059669'];
+
+      const chartInstance = new ChartJS(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: shadowColors,
+            borderWidth: 3,
+            hoverOffset: 15,
+            offset: 5,
+            borderRadius: 8,
+            spacing: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              borderColor: '#6366f1',
+              borderWidth: 1,
+              cornerRadius: 8,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  const percentage = ((context.parsed / stats.totalPosts) * 100).toFixed(1);
+                  return `${context.label}: ${context.parsed} posts (${percentage}%)`;
+                }
+              }
+            }
+          },
+          elements: {
+            arc: {
+              borderAlign: 'inner'
+            }
+          },
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1000,
+            easing: 'easeOutCubic'
+          },
+          hover: {
+            animationDuration: 300
+          },
+          layout: {
+            padding: 20
+          }
+        },
+        plugins: [{
+          id: 'centerText',
+          beforeDraw: function(chart) {
+            const ctx = chart.ctx;
+            const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+            const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+            
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Draw total number
+            ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(stats.totalPosts, centerX, centerY - 8);
+            
+            // Draw label
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = '#6366f1';
+            ctx.fillText('ARTICLES', centerX, centerY + 15);
+            
+            ctx.restore();
+          }
+        }]
+      });
+
+      chartRef.current.chartInstance = chartInstance;
+    }
+
+    return () => {
+      if (chartRef.current?.chartInstance) {
+        chartRef.current.chartInstance.destroy();
+      }
+    };
+  }, [stats]);
+
   // Handle card click
   const handleCardClick = (url) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -126,13 +241,13 @@ const Blogs = () => {
   // Open modal
   const openModal = (categoryKey) => {
     setActiveModal(categoryKey);
-    document.body.style.overflow = 'hidden'; // Prevent background scroll
+    document.body.style.overflow = 'hidden';
   };
 
   // Close modal
   const closeModal = () => {
     setActiveModal(null);
-    document.body.style.overflow = 'unset'; // Restore background scroll
+    document.body.style.overflow = 'unset';
   };
 
   // Handle modal backdrop click
@@ -190,169 +305,26 @@ const Blogs = () => {
             <div className="content-stats">
               <h6>Content Distribution</h6>
               <div className="chart-container">
-                <div className="donut-chart-3d">
-                  <svg width="260" height="220" viewBox="0 0 260 220">
-                    <defs>
-                      {/* Gradients for 3D effect */}
-                      {stats.broadCategoryDistribution.map(([broadCategory, count], index) => {
-                        const baseColor = getBroadCategoryColor(broadCategory);
-                        return (
-                          <radialGradient key={`gradient-${index}`} id={`gradient-${index}`} cx="0.3" cy="0.3" r="0.8">
-                            <stop offset="0%" stopColor={`${baseColor}dd`} />
-                            <stop offset="100%" stopColor={baseColor} />
-                          </radialGradient>
-                        );
-                      })}
-                      
-                      {/* Shadow filter */}
-                      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feDropShadow dx="2" dy="4" stdDeviation="3" floodColor="#000" floodOpacity="0.3"/>
-                      </filter>
-                    </defs>
-                    
-                    {(() => {
-                      let cumulativeAngle = 0;
-                      const centerX = 130;
-                      const centerY = 110;
-                      const radius = 60;
-                      const labelRadius = 90;
-                      
-                      return stats.broadCategoryDistribution.map(([broadCategory, count], index) => {
-                        const percentage = (count / stats.totalPosts) * 100;
-                        const angle = (percentage / 100) * 360;
-                        const startAngle = cumulativeAngle;
-                        const endAngle = cumulativeAngle + angle;
-                        
-                        // Convert to radians
-                        const startRad = (startAngle - 90) * (Math.PI / 180);
-                        const endRad = (endAngle - 90) * (Math.PI / 180);
-                        const midRad = (startRad + endRad) / 2;
-                        
-                        // Calculate path coordinates
-                        const x1 = centerX + radius * Math.cos(startRad);
-                        const y1 = centerY + radius * Math.sin(startRad);
-                        const x2 = centerX + radius * Math.cos(endRad);
-                        const y2 = centerY + radius * Math.sin(endRad);
-                        
-                        // Large arc flag
-                        const largeArcFlag = angle > 180 ? 1 : 0;
-                        
-                        // Label position
-                        const labelX = centerX + labelRadius * Math.cos(midRad);
-                        const labelY = centerY + labelRadius * Math.sin(midRad);
-                        
-                        // Line connection points
-                        const lineStartX = centerX + (radius + 10) * Math.cos(midRad);
-                        const lineStartY = centerY + (radius + 10) * Math.sin(midRad);
-                        
-                        // Text anchor based on position
-                        const textAnchor = labelX > centerX ? 'start' : 'end';
-                        const adjustedLabelX = labelX > centerX ? labelX + 8 : labelX - 8;
-                        
-                        cumulativeAngle += angle;
-                        
-                        return (
-                          <g key={broadCategory}>
-                            {/* 3D Base shadow */}
-                            <path
-                              d={`M ${centerX} ${centerY + 4} L ${x1 + 2} ${y1 + 4} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2 + 2} ${y2 + 4} Z`}
-                              fill="#00000018"
-                            />
-                            
-                            {/* Main pie segment */}
-                            <path
-                              d={`M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`}
-                              fill={`url(#gradient-${index})`}
-                              stroke="#ffffff"
-                              strokeWidth="2"
-                              filter="url(#shadow)"
-                              style={{
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer'
-                              }}
-                              className="pie-segment"
-                            />
-                            
-                            {/* Connection line */}
-                            <line
-                              x1={lineStartX}
-                              y1={lineStartY}
-                              x2={labelX}
-                              y2={labelY}
-                              stroke={getBroadCategoryColor(broadCategory)}
-                              strokeWidth="2"
-                            />
-                            
-                            {/* Percentage label */}
-                            <text
-                              x={adjustedLabelX}
-                              y={labelY - 5}
-                              textAnchor={textAnchor}
-                              fill={getBroadCategoryColor(broadCategory)}
-                              fontSize="15"
-                              fontWeight="700"
-                            >
-                              {Math.round(percentage)}%
-                            </text>
-                            
-                            {/* Category name */}
-                            <text
-                              x={adjustedLabelX}
-                              y={labelY + 12}
-                              textAnchor={textAnchor}
-                              fill="var(--color-light)"
-                              fontSize="10"
-                              fontWeight="500"
-                            >
-                              {broadCategory}
-                            </text>
-                            
-                            {/* Connection dot */}
-                            <circle
-                              cx={lineStartX}
-                              cy={lineStartY}
-                              r="3"
-                              fill={getBroadCategoryColor(broadCategory)}
-                            />
-                          </g>
-                        );
-                      });
-                    })()}
-                    
-                    {/* Center circle with text */}
-                    <circle
-                      cx="130"
-                      cy="110"
-                      r="25"
-                      fill="rgba(27, 27, 30, 0.9)"
-                      stroke="rgba(108, 92, 231, 0.3)"
-                      strokeWidth="2"
-                      filter="url(#shadow)"
-                    />
-                    
-                    <text
-                      x="130"
-                      y="105"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="var(--color-light)"
-                      fontSize="16"
-                      fontWeight="700"
-                    >
-                      {stats.totalPosts}
-                    </text>
-                    <text
-                      x="130"
-                      y="118"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="var(--color-primary)"
-                      fontSize="9"
-                      fontWeight="500"
-                    >
-                      Articles
-                    </text>
-                  </svg>
+                <div className="chart-3d-wrapper">
+                  <canvas ref={chartRef} width="320" height="300"></canvas>
+                  <div className="chart-legend">
+                    {stats.broadCategoryDistribution.map(([category, count], index) => {
+                      const colors = ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981'];
+                      const percentage = ((count / stats.totalPosts) * 100).toFixed(1);
+                      return (
+                        <div key={category} className="legend-item">
+                          <div 
+                            className="legend-color" 
+                            style={{ backgroundColor: colors[index] }}
+                          ></div>
+                          <div className="legend-text">
+                            <span className="legend-category">{category}</span>
+                            <span className="legend-stats">{count} posts ({percentage}%)</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -410,14 +382,14 @@ const Blogs = () => {
               <div className="modal-content">
                 <p className="modal-description">{broadCategories[activeModal].description}</p>
                 
-                <div className="modal-posts-grid">
+                <div className="posts-container">
                   {groupedPosts[activeModal]?.map((post) => (
-                    <article 
+                    <div 
                       key={post.id} 
-                      className="modal-blog-card"
+                      className="blog-card"
                       onClick={() => handleCardClick(post.url)}
                     >
-                      <div className="modal-blog-image">
+                      <div className="blog-image">
                         {getImagePath(post.id) ? (
                           <img 
                             src={getImagePath(post.id)} 
@@ -425,48 +397,47 @@ const Blogs = () => {
                             loading="lazy"
                           />
                         ) : (
-                          <div className="modal-image-placeholder">
+                          <div className="image-placeholder">
                             <h4>{post.title}</h4>
                             <p>{post.category}</p>
                           </div>
                         )}
                         
-                        {/* Meta overlays */}
-                        <div className="modal-blog-meta-overlay">
+                        <div className="meta-overlay">
                           <span 
-                            className="modal-blog-category"
+                            className="category-tag"
                             style={{ backgroundColor: getCategoryColor(post.category) }}
                           >
                             {post.category}
                           </span>
                           <span 
-                            className="modal-blog-difficulty"
+                            className="difficulty-tag"
                             style={{ backgroundColor: getDifficultyColor(post.difficulty) }}
                           >
                             {post.difficulty}
                           </span>
                         </div>
 
-                        {post.featured && <div className="modal-blog-featured">Featured</div>}
+                        {post.featured && <div className="featured-tag">Featured</div>}
                       </div>
 
-                      <div className="modal-blog-content">
+                      <div className="blog-content">
                         <h4>{post.title}</h4>
-                        <p className="modal-blog-excerpt">{post.excerpt}</p>
+                        <p className="blog-excerpt">{post.excerpt}</p>
                         
-                        <div className="modal-blog-details">
-                          <span className="modal-blog-date">
+                        <div className="blog-details">
+                          <span className="blog-date">
                             {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short'
                             }) : 'HackerNoon'}
                           </span>
-                          <span className="modal-blog-read-time">
+                          <span className="blog-read-time">
                             {post.estimatedReadTime ? `${post.estimatedReadTime} min read` : 'Quick read'}
                           </span>
                         </div>
                       </div>
-                    </article>
+                    </div>
                   ))}
                 </div>
               </div>

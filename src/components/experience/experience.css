@@ -19,13 +19,13 @@
 }
 
 #experience h5 {
-  color: var(--color-accent-light);
-  margin-bottom: .5rem;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
+
 
 #experience h2 {
   color: #c9a2c7;

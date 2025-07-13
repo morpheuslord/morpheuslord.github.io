@@ -416,13 +416,62 @@ const RadarChart = ({ data, color, size = 300 }) => {
   );
 };
 
-// Enhanced D3.js Mindmap Component with Zoom Controls
+// Enhanced D3.js Mindmap Component with Responsive Design
 const MindmapChart = ({ skillSet }) => {
   const svgRef = useRef();
   const simulationRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [containerSize, setContainerSize] = useState({ width: 900, height: 600 });
+  
+  // Responsive container sizing with better defaults - LARGER SIZES
+  const getResponsiveSize = () => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Define aspect ratio constraints (16:10 for comfortable viewing)
+    const aspectRatio = 16 / 10;
+    
+    let width, height;
+    
+    if (screenWidth <= 480) {
+      // Mobile
+      width = Math.min(screenWidth * 0.9, 450);
+      height = width / aspectRatio;
+    } else if (screenWidth <= 768) {
+      // Tablet
+      width = Math.min(screenWidth * 0.85, 700);
+      height = width / aspectRatio;
+    } else if (screenWidth <= 1024) {
+      // Small desktop
+      width = Math.min(screenWidth * 0.8, 850);
+      height = width / aspectRatio;
+    } else {
+      // Large desktop - much larger comfortable size
+      width = Math.min(screenWidth * 0.75, 1000);
+      height = width / aspectRatio;
+    }
+    
+    // Ensure minimum size
+    width = Math.max(width, 400);
+    height = Math.max(height, 280);
+    
+    // Ensure it doesn't exceed viewport but allow more space
+    height = Math.min(height, screenHeight * 0.65);
+    
+    return { width, height };
+  };
+
+  const [containerSize, setContainerSize] = useState(getResponsiveSize());
+
+  // Update size on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setContainerSize(getResponsiveSize());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!skillSet || !svgRef.current) return;
@@ -445,7 +494,8 @@ const MindmapChart = ({ skillSet }) => {
       })).filter(item => item.contribution > 0);
     };
 
-    // Central node
+    // Central node - scale with container size
+    const baseRadius = Math.min(width, height) * 0.05;
     const centralNode = {
       id: 'center',
       name: skillSet.header,
@@ -453,14 +503,14 @@ const MindmapChart = ({ skillSet }) => {
       fy: centerY,
       type: 'center',
       color: skillSet.color,
-      radius: 35 * zoomLevel
+      radius: baseRadius * zoomLevel
     };
 
     // Create nodes and links
     const nodes = [centralNode];
     const links = [];
 
-    // Add skill nodes
+    // Add skill nodes with responsive sizing
     skillSet.captions.forEach((skill, i) => {
       const skillNode = {
         id: `skill-${i}`,
@@ -468,7 +518,7 @@ const MindmapChart = ({ skillSet }) => {
         type: 'skill',
         value: skillSet.values[i],
         color: skillSet.color,
-        radius: 25 * zoomLevel,
+        radius: (baseRadius * 0.7) * zoomLevel,
         skillIndex: i
       };
       nodes.push(skillNode);
@@ -476,7 +526,7 @@ const MindmapChart = ({ skillSet }) => {
         source: 'center',
         target: `skill-${i}`,
         type: 'skill-link',
-        distance: 150 * zoomLevel
+        distance: Math.min(width, height) * 0.2 * zoomLevel
       });
 
       // Add experience nodes for each skill
@@ -489,7 +539,7 @@ const MindmapChart = ({ skillSet }) => {
           type: 'experience',
           contribution: exp.contribution,
           color: exp.color,
-          radius: 18 * zoomLevel,
+          radius: (baseRadius * 0.5) * zoomLevel,
           skillIndex: i,
           expIndex: j
         };
@@ -499,7 +549,7 @@ const MindmapChart = ({ skillSet }) => {
           target: `exp-${i}-${j}`,
           type: 'exp-link',
           strength: exp.contribution,
-          distance: 100 * zoomLevel
+          distance: Math.min(width, height) * 0.15 * zoomLevel
         });
       });
     });
@@ -537,28 +587,29 @@ const MindmapChart = ({ skillSet }) => {
     feMerge.append('feMergeNode').attr('in', 'coloredBlur');
     feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
-    // Create force simulation with adjusted forces
+    // Create force simulation with responsive forces
+    const baseForceStrength = Math.min(width, height) * 2;
     const simulation = d3.forceSimulation(nodes)
       .force('link', d3.forceLink(links)
         .id(d => d.id)
-        .distance(d => d.distance || (120 * zoomLevel))
+        .distance(d => d.distance || (Math.min(width, height) * 0.18 * zoomLevel))
         .strength(0.6))
       .force('charge', d3.forceManyBody()
         .strength(d => {
-          const baseStrength = d.type === 'center' ? -1500 :
-            d.type === 'skill' ? -800 : -400;
-          return baseStrength * zoomLevel;
+          const strengthMultiplier = d.type === 'center' ? -1.5 :
+            d.type === 'skill' ? -0.8 : -0.4;
+          return baseForceStrength * strengthMultiplier * zoomLevel;
         }))
       .force('center', d3.forceCenter(centerX, centerY))
       .force('collision', d3.forceCollide()
-        .radius(d => (d.radius + 25) * zoomLevel)
+        .radius(d => (d.radius + baseRadius * 0.6) * zoomLevel)
         .strength(0.9))
       .alpha(1)
       .alphaDecay(0.05);
 
     simulationRef.current = simulation;
 
-    // Create link elements
+    // Create link elements with ORIGINAL GOOD styling
     const linkElements = container.append('g')
       .attr('class', 'links')
       .selectAll('line')
@@ -612,7 +663,7 @@ const MindmapChart = ({ skillSet }) => {
 
     nodeElements.call(dragBehavior);
 
-    // Add circles to nodes
+    // Add circles to nodes with ORIGINAL stroke width
     nodeElements.append('circle')
       .attr('r', d => d.radius)
       .attr('fill', d => d.color)
@@ -621,7 +672,8 @@ const MindmapChart = ({ skillSet }) => {
       .attr('filter', `url(#glow-${skillSet.header.replace(/\s+/g, '')})`)
       .style('opacity', d => d.type === 'center' ? 1 : 0.9);
 
-    // Add improved labels with better spacing
+    // Add improved labels with responsive font sizing
+    const baseFontSize = Math.max(8, Math.min(width, height) * 0.025);
     nodeElements.each(function (d) {
       const node = d3.select(this);
 
@@ -630,30 +682,30 @@ const MindmapChart = ({ skillSet }) => {
           .attr('text-anchor', 'middle')
           .attr('dy', '0.35em')
           .attr('fill', '#fff')
-          .attr('font-size', `${14 * zoomLevel}px`)
+          .attr('font-size', `${baseFontSize * 1.2 * zoomLevel}px`)
           .attr('font-weight', 'bold')
           .text(d.name.length > 12 ? d.name.substring(0, 10) + '...' : d.name);
       } else {
         // Create better spacing for labels
-        const labelOffset = d.radius + (30 * zoomLevel);
+        const labelOffset = d.radius + (baseFontSize * 2 * zoomLevel);
 
         // Background for better text readability
         const textBg = node.append('rect')
           .attr('fill', 'rgba(0,0,0,0.8)')
-          .attr('rx', 6 * zoomLevel)
-          .attr('ry', 6 * zoomLevel)
+          .attr('rx', Math.max(3, baseFontSize * 0.5 * zoomLevel))
+          .attr('ry', Math.max(3, baseFontSize * 0.5 * zoomLevel))
           .attr('stroke', d.color)
           .attr('stroke-width', 1 * zoomLevel);
 
         const text = node.append('text')
           .attr('text-anchor', 'middle')
           .attr('fill', '#fff')
-          .attr('font-size', `${(d.type === 'skill' ? 11 : 9) * zoomLevel}px`)
+          .attr('font-size', `${(d.type === 'skill' ? baseFontSize : baseFontSize * 0.8) * zoomLevel}px`)
           .attr('font-weight', d.type === 'skill' ? 'bold' : 'normal');
 
-        // Improved text wrapping
+        // Improved text wrapping with responsive character limits
         const words = d.name.split(' ');
-        const maxChars = d.type === 'skill' ? 15 : 12;
+        const maxChars = width < 500 ? (d.type === 'skill' ? 12 : 10) : (d.type === 'skill' ? 15 : 12);
         let lines = [];
         let currentLine = '';
 
@@ -674,25 +726,14 @@ const MindmapChart = ({ skillSet }) => {
         lines.forEach((line, i) => {
           text.append('tspan')
             .attr('x', 0)
-            .attr('dy', i === 0 ? `-${labelOffset}px` : `${14 * zoomLevel}px`)
+            .attr('dy', i === 0 ? `-${labelOffset}px` : `${baseFontSize * 1.2 * zoomLevel}px`)
             .text(line);
         });
-
-        // Add contribution percentage for experience nodes
-        // if (d.type === 'experience') {
-        //   text.append('tspan')
-        //     .attr('x', 0)
-        //     .attr('dy', `${14 * zoomLevel}px`)
-        //     .attr('fill', '#8b7cf6')
-        //     .attr('font-size', `${8 * zoomLevel}px`)
-        //     .attr('font-weight', 'bold')
-        //     .text(`${(d.contribution * 100).toFixed(0)}%`);
-        // }
 
         // Update background size safely
         try {
           const bbox = text.node().getBBox();
-          const padding = 6 * zoomLevel;
+          const padding = Math.max(3, baseFontSize * 0.5 * zoomLevel);
           textBg
             .attr('x', bbox.x - padding)
             .attr('y', bbox.y - padding / 2)
@@ -700,8 +741,8 @@ const MindmapChart = ({ skillSet }) => {
             .attr('height', bbox.height + padding);
         } catch (e) {
           // Fallback
-          const fallbackWidth = d.name.length * 8 * zoomLevel;
-          const fallbackHeight = 20 * zoomLevel;
+          const fallbackWidth = d.name.length * baseFontSize * 0.6 * zoomLevel;
+          const fallbackHeight = baseFontSize * 1.5 * zoomLevel;
           textBg
             .attr('x', -fallbackWidth / 2)
             .attr('y', -labelOffset - fallbackHeight / 2)
@@ -805,13 +846,14 @@ const MindmapChart = ({ skillSet }) => {
         .attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`);
     });
 
-    // Add title
+    // Add title with responsive font size
+    const titleFontSize = Math.max(12, baseFontSize * 1.5);
     svg.append('text')
       .attr('x', width / 2)
-      .attr('y', 30)
+      .attr('y', titleFontSize * 1.5)
       .attr('text-anchor', 'middle')
       .attr('fill', skillSet.color)
-      .attr('font-size', `${18 * Math.min(zoomLevel, 1.5)}px`)
+      .attr('font-size', `${titleFontSize * Math.min(zoomLevel, 1.5)}px`)
       .attr('font-weight', 'bold')
       .style('opacity', 0)
       .transition()
@@ -832,139 +874,73 @@ const MindmapChart = ({ skillSet }) => {
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.2, 2));
-    setContainerSize(prev => ({
-      width: Math.min(prev.width + 100, 1400),
-      height: Math.min(prev.height + 80, 800)
-    }));
   };
 
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.2, 0.6));
-    setContainerSize(prev => ({
-      width: Math.max(prev.width - 100, 700),
-      height: Math.max(prev.height - 80, 400)
-    }));
   };
 
+  const buttonSize = Math.max(30, Math.min(containerSize.width, containerSize.height) * 0.06);
+  const buttonFontSize = Math.max(14, buttonSize * 0.5);
+
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'rgba(10, 10, 10, 0.5)',
-      borderRadius: '10px',
-      position: 'relative',
-      border: `2px solid ${skillSet?.color || '#6c5ce7'}`,
-      overflow: 'hidden'
-    }}>
+    <div className="mindmap-container">
       {/* Zoom Controls */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '10px',
-        display: 'flex',
-        gap: '8px',
-        zIndex: 10
-      }}>
+      <div className="zoom-controls">
         <button
           onClick={handleZoomOut}
+          className="zoom-button"
           style={{
-            background: 'rgba(108, 92, 231, 0.8)',
-            border: '1px solid #6c5ce7',
-            color: 'white',
-            borderRadius: '50%',
-            width: '35px',
-            height: '35px',
-            cursor: 'pointer',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.3s ease'
+            width: `${buttonSize}px`,
+            height: `${buttonSize}px`,
+            fontSize: `${buttonFontSize}px`
           }}
-          onMouseEnter={e => e.target.style.background = 'rgba(108, 92, 231, 1)'}
-          onMouseLeave={e => e.target.style.background = 'rgba(108, 92, 231, 0.8)'}
         >
           −
         </button>
         <button
           onClick={handleZoomIn}
+          className="zoom-button"
           style={{
-            background: 'rgba(108, 92, 231, 0.8)',
-            border: '1px solid #6c5ce7',
-            color: 'white',
-            borderRadius: '50%',
-            width: '35px',
-            height: '35px',
-            cursor: 'pointer',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.3s ease'
+            width: `${buttonSize}px`,
+            height: `${buttonSize}px`,
+            fontSize: `${buttonFontSize}px`
           }}
-          onMouseEnter={e => e.target.style.background = 'rgba(108, 92, 231, 1)'}
-          onMouseLeave={e => e.target.style.background = 'rgba(108, 92, 231, 0.8)'}
         >
           +
         </button>
       </div>
 
       {/* Zoom Level Indicator */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        background: 'rgba(0, 0, 0, 0.7)',
-        color: 'white',
-        padding: '5px 10px',
-        borderRadius: '15px',
-        fontSize: '12px',
-        border: `1px solid ${skillSet?.color || '#6c5ce7'}`
-      }}>
+      <div 
+        className="zoom-indicator"
+        style={{
+          fontSize: Math.max(10, buttonFontSize * 0.8) + 'px',
+          borderColor: skillSet?.color || '#6c5ce7'
+        }}
+      >
         Zoom: {(zoomLevel * 100).toFixed(0)}%
       </div>
 
       {/* SVG Container */}
-      <div style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden'
-      }}>
+      <div className="svg-container">
         <svg
           ref={svgRef}
+          className="mindmap-svg"
           style={{
-            maxWidth: '100%',
-            maxHeight: '100%',
-            border: `1px solid ${skillSet?.color || '#6c5ce7'}40`,
-            borderRadius: '8px'
+            border: `1px solid ${skillSet?.color || '#6c5ce7'}40`
           }}
         />
       </div>
 
       {/* Interactive Hint */}
       {hoveredNode && (
-        <div style={{
-          position: 'absolute',
-          bottom: '10px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(108, 92, 231, 0.9)',
-          color: 'white',
-          padding: '8px 15px',
-          borderRadius: '20px',
-          fontSize: '11px',
-          fontWeight: 'bold',
-          pointerEvents: 'none',
-          animation: 'fadeIn 0.3s ease-out',
-          border: '1px solid #6c5ce7'
-        }}>
+        <div 
+          className="interactive-hint"
+          style={{
+            fontSize: Math.max(9, buttonFontSize * 0.7) + 'px'
+          }}
+        >
           Drag nodes to rearrange • Use zoom controls to explore
         </div>
       )}
@@ -987,9 +963,9 @@ const Tech = () => {
   };
 
   return (
-    <div className="interactive-tech-skills" style={{ background: '#1b1b1e' }}>
+    <div className="interactive-tech-skills">
       <div className="tech-skills-container">
-
+        <h5 className="skills-subtitle">Skill I Aquired</h5>
         <h2 className="skills-title">My Skill Graphs</h2>
 
         <div className="graph-grid">
@@ -1036,7 +1012,7 @@ const Tech = () => {
             <div className="derivation-content">
               <div className="chart-section">
                 <h4 className="chart-title">Skill Development Network</h4>
-                <div style={{ height: '500px' }}>
+                <div className="mindmap-wrapper">
                   <MindmapChart skillSet={selectedSkillSet} />
                 </div>
               </div>
@@ -1058,13 +1034,13 @@ const Tech = () => {
                   ))}
                 </div>
 
-                <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(108, 92, 231, 0.1)', borderRadius: '10px' }}>
-                  <h5 style={{ color: '#8b7cf6', marginBottom: '1rem' }}>About This Network</h5>
-                  <p style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                <div className="about-network">
+                  <h5 className="about-title">About This Network</h5>
+                  <p className="about-description">
                     This mindmap visualizes how each skill in <strong>{selectedSkillSet.header}</strong> was
                     developed through your professional experiences. The network shows:
                   </p>
-                  <ul style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6', marginTop: '0.5rem', paddingLeft: '1rem' }}>
+                  <ul className="about-list">
                     <li><strong>Center:</strong> The skill category</li>
                     <li><strong>Inner Ring:</strong> Individual skills</li>
                     <li><strong>Outer Nodes:</strong> Contributing experiences</li>
@@ -1081,6 +1057,5 @@ const Tech = () => {
     </div>
   );
 };
-
 
 export default Tech;
