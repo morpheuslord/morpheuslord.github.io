@@ -1,130 +1,86 @@
-<h1 align="center">Hi 👋, I'm Chiranjeevi G</h1>
-<h5 align="center">
-  Greetings and welcome to my GitHub profile. I am a highly motivated cybersecurity professional specializing in red team operations and security testing, with a keen focus on Python automation programming. My commitment to this field is unwavering, and I continuously strive to enhance my expertise and knowledge through research and hands-on Python development. Proficient in Python, I possess a robust understanding of website security and application testing, leveraging automation for efficient and effective cybersecurity tasks. I firmly believe in the significance of ongoing learning and skill refinement to maintain a leading edge in the realm of cybersecurity. Beyond my technical acumen, I am an active researcher and blogger, dedicated to producing insightful articles and blog posts on a range of cybersecurity subjects. Thank you for visiting my profile.
-</h5>
+# Welcome to your Lovable project
 
-<p align="left">
-  <img src="https://komarev.com/ghpvc/?username=morpheuslord&label=Profile%20views&color=0e75b6&style=flat" alt="morpheuslord" />
-</p>
+## Project info
 
-[![TryHackMe Badge](https://tryhackme-badges.s3.amazonaws.com/morpheuslord.png)](https://tryhackme.com/p/morpheuslord)
-<p align="center">
-  <a href="https://www.eccouncil.org/">
-    <img src="https://github.com/morpheuslord/morpheuslord/assets/70637311/c51a4e6f-71bb-4c6a-a558-1cff9d35a1fb" alt="CEHv12 Badge" width="100" height="100">
-  </a>
-  <a href="https://www.eccouncil.org/">
-    <img src="https://github.com/morpheuslord/morpheuslord/assets/70637311/a6585de1-8495-45c7-b8a7-0589e81eb2d6" alt="CND Badge" width="100" height="100">
-  </a>
-</p>
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-<p align="left">
-  <a href="https://github.com/ryo-ma/github-profile-trophy">
-    <img src="https://github-profile-trophy.vercel.app/?username=morpheuslord" alt="morpheuslord" />
-  </a>
-</p>
+## How can I edit this code?
 
-<p align="left">
-  <a href="https://twitter.com/morpheuslord2" target="blank">
-    <img src="https://img.shields.io/twitter/follow/morpheuslord2?logo=twitter&style=for-the-badge" alt="morpheuslord2" />
-  </a>
-</p>
+There are several ways of editing your application.
 
-- 🔭 I’m currently working on [GPT-Vuln_Analyzer](https://github.com/morpheuslord/GPT_Vuln-analyzer)
-- 👯 I’m looking to collaborate on [HackBot](https://github.com/morpheuslord/HackBot)
-- 🤝 I’m looking for help with [CVE-llm_dataset](https://github.com/morpheuslord/CVE-llm_dataset)
-- 👨‍💻 All of my projects are available at [My Repositories](https://github.com/morpheuslord?tab=repositories)
-- 📝 I regularly write articles on [Hacker Noon](https://hackernoon.com/u/morpheuslord)
-- 💬 Ask me about **Flask, Red Team concepts**
-- 📫 How to reach me **chiranjeevi.naidu@proton.me**
+**Use Lovable**
 
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
+Changes made via Lovable will be committed automatically to this repo.
 
-### Connect with me:
-<p align="left">
-  <a href="https://twitter.com/morpheuslord2" target="blank">
-    <img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/twitter.svg" alt="morpheuslord2" height="30" width="40" />
-  </a>
-  <a href="https://linkedin.com/in/chiranjeevi g" target="blank">
-    <img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="chiranjeevi g" height="30" width="40" />
-  </a>
-  <a href="https://stackoverflow.com/users/14521763" target="blank">
-    <img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/stack-overflow.svg" alt="14521763" height="30" width="40" />
-  </a>
-  <a href="https://kaggle.com/chiranjeevi g naidu" target="blank">
-    <img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/kaggle.svg" alt="chiranjeevi g naidu" height="30" width="40" />
-  </a>
-  <a href="https://hackernoon.com/feed/u/morpheuslord" target="blank">
-    <img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/rss.svg" alt="https://hackernoon.com/feed/u/morpheuslord" height="30" width="40" />
-  </a>
-</p>
+**Use your preferred IDE**
 
-### Languages and Tools:
-<p align="center">
-  <a href="https://aws.amazon.com" target="_blank" rel="noreferrer">
-    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="aws" width="40" height="40" />
-  </a>
-  <a href="https://www.gnu.org/software/bash/" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/gnu_bash/gnu_bash-icon.svg" alt="bash" width="40" height="40" />
-  </a>
-  <a href="https://www.docker.com/" target="_blank" rel="noreferrer">
-    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg" alt="docker" width="40" height="40" />
-  </a>
-  <a href="https://flask.palletsprojects.com/" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/pocoo_flask/pocoo_flask-icon.svg" alt="flask" width="40" height="40" />
-  </a>
-  <a href="https://git-scm.com/" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/git-scm/git-scm-icon.svg" alt="git" width="40" height="40" />
-  </a>
-  <a href="https://heroku.com" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/heroku/heroku-icon.svg" alt="heroku" width="40" height="40" />
-  </a>
-  <a href="https://kubernetes.io" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/kubernetes/kubernetes-icon.svg" alt="kubernetes" width="40" height="40" />
-  </a>
-  <a href="https://www.linux.org/" target="_blank" rel="noreferrer">
-    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linux/linux-original.svg" alt="linux" width="40" height="40" />
-  </a>
-  <a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/Introduction/Introduction.html" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/apple_objectivec/apple_objectivec-icon.svg" alt="objectivec" width="40" height="40" />
-  </a>
-  <a href="https://www.oracle.com/" target="_blank" rel="noreferrer">
-    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/oracle/oracle-original.svg" alt="oracle" width="40" height="40" />
-  </a>
-  <a href="https://postman.com" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/getpostman/getpostman-icon.svg" alt="postman" width="40" height="40" />
-  </a>
-  <a href="https://www.python.org" target="_blank" rel="noreferrer">
-    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="python" width="40" height="40" />
-  </a>
-  <a href="https://pytorch.org/" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/pytorch/pytorch-icon.svg" alt="pytorch" width="40" height="40" />
-  </a>
-  <a href="https://www.qt.io/" target="_blank" rel="noreferrer">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Qt_logo_2016.svg" alt="qt" width="40" height="40" />
-  </a>
-  <a href="https://www.sqlite.org/" target="_blank" rel="noreferrer">
-    <img src="https://www.vectorlogo.zone/logos/sqlite/sqlite-icon.svg" alt="sqlite" width="40" height="40" />
-  </a>
-</p>
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs?username=morpheuslord&show_icons=true&locale=en&layout=compact" alt="morpheuslord" />
-</p>
-<p align="center">
-  <a href="https://github.com/morpheuslord">
-    <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=morpheuslord&theme=radical" alt="Morpheuslord's GitHub Contribution"/>
-  </a>
-</p>
-<p  align="center">&nbsp;
-  <img align="center" src="https://github-readme-stats.vercel.app/api?username=morpheuslord&show_icons=true&locale=en" alt="morpheuslord" />
-</p>
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-<p align="center">
-  <img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=morpheuslord&" alt="morpheuslord" />
-</p>
+**Important**: This project requires **Node.js 18+** (Vite requires Node.js 14.18+ or 16+, but we recommend 18+ for best compatibility).
 
-<p align="center">
-  <a href="https://www.buymeacoffee.com/Morpheuslord">
-    <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" />
-  </a>
-</p>
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: If using nvm, install and use Node.js 18+
+nvm install 18
+nvm use 18
+# Or if .nvmrc exists, just run:
+nvm use
+
+# Step 4: Verify Node.js version (should be 18+)
+node --version
+
+# Step 5: Install the necessary dependencies.
+npm i
+
+# Step 6: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
+
+**Troubleshooting**: If you encounter `SyntaxError: Unexpected token {` when running `npm run dev`, it means your Node.js version is too old. Upgrade to Node.js 18+ using nvm or your system's package manager.
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
