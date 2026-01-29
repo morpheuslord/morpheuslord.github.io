@@ -71,24 +71,22 @@ const Projects = () => {
         {/* Projects Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedProjects.map((project, index) => (
-            <div 
+            <a
               key={project.id}
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`project-card opacity-0 card-cyber rounded-xl p-6 flex flex-col group hover:border-foreground/20 transition-all duration-300 ${
                 index >= 6 ? 'project-card-extra' : ''
               }`}
+              aria-label={`View ${project.title} on GitHub`}
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <Folder className="w-10 h-10 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="View on GitHub"
-                >
+                <div className="p-2 text-muted-foreground group-hover:text-foreground transition-colors">
                   <Github className="w-5 h-5" />
-                </a>
+                </div>
               </div>
 
               {/* Title */}
@@ -112,7 +110,7 @@ const Projects = () => {
                   </span>
                 ))}
               </div>
-            </div>
+            </a>
           ))}
         </div>
 

@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import anime from 'animejs';
 import { personalInfo, stats } from '@/data/portfolioData';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Download } from 'lucide-react';
 import ComputerModel from './ComputerModel';
+import resumePdf from '@/data/Resume.pdf';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -133,7 +134,7 @@ const Hero = () => {
               className="font-mono text-sm md:text-base text-muted-foreground max-w-md mx-auto lg:mx-0 mb-10 opacity-0"
             >
               <span className="text-foreground font-medium">{personalInfo.title}</span>
-              <span className="mx-3 text-border">|</span>
+              <span className="mx-3 text-foreground">|</span>
               <span>{personalInfo.subtitle}</span>
             </p>
 
@@ -158,6 +159,14 @@ const Hero = () => {
               </a>
               <a href="#projects" className="btn-ghost">
                 View Projects
+              </a>
+              <a 
+                href={resumePdf} 
+                download="Chiranjeevi_Naidu_Resume.pdf"
+                className="btn-ghost inline-flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download Resume
               </a>
             </div>
           </div>

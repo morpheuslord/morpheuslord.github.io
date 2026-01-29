@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { navLinks } from '@/data/portfolioData';
 import anime from 'animejs';
 
@@ -11,8 +12,10 @@ const Navigation = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
 
-      // Determine active section
-      const sections = navLinks.map(link => link.href.replace('#', ''));
+      // Determine active section (only for anchor links)
+      const sections = navLinks
+        .filter(link => link.href.startsWith('#'))
+        .map(link => link.href.replace('#', ''));
       for (const section of sections.reverse()) {
         const element = document.getElementById(section);
         if (element) {
@@ -41,10 +44,13 @@ const Navigation = () => {
   }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    // Only handle anchor links here, route links will be handled by React Router
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
     setIsMobileMenuOpen(false);
   };
@@ -69,18 +75,35 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className={`nav-item nav-link ${
-                  activeSection === link.href.replace('#', '') ? 'active' : ''
-                }`}
-              >
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isAnchorLink = link.href.startsWith('#');
+              
+              if (isAnchorLink) {
+                return (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    className={`nav-item nav-link ${
+                      activeSection === link.href.replace('#', '') ? 'active' : ''
+                    }`}
+                  >
+                    {link.name}
+                  </a>
+                );
+              } else {
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className="nav-item nav-link"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              }
+            })}
           </div>
 
           {/* Mobile Menu Button */}
@@ -114,16 +137,33 @@ const Navigation = () => {
         }`}
       >
         <div className="px-6 py-6 flex flex-col gap-4">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              className="nav-link text-lg"
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const isAnchorLink = link.href.startsWith('#');
+            
+            if (isAnchorLink) {
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="nav-link text-lg"
+                >
+                  {link.name}
+                </a>
+              );
+            } else {
+              return (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="nav-link text-lg"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              );
+            }
+          })}
         </div>
       </div>
     </nav>

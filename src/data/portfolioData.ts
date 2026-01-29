@@ -2,7 +2,7 @@
 export const personalInfo = {
   name: "Chiranjeevi Naidu",
   title: "Cybersecurity Engineer",
-  subtitle: "& Agentic AI Developer",
+  subtitle: "Agentic AI Developer",
   email: "chiranjeevi.naidu@proton.me",
   linkedin: "https://www.linkedin.com/in/chiranjeevi-g-naidu/",
   github: "https://github.com/morpheuslord",
@@ -26,7 +26,7 @@ export const experiences = [
     title: "CyberSecurity Engineer",
     company: "Cygne Noir Cyber",
     period: "Oct 2024 - Present",
-    duration: "8+ months",
+    duration: "1.5+ months",
     current: true,
     highlights: [
       { title: "Python & API Development", desc: "Developed secure backend systems and tooling using Python and REST APIs." },
@@ -35,6 +35,12 @@ export const experiences = [
       { title: "Client-Facing Research", desc: "Collaborated with clients to deliver research-driven automation." },
       { title: "Security Automation", desc: "Built automated scripts for vulnerability validation and pipeline integration." },
       { title: "Training & Mentorship", desc: "Providing training and guidance to cybersecurity trainees." },
+      { title: "Application Pentesting", desc: "Lead a Team in performing application pentesting." },
+      { title: "Android Development", desc: "Lead a Team in developing a secure backend for a mobile application." },
+      { title: "Recruting", desc: "Recruiting and managing a team of cybersecurity professionals and interns." },
+      { title: "Team Lead in MVP Projects", desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery." },
+      { title: "Architectural Design Leadership", desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices." },
+      { title: "Cross-Domain Research", desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas." },
     ],
   },
   {
@@ -219,6 +225,13 @@ export const projects = [
     github: "https://github.com/morpheuslord/WinFiHack",
     tags: ["Python", "WiFi", "Windows"],
   },
+  {
+    id: 10,
+    title: "Komo.do-Hub",
+    description: "A Mobile application interface for the Komodo Container Management Platform",
+    github: "https://github.com/morpheuslord/komo.do-hub",
+    tags: ["Android", "Komodo", "Container Management","Java", "Node.js", "React Native", "React"],
+  },
 ];
 
 export const researchPapers = [
@@ -294,5 +307,7 @@ export const navLinks = [
   { name: "Skills", href: "#skills" },
   { name: "Projects", href: "#projects" },
   { name: "Research", href: "#research" },
+  { name: "Services", href: "#services" },
+  { name: "Articles", href: "/articles" },
   { name: "Contact", href: "#contact" },
 ];

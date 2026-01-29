@@ -88,7 +88,10 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       children: [
         // Employment nodes with only unique skills
         ...experiences.map((exp, i) => {
-          const shortName = exp.title.split(' – ')[0].split(' ').slice(0, 2).join(' ');
+          const titleParts = exp.title.split(' – ');
+          const jobTitle = titleParts[0].split(' ').slice(0, 2).join(' ');
+          const companyName = titleParts[1] || '';
+          const shortName = companyName ? `${jobTitle} @ ${companyName}` : jobTitle;
           const uniqueSkills = Object.keys(exp.skills).filter(skillName => {
             const employments = skillToEmployments.get(skillName);
             return !employments || employments.length === 1;
@@ -812,7 +815,12 @@ const Skills = () => {
                           }} 
                         />
                         <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-mono">
-                          {exp.title.split(' – ')[0].split(' ').slice(0, 2).join(' ')}
+                          {(() => {
+                            const titleParts = exp.title.split(' – ');
+                            const jobTitle = titleParts[0].split(' ').slice(0, 2).join(' ');
+                            const companyName = titleParts[1] || '';
+                            return companyName ? `${jobTitle} @ ${companyName}` : jobTitle;
+                          })()}
                         </span>
                       </div>
                     );

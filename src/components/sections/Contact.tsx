@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, FormEvent } from 'react';
 import anime from 'animejs';
+import emailjs from '@emailjs/browser';
 import { personalInfo } from '@/data/portfolioData';
 import { Mail, Linkedin, Github, Send, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,6 +11,9 @@ const Contact = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
+    // Initialize EmailJS with public key
+    emailjs.init('8wQaI_dSLeMjhrmB2');
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -49,17 +53,45 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success('Message sent successfully!');
-
-    // Reset form
-    (e.target as HTMLFormElement).reset();
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
     
-    setTimeout(() => setIsSubmitted(false), 3000);
+    // Extract form data
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const message = formData.get('message') as string;
+
+    // Map form fields to EmailJS template parameters
+    const templateParams = {
+      name,
+      email,
+      message,
+    };
+
+    try {
+      // Send email using EmailJS
+      await emailjs.send(
+        'service_qdoncr5',
+        'template_clv1uvg',
+        templateParams,
+        {
+          publicKey: '8wQaI_dSLeMjhrmB2',
+        }
+      );
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      toast.success('Message sent successfully!');
+
+      // Reset form
+      form.reset();
+      
+      setTimeout(() => setIsSubmitted(false), 3000);
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error('EmailJS error:', error);
+      toast.error('Failed to send message. Please try again or contact me directly via email.');
+    }
   };
 
   const contactLinks = [
