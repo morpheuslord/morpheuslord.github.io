@@ -1,4 +1,4 @@
-# Personal Profile
+# Personal Profile New Design
 A personal portfolio website showcasing cybersecurity engineering work, research, and projects. Built as a modern single-page application with React and TypeScript.
 
 ## Overview
