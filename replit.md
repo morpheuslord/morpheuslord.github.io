@@ -35,6 +35,12 @@ src/
 Configured for static deployment with the built `dist` folder.
 
 ## Recent Changes
+- 2026-01-30: Redesigned Experience section layout
+  - Changed from vertical list to 2-column grid layout for highlights
+  - Added ScrollArea for better content management with many items
+  - Added dynamic category icons based on highlight content
+  - Compact card design for each highlight with hover effects
+  - Added highlight counter in header
 - 2026-01-30: Migrated from Lovable to Replit environment
   - Updated Vite config to use port 5000 with allowedHosts for Replit proxy
   - Removed lovable-tagger plugin dependency from vite config

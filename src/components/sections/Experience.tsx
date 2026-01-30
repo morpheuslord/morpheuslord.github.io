@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import anime from 'animejs';
 import { experiences } from '@/data/portfolioData';
-import { CheckCircle2, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Briefcase, Code, Users, Lightbulb } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Experience = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -53,18 +54,31 @@ const Experience = () => {
   }, []);
 
   useEffect(() => {
-    // Animate content change
     anime({
       targets: '.exp-detail',
       opacity: [0, 1],
       translateY: [20, 0],
-      delay: anime.stagger(50),
+      delay: anime.stagger(30),
       duration: 400,
       easing: 'easeOutExpo',
     });
   }, [activeRole]);
 
   const currentExp = experiences[activeRole];
+
+  const getCategoryIcon = (title: string) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('lead') || lowerTitle.includes('team') || lowerTitle.includes('mentor') || lowerTitle.includes('recruit')) {
+      return Users;
+    }
+    if (lowerTitle.includes('development') || lowerTitle.includes('api') || lowerTitle.includes('python') || lowerTitle.includes('android')) {
+      return Code;
+    }
+    if (lowerTitle.includes('research') || lowerTitle.includes('design') || lowerTitle.includes('architecture')) {
+      return Lightbulb;
+    }
+    return Briefcase;
+  };
 
   return (
     <section id="experience" ref={sectionRef} className="section bg-card/30">
@@ -82,6 +96,7 @@ const Experience = () => {
               <button
                 key={exp.id}
                 onClick={() => setActiveRole(index)}
+                data-testid={`button-experience-tab-${exp.id}`}
                 className={`exp-tab opacity-0 flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 whitespace-nowrap lg:whitespace-normal ${
                   activeRole === index
                     ? 'bg-foreground/10 text-foreground border-l-2 border-foreground'
@@ -102,7 +117,7 @@ const Experience = () => {
           {/* Content */}
           <div className="exp-content opacity-0 card-cyber rounded-xl p-6 md:p-8">
             {/* Header */}
-            <div className="exp-detail mb-6">
+            <div className="exp-detail mb-6 pb-6 border-b border-border/50">
               <h3 className="text-xl md:text-2xl font-bold mb-2">
                 {currentExp.title}
                 <span className="text-muted-foreground"> @ {currentExp.company}</span>
@@ -121,23 +136,36 @@ const Experience = () => {
                   </>
                 )}
               </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                {currentExp.highlights.length} key responsibilities & achievements
+              </p>
             </div>
 
-            {/* Highlights */}
-            <div className="space-y-4">
-              {currentExp.highlights.map((highlight, index) => (
-                <div 
-                  key={index} 
-                  className="exp-detail flex gap-4 group"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-foreground mb-1">{highlight.title}</h4>
-                    <p className="text-sm text-muted-foreground">{highlight.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Highlights Grid with Scroll */}
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="grid sm:grid-cols-2 gap-3">
+                {currentExp.highlights.map((highlight, index) => {
+                  const IconComponent = getCategoryIcon(highlight.title);
+                  return (
+                    <div 
+                      key={index} 
+                      className="exp-detail group p-4 rounded-lg bg-background/50 border border-border/30 hover:border-foreground/20 hover:bg-background/80 transition-all duration-300"
+                      data-testid={`card-highlight-${index}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-md bg-foreground/5 group-hover:bg-foreground/10 transition-colors">
+                          <IconComponent className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm text-foreground mb-1 leading-tight">{highlight.title}</h4>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{highlight.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </div>
