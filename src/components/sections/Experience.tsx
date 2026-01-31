@@ -66,7 +66,22 @@ const Experience = () => {
     });
   }, [activeRole]);
 
-  // D3 Chart for Responsibilities
+  // Categorize highlights
+  const categorizeHighlight = (title: string) => {
+    const lower = title.toLowerCase();
+    if (lower.includes('lead') || lower.includes('team') || lower.includes('mentor') || lower.includes('recruit') || lower.includes('training')) {
+      return 'leadership';
+    }
+    if (lower.includes('development') || lower.includes('api') || lower.includes('python') || lower.includes('android') || lower.includes('automation') || lower.includes('tools')) {
+      return 'development';
+    }
+    if (lower.includes('research') || lower.includes('design') || lower.includes('architecture') || lower.includes('poc')) {
+      return 'research';
+    }
+    return 'security';
+  };
+
+  // D3 Stacked Bar Chart for Responsibilities
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -77,8 +92,8 @@ const Experience = () => {
     if (!container) return;
 
     const width = container.clientWidth;
-    const height = 120;
-    const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+    const height = 180;
+    const margin = { top: 30, right: 20, bottom: 50, left: 50 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -87,157 +102,200 @@ const Experience = () => {
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Prepare data - reversed so oldest is first (left to right growth)
-    const data = [...experiences].reverse().map((exp, i) => ({
-      index: i,
-      company: exp.company.split('/')[0].trim(),
-      responsibilities: exp.highlights.length,
-      isCurrent: exp.current,
-      isActive: experiences.length - 1 - i === activeRole,
-    }));
+    // Prepare data with categories - reversed so oldest is first
+    const data = [...experiences].reverse().map((exp, i) => {
+      const categories = { leadership: 0, development: 0, research: 0, security: 0 };
+      exp.highlights.forEach(h => {
+        const cat = categorizeHighlight(h.title);
+        categories[cat as keyof typeof categories]++;
+      });
+      return {
+        index: i,
+        title: exp.title,
+        company: exp.company.split('/')[0].trim(),
+        period: exp.period,
+        total: exp.highlights.length,
+        ...categories,
+        isCurrent: exp.current,
+        isActive: experiences.length - 1 - i === activeRole,
+      };
+    });
+
+    const categories = ['security', 'development', 'research', 'leadership'] as const;
+    const colors: Record<typeof categories[number], string> = {
+      leadership: '#f59e0b',
+      development: '#3b82f6',
+      research: '#8b5cf6',
+      security: '#22c55e',
+    };
+
+    // Stack data
+    const stack = d3.stack<typeof data[0]>()
+      .keys(categories)
+      .order(d3.stackOrderNone)
+      .offset(d3.stackOffsetNone);
+
+    const stackedData = stack(data);
 
     // Scales
     const xScale = d3.scaleBand()
       .domain(data.map((_, i) => i.toString()))
       .range([0, innerWidth])
-      .padding(0.3);
+      .padding(0.25);
 
     const yScale = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.responsibilities) || 10])
+      .domain([0, d3.max(data, d => d.total) || 10])
       .range([innerHeight, 0]);
 
-    // Area generator for growth visualization
-    const area = d3.area<typeof data[0]>()
-      .x((_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .y0(innerHeight)
-      .y1(d => yScale(d.responsibilities))
-      .curve(d3.curveMonotoneX);
+    // Y-axis gridlines
+    g.selectAll('.grid-line')
+      .data(yScale.ticks(5))
+      .join('line')
+      .attr('class', 'grid-line')
+      .attr('x1', 0)
+      .attr('x2', innerWidth)
+      .attr('y1', d => yScale(d))
+      .attr('y2', d => yScale(d))
+      .attr('stroke', 'rgba(255,255,255,0.05)')
+      .attr('stroke-dasharray', '3,3');
 
-    // Line generator
-    const line = d3.line<typeof data[0]>()
-      .x((_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .y(d => yScale(d.responsibilities))
-      .curve(d3.curveMonotoneX);
+    // Y-axis labels
+    g.selectAll('.y-label')
+      .data(yScale.ticks(5))
+      .join('text')
+      .attr('class', 'y-label')
+      .attr('x', -8)
+      .attr('y', d => yScale(d))
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', 'rgba(255,255,255,0.4)')
+      .attr('font-size', '10px')
+      .attr('font-family', 'monospace')
+      .text(d => d);
 
-    // Draw gradient area
-    const gradient = svg.append('defs')
-      .append('linearGradient')
-      .attr('id', 'areaGradient')
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '0%')
-      .attr('y2', '100%');
+    // Tooltip
+    const tooltip = d3.select('body').append('div')
+      .attr('class', 'exp-tooltip')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('background', 'rgba(0,0,0,0.9)')
+      .style('border', '1px solid rgba(255,255,255,0.2)')
+      .style('border-radius', '8px')
+      .style('padding', '12px')
+      .style('font-size', '12px')
+      .style('color', 'white')
+      .style('pointer-events', 'none')
+      .style('z-index', '1000')
+      .style('max-width', '250px');
 
-    gradient.append('stop')
-      .attr('offset', '0%')
-      .attr('stop-color', '#22c55e')
-      .attr('stop-opacity', 0.3);
+    // Draw stacked bars
+    stackedData.forEach((layer, layerIndex) => {
+      g.selectAll(`.bar-${layer.key}`)
+        .data(layer)
+        .join('rect')
+        .attr('class', `bar-${layer.key}`)
+        .attr('x', (d, i) => xScale(i.toString()) || 0)
+        .attr('y', innerHeight)
+        .attr('width', xScale.bandwidth())
+        .attr('height', 0)
+        .attr('fill', colors[layer.key as keyof typeof colors])
+        .attr('opacity', d => d.data.isActive ? 1 : 0.6)
+        .attr('cursor', 'pointer')
+        .on('click', (_, d) => {
+          setActiveRole(experiences.length - 1 - d.data.index);
+        })
+        .on('mouseover', function(event, d) {
+          const catLabels: Record<string, string> = {
+            leadership: 'Leadership & Mentorship',
+            development: 'Development & Tools',
+            research: 'Research & Architecture',
+            security: 'Security & Operations'
+          };
+          
+          tooltip.html(`
+            <div style="font-weight: bold; margin-bottom: 8px; color: #22c55e;">${d.data.title}</div>
+            <div style="color: #888; margin-bottom: 8px; font-size: 11px;">${d.data.company} • ${d.data.period}</div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+              <div style="margin-bottom: 4px; font-weight: 500;">Responsibility Breakdown:</div>
+              ${categories.map(cat => `
+                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                  <span style="color: ${colors[cat]};">${catLabels[cat]}</span>
+                  <span style="font-weight: bold;">${d.data[cat]}</span>
+                </div>
+              `).join('')}
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 6px; padding-top: 6px; display: flex; justify-content: space-between;">
+                <span>Total</span>
+                <span style="font-weight: bold; color: #22c55e;">${d.data.total}</span>
+              </div>
+            </div>
+          `)
+            .style('visibility', 'visible')
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY - 10) + 'px');
+        })
+        .on('mousemove', function(event) {
+          tooltip
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY - 10) + 'px');
+        })
+        .on('mouseout', function() {
+          tooltip.style('visibility', 'hidden');
+        })
+        .transition()
+        .duration(800)
+        .delay((_, i) => i * 100 + layerIndex * 50)
+        .attr('y', d => yScale(d[1]))
+        .attr('height', d => yScale(d[0]) - yScale(d[1]));
+    });
 
-    gradient.append('stop')
-      .attr('offset', '100%')
-      .attr('stop-color', '#22c55e')
-      .attr('stop-opacity', 0.05);
-
-    // Area path
-    g.append('path')
-      .datum(data)
-      .attr('fill', 'url(#areaGradient)')
-      .attr('d', area)
+    // Total labels on top
+    g.selectAll('.total')
+      .data(data)
+      .join('text')
+      .attr('class', 'total')
+      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
+      .attr('y', d => yScale(d.total) - 8)
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.7)')
+      .attr('font-size', '12px')
+      .attr('font-weight', 'bold')
       .attr('opacity', 0)
-      .transition()
-      .duration(1000)
-      .attr('opacity', 1);
-
-    // Line path
-    const linePath = g.append('path')
-      .datum(data)
-      .attr('fill', 'none')
-      .attr('stroke', '#22c55e')
-      .attr('stroke-width', 2)
-      .attr('d', line);
-
-    // Animate line
-    const lineLength = linePath.node()?.getTotalLength() || 0;
-    linePath
-      .attr('stroke-dasharray', lineLength)
-      .attr('stroke-dashoffset', lineLength)
-      .transition()
-      .duration(1500)
-      .ease(d3.easeQuadOut)
-      .attr('stroke-dashoffset', 0);
-
-    // Draw bars
-    g.selectAll('.bar')
-      .data(data)
-      .join('rect')
-      .attr('class', 'bar')
-      .attr('x', (_, i) => xScale(i.toString()) || 0)
-      .attr('y', innerHeight)
-      .attr('width', xScale.bandwidth())
-      .attr('height', 0)
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.1)')
-      .attr('rx', 3)
-      .attr('cursor', 'pointer')
-      .on('click', (_, d) => {
-        setActiveRole(experiences.length - 1 - d.index);
-      })
-      .transition()
-      .duration(800)
-      .delay((_, i) => i * 100)
-      .attr('y', d => yScale(d.responsibilities))
-      .attr('height', d => innerHeight - yScale(d.responsibilities));
-
-    // Draw dots on top of bars
-    g.selectAll('.dot')
-      .data(data)
-      .join('circle')
-      .attr('class', 'dot')
-      .attr('cx', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('cy', innerHeight)
-      .attr('r', 0)
-      .attr('fill', d => d.isCurrent ? '#22c55e' : d.isActive ? '#22c55e' : 'rgba(255,255,255,0.5)')
-      .attr('stroke', d => d.isActive ? '#22c55e' : 'transparent')
-      .attr('stroke-width', 2)
-      .attr('cursor', 'pointer')
-      .on('click', (_, d) => {
-        setActiveRole(experiences.length - 1 - d.index);
-      })
+      .text(d => d.total)
       .transition()
       .duration(800)
       .delay((_, i) => i * 100 + 400)
-      .attr('cy', d => yScale(d.responsibilities))
-      .attr('r', d => d.isActive ? 6 : 4);
-
-    // Labels
-    g.selectAll('.label')
-      .data(data)
-      .join('text')
-      .attr('class', 'label')
-      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 16)
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.4)')
-      .attr('font-size', '10px')
-      .attr('font-family', 'monospace')
-      .text(d => d.company.substring(0, 8));
-
-    // Value labels on top
-    g.selectAll('.value')
-      .data(data)
-      .join('text')
-      .attr('class', 'value')
-      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d.responsibilities) - 8)
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.6)')
-      .attr('font-size', '11px')
-      .attr('font-weight', 'bold')
-      .attr('opacity', 0)
-      .text(d => d.responsibilities)
-      .transition()
-      .duration(800)
-      .delay((_, i) => i * 100 + 600)
       .attr('opacity', 1);
+
+    // X-axis labels (title)
+    g.selectAll('.x-title')
+      .data(data)
+      .join('text')
+      .attr('class', 'x-title')
+      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
+      .attr('y', innerHeight + 14)
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.5)')
+      .attr('font-size', '9px')
+      .attr('font-weight', '500')
+      .text(d => d.title.split(' ')[0]);
+
+    // X-axis labels (company)
+    g.selectAll('.x-company')
+      .data(data)
+      .join('text')
+      .attr('class', 'x-company')
+      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
+      .attr('y', innerHeight + 26)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(255,255,255,0.3)')
+      .attr('font-size', '8px')
+      .attr('font-family', 'monospace')
+      .text(d => d.company.substring(0, 10));
+
+    // Cleanup tooltip on unmount
+    return () => {
+      d3.selectAll('.exp-tooltip').remove();
+    };
 
   }, [activeRole]);
 
@@ -277,9 +335,29 @@ const Experience = () => {
 
         {/* Responsibility Growth Chart */}
         <div className="exp-header opacity-0 mb-8 p-4 rounded-xl bg-background/30 border border-border/30">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-muted-foreground font-mono">Responsibilities Over Time</p>
-            <p className="text-xs text-green-500 font-mono">Click bars to navigate</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Responsibility Growth</p>
+              <p className="text-xs text-muted-foreground">Hover over bars to see breakdown</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-[#22c55e]" />
+                <span className="text-muted-foreground">Security</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-[#3b82f6]" />
+                <span className="text-muted-foreground">Development</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-[#8b5cf6]" />
+                <span className="text-muted-foreground">Research</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-[#f59e0b]" />
+                <span className="text-muted-foreground">Leadership</span>
+              </div>
+            </div>
           </div>
           <div className="w-full overflow-hidden">
             <svg ref={chartRef} className="w-full" />
@@ -300,8 +378,9 @@ const Experience = () => {
               }`}
             >
               <div>
-                <p className="font-medium text-sm whitespace-nowrap">{exp.company}</p>
-                <p className="font-mono text-xs text-muted-foreground">{exp.period}</p>
+                <p className="font-medium text-sm whitespace-nowrap">{exp.title}</p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">{exp.company}</p>
+                <p className="font-mono text-[10px] text-muted-foreground/70">{exp.period}</p>
               </div>
               {exp.current && (
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
