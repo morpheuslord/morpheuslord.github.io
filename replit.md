@@ -35,14 +35,15 @@ src/
 Configured for static deployment with the built `dist` folder.
 
 ## Recent Changes
-- 2026-01-31: Enhanced Experience section with growth visualization
-  - Added animated timeline with gradient growth line
-  - Role level badges (Senior/Mid-Level/Junior/Entry)
-  - Impact score metric for each role
-  - Responsibility growth progress bars
-  - Career progression percentage indicators
+- 2026-01-31: Rebuilt Experience section with D3 visualization
+  - Added D3 area/bar chart showing responsibilities over time
+  - Animated chart with gradient fill and connecting line
+  - Clickable bars to navigate between roles
+  - Fixed mobile layout with horizontal scrollable tabs
+  - Removed problematic Impact Score
+  - Kept role level badges (Senior/Mid-Level/Junior/Entry)
+  - Responsibilities count badge per role
   - Green accent hover effects for dynamic feel
-  - "Latest" badge on current role
 - 2026-01-30: Redesigned Experience section layout
   - Changed from vertical list to 2-column grid layout for highlights
   - Added ScrollArea for better content management with many items
