@@ -137,6 +137,8 @@ const Experience = () => {
     });
   };
 
+  const [showCombined, setShowCombined] = useState(true);
+
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -147,72 +149,81 @@ const Experience = () => {
     if (!container) return;
 
     const width = container.clientWidth;
-    const height = 220;
-    const margin = { top: 20, right: 30, bottom: 60, left: 45 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+    const height = 340;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 60;
 
     svg.attr('width', width).attr('height', height);
 
     const g = svg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
+      .attr('transform', `translate(${centerX},${centerY})`);
 
-    const data = calculateRoleMetrics();
-
+    const allData = calculateRoleMetrics();
     const categories = ['security', 'development', 'research', 'leadership'] as const;
-    const colors: Record<typeof categories[number], string> = {
-      security: '#22c55e',
-      development: '#3b82f6',
-      research: '#8b5cf6',
-      leadership: '#f59e0b',
-    };
-
+    
     const categoryLabels: Record<typeof categories[number], string> = {
-      security: 'Security Operations',
-      development: 'Development & Tools',
-      research: 'Research & Strategy',
-      leadership: 'Leadership & Mentoring',
+      security: 'Security',
+      development: 'Development',
+      research: 'Research',
+      leadership: 'Leadership',
     };
 
-    const xScale = d3.scalePoint<number>()
-      .domain(data.map((_, i) => i))
-      .range([0, innerWidth])
-      .padding(0.3);
+    const roleColors = ['#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b'];
 
-    const maxCategoryValue = Math.max(
-      ...data.flatMap(d => [d.scores.security, d.scores.development, d.scores.research, d.scores.leadership])
+    const maxValue = Math.max(
+      ...allData.flatMap(d => categories.map(c => d.scores[c]))
     );
-    const yMax = Math.max(maxCategoryValue + 1, 6);
+    const levels = 5;
+    const angleSlice = (Math.PI * 2) / categories.length;
 
-    const yScale = d3.scaleLinear()
-      .domain([0, yMax])
-      .range([innerHeight, 0]);
+    for (let level = 1; level <= levels; level++) {
+      const levelRadius = (radius / levels) * level;
+      const levelValue = Math.round((maxValue / levels) * level);
+      
+      g.append('circle')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', levelRadius)
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(255,255,255,0.1)')
+        .attr('stroke-dasharray', '3,3');
 
-    const yTicks = d3.range(0, yMax + 1, Math.ceil(yMax / 5));
+      g.append('text')
+        .attr('x', 5)
+        .attr('y', -levelRadius - 2)
+        .attr('fill', 'rgba(255,255,255,0.4)')
+        .attr('font-size', '9px')
+        .attr('font-family', 'monospace')
+        .text(levelValue);
+    }
 
-    g.selectAll('.grid-line')
-      .data(yTicks)
-      .join('line')
-      .attr('class', 'grid-line')
-      .attr('x1', 0)
-      .attr('x2', innerWidth)
-      .attr('y1', d => yScale(d))
-      .attr('y2', d => yScale(d))
-      .attr('stroke', 'rgba(255,255,255,0.06)')
-      .attr('stroke-dasharray', '4,4');
+    categories.forEach((cat, i) => {
+      const angle = angleSlice * i - Math.PI / 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
 
-    g.selectAll('.y-label')
-      .data(yTicks)
-      .join('text')
-      .attr('class', 'y-label')
-      .attr('x', -8)
-      .attr('y', d => yScale(d))
-      .attr('text-anchor', 'end')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', 'rgba(255,255,255,0.4)')
-      .attr('font-size', '9px')
-      .attr('font-family', 'monospace')
-      .text(d => d);
+      g.append('line')
+        .attr('x1', 0)
+        .attr('y1', 0)
+        .attr('x2', x)
+        .attr('y2', y)
+        .attr('stroke', 'rgba(255,255,255,0.15)')
+        .attr('stroke-width', 1);
+
+      const labelX = Math.cos(angle) * (radius + 25);
+      const labelY = Math.sin(angle) * (radius + 25);
+
+      g.append('text')
+        .attr('x', labelX)
+        .attr('y', labelY)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('fill', 'rgba(255,255,255,0.7)')
+        .attr('font-size', '11px')
+        .attr('font-weight', '500')
+        .text(categoryLabels[cat]);
+    });
 
     const tooltip = d3.select('body').append('div')
       .attr('class', 'exp-tooltip')
@@ -226,84 +237,57 @@ const Experience = () => {
       .style('color', 'white')
       .style('pointer-events', 'none')
       .style('z-index', '1000')
-      .style('max-width', '320px')
+      .style('max-width', '280px')
       .style('box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
 
-    categories.forEach((category, catIndex) => {
-      const lineData = data.map((d, i) => ({
-        x: xScale(i) || 0,
-        y: yScale(d.scores[category]),
-        value: d.scores[category],
-        raw: d.rawCounts[category],
-        total: d.totalResponsibilities,
-        ...d,
-      }));
+    const radarLine = d3.lineRadial<number>()
+      .radius(d => (d / maxValue) * radius)
+      .angle((_, i) => i * angleSlice)
+      .curve(d3.curveLinearClosed);
 
-      const line = d3.line<typeof lineData[0]>()
-        .x(d => d.x)
-        .y(d => d.y)
-        .curve(d3.curveMonotoneX);
+    const dataToRender = showCombined ? allData : [allData[experiences.length - 1 - activeRole]];
 
-      const path = g.append('path')
-        .datum(lineData)
-        .attr('fill', 'none')
-        .attr('stroke', colors[category])
-        .attr('stroke-width', 2.5)
-        .attr('stroke-opacity', 0.8)
-        .attr('d', line);
+    dataToRender.forEach((role, roleIndex) => {
+      const values = categories.map(c => role.scores[c]);
+      const color = showCombined ? roleColors[roleIndex % roleColors.length] : '#22c55e';
+      const opacity = showCombined ? (role.isActive ? 1 : 0.4) : 0.8;
 
-      const pathLength = path.node()?.getTotalLength() || 0;
-      path
-        .attr('stroke-dasharray', pathLength)
-        .attr('stroke-dashoffset', pathLength)
-        .transition()
-        .duration(1200)
-        .delay(catIndex * 150)
-        .ease(d3.easeQuadOut)
-        .attr('stroke-dashoffset', 0);
-
-      g.selectAll(`.dot-${category}`)
-        .data(lineData)
-        .join('circle')
-        .attr('class', `dot-${category}`)
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-        .attr('r', 0)
-        .attr('fill', colors[category])
-        .attr('stroke', d => d.isActive ? 'white' : 'transparent')
-        .attr('stroke-width', 2)
+      g.append('path')
+        .datum(values)
+        .attr('fill', color)
+        .attr('fill-opacity', opacity * 0.15)
+        .attr('stroke', color)
+        .attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5)
+        .attr('stroke-opacity', opacity)
+        .attr('d', radarLine)
         .attr('cursor', 'pointer')
-        .on('click', (_, d) => {
-          setActiveRole(experiences.length - 1 - d.index);
+        .on('click', () => {
+          if (showCombined) {
+            setActiveRole(experiences.length - 1 - role.index);
+          }
         })
-        .on('mouseover', function(event, d) {
-          d3.select(this).transition().duration(150).attr('r', 8);
+        .on('mouseover', function(event) {
+          d3.select(this).attr('stroke-width', 3);
           
-          const pct = ((d.value / d.total) * 100).toFixed(0);
+          const coords = categories.map(c => `${categoryLabels[c]}: ${role.scores[c]}`).join(' | ');
           
           tooltip.html(`
-            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
-              <div style="font-weight: 600; font-size: 13px; color: #22c55e;">${d.title}</div>
-              <div style="color: #888; font-size: 11px; margin-top: 2px;">${d.company} | ${d.period}</div>
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+              <div style="font-weight: 600; font-size: 13px; color: ${color};">${role.title}</div>
+              <div style="color: #888; font-size: 11px; margin-top: 2px;">${role.company} | ${role.period}</div>
             </div>
-            
-            <div style="margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colors[category]};"></span>
-                <span style="font-weight: 500;">${categoryLabels[category]}</span>
-              </div>
-              <div style="font-size: 24px; font-weight: bold; color: ${colors[category]};">${d.value} tasks</div>
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">Responsibility Scores:</div>
+              ${categories.map(c => `
+                <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                  <span style="color: #888;">${categoryLabels[c]}:</span>
+                  <span style="font-weight: bold; color: white;">${role.scores[c]}</span>
+                </div>
+              `).join('')}
             </div>
-            
-            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; font-size: 11px;">
-              <div style="font-weight: 500; margin-bottom: 6px; color: #aaa;">Responsibility Breakdown:</div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                <span style="color: #888;">Total responsibilities:</span>
-                <span style="font-weight: bold; color: #22c55e;">${d.total}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #888;">${categoryLabels[category]}:</span>
-                <span style="font-weight: bold; color: ${colors[category]};">${d.value} (${pct}%)</span>
+            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; font-size: 10px;">
+              <div style="color: #22c55e; font-family: monospace; word-break: break-all;">
+                (${coords})
               </div>
             </div>
           `)
@@ -317,57 +301,64 @@ const Experience = () => {
             .style('top', (event.pageY - 15) + 'px');
         })
         .on('mouseout', function() {
-          d3.select(this).transition().duration(150).attr('r', d => (d as typeof lineData[0]).isActive ? 6 : 5);
+          d3.select(this).attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5);
           tooltip.style('visibility', 'hidden');
-        })
-        .transition()
-        .duration(600)
-        .delay((_, i) => catIndex * 150 + i * 100 + 800)
-        .attr('r', d => d.isActive ? 6 : 5);
+        });
+
+      categories.forEach((cat, catIndex) => {
+        const angle = angleSlice * catIndex - Math.PI / 2;
+        const value = role.scores[cat];
+        const pointRadius = (value / maxValue) * radius;
+        const x = Math.cos(angle) * pointRadius;
+        const y = Math.sin(angle) * pointRadius;
+
+        g.append('circle')
+          .attr('cx', x)
+          .attr('cy', y)
+          .attr('r', role.isActive || !showCombined ? 5 : 3)
+          .attr('fill', color)
+          .attr('stroke', 'white')
+          .attr('stroke-width', role.isActive || !showCombined ? 2 : 0)
+          .attr('cursor', 'pointer')
+          .on('click', () => {
+            if (showCombined) {
+              setActiveRole(experiences.length - 1 - role.index);
+            }
+          });
+      });
     });
 
-    g.selectAll('.x-label')
-      .data(data)
-      .join('text')
-      .attr('class', 'x-label')
-      .attr('x', (_, i) => xScale(i) || 0)
-      .attr('y', innerHeight + 18)
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.5)')
-      .attr('font-size', '9px')
-      .attr('font-weight', d => d.isActive ? '600' : '400')
-      .text(d => d.title.split(' ')[0]);
+    if (showCombined) {
+      const legendG = svg.append('g')
+        .attr('transform', `translate(${width - 150}, 20)`);
 
-    g.selectAll('.x-company')
-      .data(data)
-      .join('text')
-      .attr('class', 'x-company')
-      .attr('x', (_, i) => xScale(i) || 0)
-      .attr('y', innerHeight + 32)
-      .attr('text-anchor', 'middle')
-      .attr('fill', 'rgba(255,255,255,0.3)')
-      .attr('font-size', '8px')
-      .attr('font-family', 'monospace')
-      .text(d => d.company.substring(0, 12));
+      allData.forEach((role, i) => {
+        const color = roleColors[i % roleColors.length];
+        const yPos = i * 18;
 
-    g.selectAll('.x-scope')
-      .data(data)
-      .join('text')
-      .attr('class', 'x-scope')
-      .attr('x', (_, i) => xScale(i) || 0)
-      .attr('y', innerHeight + 46)
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.4)')
-      .attr('font-size', '10px')
-      .attr('font-weight', '600')
-      .attr('font-family', 'monospace')
-      .text(d => `${d.totalResponsibilities}`);
+        legendG.append('rect')
+          .attr('x', 0)
+          .attr('y', yPos)
+          .attr('width', 12)
+          .attr('height', 12)
+          .attr('fill', color)
+          .attr('rx', 2)
+          .attr('opacity', role.isActive ? 1 : 0.5);
+
+        legendG.append('text')
+          .attr('x', 18)
+          .attr('y', yPos + 10)
+          .attr('fill', role.isActive ? 'white' : 'rgba(255,255,255,0.5)')
+          .attr('font-size', '10px')
+          .text(role.company.substring(0, 12));
+      });
+    }
 
     return () => {
       d3.selectAll('.exp-tooltip').remove();
     };
 
-  }, [activeRole]);
+  }, [activeRole, showCombined]);
 
   const currentExp = experiences[activeRole];
 
@@ -406,7 +397,7 @@ const Experience = () => {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm font-medium text-foreground">Responsibility Growth</p>
+                <p className="text-sm font-medium text-foreground">Responsibility Radar</p>
                 <button 
                   onClick={() => setShowMethodology(!showMethodology)}
                   className="p-1 rounded hover:bg-foreground/10 transition-colors"
@@ -415,42 +406,52 @@ const Experience = () => {
                   <Info className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Hover points for detailed breakdown | Click to navigate</p>
+              <p className="text-xs text-muted-foreground">
+                {showCombined ? 'All positions overlaid | Hover to see coordinates' : `Showing: ${experiences[activeRole].title}`}
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#22c55e]" />
-                <span className="text-muted-foreground">Security</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#3b82f6]" />
-                <span className="text-muted-foreground">Development</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#8b5cf6]" />
-                <span className="text-muted-foreground">Research</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#f59e0b]" />
-                <span className="text-muted-foreground">Leadership</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 p-1 rounded-lg bg-foreground/5 border border-border/30">
+                <button
+                  onClick={() => setShowCombined(true)}
+                  data-testid="button-view-combined"
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                    showCombined 
+                      ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Combined
+                </button>
+                <button
+                  onClick={() => setShowCombined(false)}
+                  data-testid="button-view-selected"
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                    !showCombined 
+                      ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Selected
+                </button>
               </div>
             </div>
           </div>
 
           {showMethodology && (
             <div className="mb-4 p-3 rounded-lg bg-green-500/5 border border-green-500/20 text-xs">
-              <p className="font-medium text-green-500 mb-2">Quantization Methodology</p>
+              <p className="font-medium text-green-500 mb-2">Radar Chart Quantization</p>
               <p className="text-muted-foreground leading-relaxed">
-                This chart shows <span className="text-green-500/80">absolute responsibility counts</span> across 
+                This radar chart visualizes <span className="text-green-500/80">responsibility distribution</span> across 
                 four key domains, inspired by the <span className="text-green-500/80">ResQu (Responsibility Quantification) Model</span>. 
-                Each line tracks the actual number of tasks in that category over time:
+                Each axis represents a category, and the distance from center shows the count:
               </p>
               <div className="mt-2 p-2 rounded bg-background/50 font-mono text-green-500/80">
-                Y-axis = Number of responsibilities in each category
+                Coordinates = (Security, Development, Research, Leadership)
               </div>
               <p className="text-muted-foreground mt-2">
-                This provides an objective view of responsibility growth, clearly showing how both scope and 
-                specialization have increased throughout career progression.
+                Combined view overlays all positions to show growth trajectory. 
+                Selected view focuses on a single role for detailed analysis.
               </p>
             </div>
           )}
