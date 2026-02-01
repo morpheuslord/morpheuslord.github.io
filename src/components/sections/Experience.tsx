@@ -2,13 +2,34 @@ import { useRef, useEffect, useState } from 'react';
 import anime from 'animejs';
 import * as d3 from 'd3';
 import { experiences } from '@/data/portfolioData';
-import { Briefcase, Code, Users, Lightbulb, TrendingUp } from 'lucide-react';
+import { Briefcase, Code, Users, Lightbulb, TrendingUp, Info } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+interface CategoryScores {
+  security: number;
+  development: number;
+  research: number;
+  leadership: number;
+}
+
+interface RoleMetrics {
+  index: number;
+  title: string;
+  company: string;
+  period: string;
+  scores: CategoryScores;
+  rawCounts: CategoryScores;
+  totalResponsibilities: number;
+  scopeScore: number;
+  isActive: boolean;
+  isCurrent: boolean;
+}
 
 const Experience = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<SVGSVGElement>(null);
   const [activeRole, setActiveRole] = useState(0);
+  const [showMethodology, setShowMethodology] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -66,22 +87,56 @@ const Experience = () => {
     });
   }, [activeRole]);
 
-  // Categorize highlights
-  const categorizeHighlight = (title: string) => {
+  const categorizeHighlight = (title: string): keyof CategoryScores => {
     const lower = title.toLowerCase();
-    if (lower.includes('lead') || lower.includes('team') || lower.includes('mentor') || lower.includes('recruit') || lower.includes('training')) {
+    if (lower.includes('lead') || lower.includes('team') || lower.includes('mentor') || lower.includes('recruit') || lower.includes('training') || lower.includes('coordinate')) {
       return 'leadership';
     }
-    if (lower.includes('development') || lower.includes('api') || lower.includes('python') || lower.includes('android') || lower.includes('automation') || lower.includes('tools')) {
+    if (lower.includes('development') || lower.includes('api') || lower.includes('python') || lower.includes('android') || lower.includes('automation') || lower.includes('tools') || lower.includes('implement')) {
       return 'development';
     }
-    if (lower.includes('research') || lower.includes('design') || lower.includes('architecture') || lower.includes('poc')) {
+    if (lower.includes('research') || lower.includes('design') || lower.includes('architecture') || lower.includes('poc') || lower.includes('analysis') || lower.includes('strategy')) {
       return 'research';
     }
     return 'security';
   };
 
-  // D3 Stacked Bar Chart for Responsibilities
+  const calculateRoleMetrics = (): RoleMetrics[] => {
+    const maxResponsibilities = Math.max(...experiences.map(e => e.highlights.length));
+    
+    return [...experiences].reverse().map((exp, i) => {
+      const rawCounts: CategoryScores = { leadership: 0, development: 0, research: 0, security: 0 };
+      
+      exp.highlights.forEach(h => {
+        const cat = categorizeHighlight(h.title);
+        rawCounts[cat]++;
+      });
+
+      const totalResponsibilities = exp.highlights.length;
+      const scopeScore = (totalResponsibilities / maxResponsibilities) * 100;
+
+      const scores: CategoryScores = {
+        security: (rawCounts.security / Math.max(totalResponsibilities, 1)) * 100,
+        development: (rawCounts.development / Math.max(totalResponsibilities, 1)) * 100,
+        research: (rawCounts.research / Math.max(totalResponsibilities, 1)) * 100,
+        leadership: (rawCounts.leadership / Math.max(totalResponsibilities, 1)) * 100,
+      };
+
+      return {
+        index: i,
+        title: exp.title,
+        company: exp.company.split('/')[0].trim(),
+        period: exp.period,
+        scores,
+        rawCounts,
+        totalResponsibilities,
+        scopeScore,
+        isActive: experiences.length - 1 - i === activeRole,
+        isCurrent: exp.current || false,
+      };
+    });
+  };
+
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -92,8 +147,8 @@ const Experience = () => {
     if (!container) return;
 
     const width = container.clientWidth;
-    const height = 180;
-    const margin = { top: 30, right: 20, bottom: 50, left: 50 };
+    const height = 220;
+    const margin = { top: 20, right: 30, bottom: 60, left: 45 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -102,66 +157,45 @@ const Experience = () => {
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Prepare data with categories - reversed so oldest is first
-    const data = [...experiences].reverse().map((exp, i) => {
-      const categories = { leadership: 0, development: 0, research: 0, security: 0 };
-      exp.highlights.forEach(h => {
-        const cat = categorizeHighlight(h.title);
-        categories[cat as keyof typeof categories]++;
-      });
-      return {
-        index: i,
-        title: exp.title,
-        company: exp.company.split('/')[0].trim(),
-        period: exp.period,
-        total: exp.highlights.length,
-        ...categories,
-        isCurrent: exp.current,
-        isActive: experiences.length - 1 - i === activeRole,
-      };
-    });
+    const data = calculateRoleMetrics();
 
     const categories = ['security', 'development', 'research', 'leadership'] as const;
     const colors: Record<typeof categories[number], string> = {
-      leadership: '#f59e0b',
+      security: '#22c55e',
       development: '#3b82f6',
       research: '#8b5cf6',
-      security: '#22c55e',
+      leadership: '#f59e0b',
     };
 
-    // Stack data
-    const stack = d3.stack<typeof data[0]>()
-      .keys(categories)
-      .order(d3.stackOrderNone)
-      .offset(d3.stackOffsetNone);
+    const categoryLabels: Record<typeof categories[number], string> = {
+      security: 'Security Operations',
+      development: 'Development & Tools',
+      research: 'Research & Strategy',
+      leadership: 'Leadership & Mentoring',
+    };
 
-    const stackedData = stack(data);
-
-    // Scales
-    const xScale = d3.scaleBand()
-      .domain(data.map((_, i) => i.toString()))
+    const xScale = d3.scalePoint<number>()
+      .domain(data.map((_, i) => i))
       .range([0, innerWidth])
-      .padding(0.25);
+      .padding(0.3);
 
     const yScale = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.total) || 10])
+      .domain([0, 100])
       .range([innerHeight, 0]);
 
-    // Y-axis gridlines
     g.selectAll('.grid-line')
-      .data(yScale.ticks(5))
+      .data([0, 25, 50, 75, 100])
       .join('line')
       .attr('class', 'grid-line')
       .attr('x1', 0)
       .attr('x2', innerWidth)
       .attr('y1', d => yScale(d))
       .attr('y2', d => yScale(d))
-      .attr('stroke', 'rgba(255,255,255,0.05)')
-      .attr('stroke-dasharray', '3,3');
+      .attr('stroke', 'rgba(255,255,255,0.06)')
+      .attr('stroke-dasharray', '4,4');
 
-    // Y-axis labels
     g.selectAll('.y-label')
-      .data(yScale.ticks(5))
+      .data([0, 25, 50, 75, 100])
       .join('text')
       .attr('class', 'y-label')
       .attr('x', -8)
@@ -169,130 +203,155 @@ const Experience = () => {
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
       .attr('fill', 'rgba(255,255,255,0.4)')
-      .attr('font-size', '10px')
+      .attr('font-size', '9px')
       .attr('font-family', 'monospace')
-      .text(d => d);
+      .text(d => `${d}%`);
 
-    // Tooltip
     const tooltip = d3.select('body').append('div')
       .attr('class', 'exp-tooltip')
       .style('position', 'absolute')
       .style('visibility', 'hidden')
-      .style('background', 'rgba(0,0,0,0.9)')
-      .style('border', '1px solid rgba(255,255,255,0.2)')
-      .style('border-radius', '8px')
-      .style('padding', '12px')
+      .style('background', 'rgba(10,10,10,0.95)')
+      .style('border', '1px solid rgba(34,197,94,0.3)')
+      .style('border-radius', '10px')
+      .style('padding', '14px')
       .style('font-size', '12px')
       .style('color', 'white')
       .style('pointer-events', 'none')
       .style('z-index', '1000')
-      .style('max-width', '250px');
+      .style('max-width', '320px')
+      .style('box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
 
-    // Draw stacked bars
-    stackedData.forEach((layer, layerIndex) => {
-      g.selectAll(`.bar-${layer.key}`)
-        .data(layer)
-        .join('rect')
-        .attr('class', `bar-${layer.key}`)
-        .attr('x', (d, i) => xScale(i.toString()) || 0)
-        .attr('y', innerHeight)
-        .attr('width', xScale.bandwidth())
-        .attr('height', 0)
-        .attr('fill', colors[layer.key as keyof typeof colors])
-        .attr('opacity', d => d.data.isActive ? 1 : 0.6)
+    categories.forEach((category, catIndex) => {
+      const lineData = data.map((d, i) => ({
+        x: xScale(i) || 0,
+        y: yScale(d.scores[category]),
+        value: d.scores[category],
+        raw: d.rawCounts[category],
+        total: d.totalResponsibilities,
+        ...d,
+      }));
+
+      const line = d3.line<typeof lineData[0]>()
+        .x(d => d.x)
+        .y(d => d.y)
+        .curve(d3.curveMonotoneX);
+
+      const path = g.append('path')
+        .datum(lineData)
+        .attr('fill', 'none')
+        .attr('stroke', colors[category])
+        .attr('stroke-width', 2.5)
+        .attr('stroke-opacity', 0.8)
+        .attr('d', line);
+
+      const pathLength = path.node()?.getTotalLength() || 0;
+      path
+        .attr('stroke-dasharray', pathLength)
+        .attr('stroke-dashoffset', pathLength)
+        .transition()
+        .duration(1200)
+        .delay(catIndex * 150)
+        .ease(d3.easeQuadOut)
+        .attr('stroke-dashoffset', 0);
+
+      g.selectAll(`.dot-${category}`)
+        .data(lineData)
+        .join('circle')
+        .attr('class', `dot-${category}`)
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y)
+        .attr('r', 0)
+        .attr('fill', colors[category])
+        .attr('stroke', d => d.isActive ? 'white' : 'transparent')
+        .attr('stroke-width', 2)
         .attr('cursor', 'pointer')
         .on('click', (_, d) => {
-          setActiveRole(experiences.length - 1 - d.data.index);
+          setActiveRole(experiences.length - 1 - d.index);
         })
         .on('mouseover', function(event, d) {
-          const catLabels: Record<string, string> = {
-            leadership: 'Leadership & Mentorship',
-            development: 'Development & Tools',
-            research: 'Research & Architecture',
-            security: 'Security & Operations'
-          };
+          d3.select(this).transition().duration(150).attr('r', 8);
           
           tooltip.html(`
-            <div style="font-weight: bold; margin-bottom: 8px; color: #22c55e;">${d.data.title}</div>
-            <div style="color: #888; margin-bottom: 8px; font-size: 11px;">${d.data.company} • ${d.data.period}</div>
-            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-              <div style="margin-bottom: 4px; font-weight: 500;">Responsibility Breakdown:</div>
-              ${categories.map(cat => `
-                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
-                  <span style="color: ${colors[cat]};">${catLabels[cat]}</span>
-                  <span style="font-weight: bold;">${d.data[cat]}</span>
-                </div>
-              `).join('')}
-              <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 6px; padding-top: 6px; display: flex; justify-content: space-between;">
-                <span>Total</span>
-                <span style="font-weight: bold; color: #22c55e;">${d.data.total}</span>
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
+              <div style="font-weight: 600; font-size: 13px; color: #22c55e;">${d.title}</div>
+              <div style="color: #888; font-size: 11px; margin-top: 2px;">${d.company} | ${d.period}</div>
+            </div>
+            
+            <div style="margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colors[category]};"></span>
+                <span style="font-weight: 500;">${categoryLabels[category]}</span>
+              </div>
+              <div style="font-size: 24px; font-weight: bold; color: ${colors[category]};">${d.value.toFixed(1)}%</div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; font-size: 11px;">
+              <div style="font-weight: 500; margin-bottom: 6px; color: #aaa;">Calculation Method (ResQu-inspired):</div>
+              <div style="font-family: monospace; color: #22c55e;">
+                Score = (${d.raw} / ${d.total}) × 100 = ${d.value.toFixed(1)}%
+              </div>
+              <div style="margin-top: 6px; color: #666;">
+                ${d.raw} ${category} tasks out of ${d.total} total responsibilities
               </div>
             </div>
           `)
             .style('visibility', 'visible')
-            .style('left', (event.pageX + 10) + 'px')
-            .style('top', (event.pageY - 10) + 'px');
+            .style('left', (event.pageX + 15) + 'px')
+            .style('top', (event.pageY - 15) + 'px');
         })
         .on('mousemove', function(event) {
           tooltip
-            .style('left', (event.pageX + 10) + 'px')
-            .style('top', (event.pageY - 10) + 'px');
+            .style('left', (event.pageX + 15) + 'px')
+            .style('top', (event.pageY - 15) + 'px');
         })
         .on('mouseout', function() {
+          d3.select(this).transition().duration(150).attr('r', d => (d as typeof lineData[0]).isActive ? 6 : 5);
           tooltip.style('visibility', 'hidden');
         })
         .transition()
-        .duration(800)
-        .delay((_, i) => i * 100 + layerIndex * 50)
-        .attr('y', d => yScale(d[1]))
-        .attr('height', d => yScale(d[0]) - yScale(d[1]));
+        .duration(600)
+        .delay((_, i) => catIndex * 150 + i * 100 + 800)
+        .attr('r', d => d.isActive ? 6 : 5);
     });
 
-    // Total labels on top
-    g.selectAll('.total')
+    g.selectAll('.x-label')
       .data(data)
       .join('text')
-      .attr('class', 'total')
-      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d.total) - 8)
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.7)')
-      .attr('font-size', '12px')
-      .attr('font-weight', 'bold')
-      .attr('opacity', 0)
-      .text(d => d.total)
-      .transition()
-      .duration(800)
-      .delay((_, i) => i * 100 + 400)
-      .attr('opacity', 1);
-
-    // X-axis labels (title)
-    g.selectAll('.x-title')
-      .data(data)
-      .join('text')
-      .attr('class', 'x-title')
-      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 14)
+      .attr('class', 'x-label')
+      .attr('x', (_, i) => xScale(i) || 0)
+      .attr('y', innerHeight + 18)
       .attr('text-anchor', 'middle')
       .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.5)')
       .attr('font-size', '9px')
-      .attr('font-weight', '500')
+      .attr('font-weight', d => d.isActive ? '600' : '400')
       .text(d => d.title.split(' ')[0]);
 
-    // X-axis labels (company)
     g.selectAll('.x-company')
       .data(data)
       .join('text')
       .attr('class', 'x-company')
-      .attr('x', (_, i) => (xScale(i.toString()) || 0) + xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 26)
+      .attr('x', (_, i) => xScale(i) || 0)
+      .attr('y', innerHeight + 32)
       .attr('text-anchor', 'middle')
       .attr('fill', 'rgba(255,255,255,0.3)')
       .attr('font-size', '8px')
       .attr('font-family', 'monospace')
-      .text(d => d.company.substring(0, 10));
+      .text(d => d.company.substring(0, 12));
 
-    // Cleanup tooltip on unmount
+    g.selectAll('.x-scope')
+      .data(data)
+      .join('text')
+      .attr('class', 'x-scope')
+      .attr('x', (_, i) => xScale(i) || 0)
+      .attr('y', innerHeight + 46)
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d.isActive ? '#22c55e' : 'rgba(255,255,255,0.4)')
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('font-family', 'monospace')
+      .text(d => `${d.totalResponsibilities}`);
+
     return () => {
       d3.selectAll('.exp-tooltip').remove();
     };
@@ -323,7 +382,6 @@ const Experience = () => {
   return (
     <section id="experience" ref={sectionRef} className="section bg-card/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Section Header */}
         <div className="text-center mb-12">
           <p className="section-title exp-header opacity-0">Where I've Worked</p>
           <h2 className="section-heading exp-header opacity-0">Experience</h2>
@@ -333,38 +391,64 @@ const Experience = () => {
           </div>
         </div>
 
-        {/* Responsibility Growth Chart */}
-        <div className="exp-header opacity-0 mb-8 p-4 rounded-xl bg-background/30 border border-border/30">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <div>
-              <p className="text-sm font-medium text-foreground">Responsibility Growth</p>
-              <p className="text-xs text-muted-foreground">Hover over bars to see breakdown</p>
+        <div className="exp-header opacity-0 mb-8 p-4 sm:p-5 rounded-xl bg-background/30 border border-border/30">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-sm font-medium text-foreground">Responsibility Distribution</p>
+                <button 
+                  onClick={() => setShowMethodology(!showMethodology)}
+                  className="p-1 rounded hover:bg-foreground/10 transition-colors"
+                  data-testid="button-methodology-toggle"
+                >
+                  <Info className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Hover points for detailed breakdown | Click to navigate</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-[#22c55e]" />
+                <span className="w-3 h-3 rounded-full bg-[#22c55e]" />
                 <span className="text-muted-foreground">Security</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-[#3b82f6]" />
+                <span className="w-3 h-3 rounded-full bg-[#3b82f6]" />
                 <span className="text-muted-foreground">Development</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-[#8b5cf6]" />
+                <span className="w-3 h-3 rounded-full bg-[#8b5cf6]" />
                 <span className="text-muted-foreground">Research</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-[#f59e0b]" />
+                <span className="w-3 h-3 rounded-full bg-[#f59e0b]" />
                 <span className="text-muted-foreground">Leadership</span>
               </div>
             </div>
           </div>
+
+          {showMethodology && (
+            <div className="mb-4 p-3 rounded-lg bg-green-500/5 border border-green-500/20 text-xs">
+              <p className="font-medium text-green-500 mb-2">Quantization Methodology</p>
+              <p className="text-muted-foreground leading-relaxed">
+                Scores are calculated using a normalized responsibility distribution approach inspired by the 
+                <span className="text-green-500/80"> ResQu (Responsibility Quantification) Model</span>. 
+                Each category score represents the proportion of responsibilities in that domain:
+              </p>
+              <div className="mt-2 p-2 rounded bg-background/50 font-mono text-green-500/80">
+                Score(category) = (tasks in category / total responsibilities) × 100
+              </div>
+              <p className="text-muted-foreground mt-2">
+                This provides an objective, normalized view of responsibility distribution across different skill areas, 
+                enabling fair comparison across roles regardless of total scope.
+              </p>
+            </div>
+          )}
+
           <div className="w-full overflow-hidden">
             <svg ref={chartRef} className="w-full" />
           </div>
         </div>
 
-        {/* Role Tabs - Horizontal scroll on mobile */}
         <div className="exp-tab opacity-0 flex gap-2 overflow-x-auto pb-4 mb-6 hide-scrollbar">
           {experiences.map((exp, index) => (
             <button
@@ -389,9 +473,7 @@ const Experience = () => {
           ))}
         </div>
 
-        {/* Content */}
         <div className="exp-content opacity-0 card-cyber rounded-xl p-4 sm:p-6 md:p-8">
-          {/* Header */}
           <div className="exp-detail mb-6 pb-6 border-b border-border/50">
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -419,12 +501,11 @@ const Experience = () => {
             
             <div className="flex flex-wrap items-center gap-3 font-mono text-sm text-muted-foreground">
               <span>{currentExp.period}</span>
-              <span className="text-border">•</span>
+              <span className="text-border">|</span>
               <span>{currentExp.duration}</span>
             </div>
           </div>
 
-          {/* Highlights Grid with Scroll */}
           <ScrollArea className="h-[350px] sm:h-[400px] pr-2 sm:pr-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {currentExp.highlights.map((highlight, index) => {

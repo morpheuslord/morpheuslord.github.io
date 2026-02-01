@@ -35,15 +35,15 @@ src/
 Configured for static deployment with the built `dist` folder.
 
 ## Recent Changes
-- 2026-01-31: Enhanced Experience section with D3 stacked bar chart
-  - Added D3 stacked bar chart with 4 responsibility categories
+- 2026-02-01: Implemented ResQu-inspired quantization with D3 multi-line chart
+  - Research-backed scoring methodology based on ResQu (Responsibility Quantification) Model
+  - D3 multi-line chart showing 4 normalized category scores (0-100%)
   - Categories: Security (green), Development (blue), Research (purple), Leadership (amber)
-  - Hover tooltips showing detailed breakdown of responsibilities
-  - Job titles now displayed in role tabs alongside company and dates
-  - Color legend for category reference
-  - Numeric Y-axis scale for quantified view
-  - Clickable bars to navigate between roles
-  - Fixed mobile layout with horizontal scrollable tabs
+  - Normalized percentage scores for fair cross-role comparison
+  - Interactive hover tooltips showing exact calculation formula
+  - Expandable methodology section explaining the quantization approach
+  - Job titles displayed in role tabs alongside company and dates
+  - Clickable data points to navigate between roles
 - 2026-01-30: Redesigned Experience section layout
   - Changed from vertical list to 2-column grid layout for highlights
   - Added ScrollArea for better content management with many items
