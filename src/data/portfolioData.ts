@@ -1,4 +1,45 @@
 // Portfolio Data
+
+/** Importance of this responsibility in the role (1–5). Used with mainExp to compute radar score: score = min(5, round(avg importance in category)). */
+export type ImportanceLevel = 1 | 2 | 3 | 4 | 5;
+
+/** Main EXP category: each responsibility maps to one of these. Radar score 1–5 = min(5, round(avg importance in category)). */
+export const RESPONSIBILITY_CATEGORIES = [
+  'security',
+  'development',
+  'research',
+  'leadership',
+  'collaboration',
+  'strategy',
+  'delivery',
+  'advisory',
+] as const;
+
+export type MainExpCategory = (typeof RESPONSIBILITY_CATEGORIES)[number];
+
+/** Responsibility axes for the radar chart. Scores 0–5 = min(5, round(avg importance in category)). */
+export type ResponsibilityScores = {
+  security: number;
+  development: number;
+  research: number;
+  leadership: number;
+  collaboration: number;
+  strategy: number;
+  delivery: number;
+  advisory: number;
+};
+
+export const DEFAULT_IMPORTANCE: ImportanceLevel = 3;
+
+export type ExperienceHighlight = {
+  title: string;
+  desc: string;
+  /** MAIN EXP: which of the 8 responsibility categories this highlight falls under. */
+  mainExp: MainExpCategory;
+  /** Importance of this responsibility in the role (1–5). Score per category = min(5, round(avg importance)). Default 3. */
+  importance?: ImportanceLevel;
+};
+
 export const personalInfo = {
   name: "Chiranjeevi Naidu",
   title: "Cybersecurity Engineer",
@@ -20,7 +61,15 @@ export const stats = [
   { label: "Experience", value: "2+ Years" },
 ];
 
-export const experiences = [
+export const experiences: Array<{
+  id: number;
+  title: string;
+  company: string;
+  period: string;
+  duration: string;
+  current: boolean;
+  highlights: ExperienceHighlight[];
+}> = [
   {
     id: 1,
     title: "CyberSecurity Engineer",
@@ -29,18 +78,18 @@ export const experiences = [
     duration: "1.5+ months",
     current: true,
     highlights: [
-      { title: "Python & API Development", desc: "Developed secure backend systems and tooling using Python and REST APIs." },
-      { title: "Agentic AI Systems", desc: "Designed autonomous agents for internal security automation and threat response." },
-      { title: "MCP-Based Architecture", desc: "Worked on modular control pipelines for process-level control." },
-      { title: "Client-Facing Research", desc: "Collaborated with clients to deliver research-driven automation." },
-      { title: "Security Automation", desc: "Built automated scripts for vulnerability validation and pipeline integration." },
-      { title: "Training & Mentorship", desc: "Providing training and guidance to cybersecurity trainees." },
-      { title: "Application Pentesting", desc: "Lead a Team in performing application pentesting." },
-      { title: "Android Development", desc: "Lead a Team in developing a secure backend for a mobile application." },
-      { title: "Recruting", desc: "Recruiting and managing a team of cybersecurity professionals and interns." },
-      { title: "Team Lead in MVP Projects", desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery." },
-      { title: "Architectural Design Leadership", desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices." },
-      { title: "Cross-Domain Research", desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas." },
+      { title: "Python & API Development", desc: "Developed secure backend systems and tooling using Python and REST APIs.", mainExp: "development", importance: 4 },
+      { title: "Agentic AI Systems", desc: "Designed autonomous agents for internal security automation and threat response.", mainExp: "development", importance: 5 },
+      { title: "MCP-Based Architecture", desc: "Worked on modular control pipelines for process-level control.", mainExp: "strategy", importance: 4 },
+      { title: "Client-Facing Research", desc: "Collaborated with clients to deliver research-driven automation.", mainExp: "collaboration", importance: 5 },
+      { title: "Security Automation", desc: "Built automated scripts for vulnerability validation and pipeline integration.", mainExp: "security", importance: 4 },
+      { title: "Training & Mentorship", desc: "Providing training and guidance to cybersecurity trainees.", mainExp: "advisory", importance: 5 },
+      { title: "Application Pentesting", desc: "Lead a Team in performing application pentesting.", mainExp: "security", importance: 5 },
+      { title: "Android Development", desc: "Lead a Team in developing a secure backend for a mobile application.", mainExp: "development", importance: 4 },
+      { title: "Recruting", desc: "Recruiting and managing a team of cybersecurity professionals and interns.", mainExp: "leadership", importance: 5 },
+      { title: "Team Lead in MVP Projects", desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery.", mainExp: "delivery", importance: 5 },
+      { title: "Architectural Design Leadership", desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices.", mainExp: "strategy", importance: 5 },
+      { title: "Cross-Domain Research", desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas.", mainExp: "research", importance: 5 },
     ],
   },
   {
@@ -51,9 +100,9 @@ export const experiences = [
     duration: "7 months",
     current: false,
     highlights: [
-      { title: "PoC Development", desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits." },
-      { title: "Automation Development", desc: "Built sophisticated automation tools for testing and monitoring." },
-      { title: "Technical Writing", desc: "Provided proofreading for technical reports and research papers." },
+      { title: "PoC Development", desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits.", mainExp: "research", importance: 5 },
+      { title: "Automation Development", desc: "Built sophisticated automation tools for testing and monitoring.", mainExp: "development", importance: 5 },
+      { title: "Technical Writing", desc: "Provided proofreading for technical reports and research papers.", mainExp: "research", importance: 3 },
     ],
   },
   {
@@ -64,11 +113,11 @@ export const experiences = [
     duration: "8 months",
     current: false,
     highlights: [
-      { title: "Azure and AWS Security", desc: "Managed cloud infrastructure security and compliance assessments." },
-      { title: "Linux Optimization", desc: "Optimized system initialization and security hardening." },
-      { title: "SBOM Tools", desc: "Evaluated Software Bill of Materials tools for integration." },
-      { title: "Terraform Projects", desc: "Deployed security-focused infrastructure using IaC." },
-      { title: "Vulnerability Research", desc: "Conducted in-depth security research and exploit development." },
+      { title: "Azure and AWS Security", desc: "Managed cloud infrastructure security and compliance assessments.", mainExp: "security", importance: 5 },
+      { title: "Linux Optimization", desc: "Optimized system initialization and security hardening.", mainExp: "development", importance: 4 },
+      { title: "SBOM Tools", desc: "Evaluated Software Bill of Materials tools for integration.", mainExp: "development", importance: 3 },
+      { title: "Terraform Projects", desc: "Deployed security-focused infrastructure using IaC.", mainExp: "delivery", importance: 4 },
+      { title: "Vulnerability Research", desc: "Conducted in-depth security research and exploit development.", mainExp: "research", importance: 5 },
     ],
   },
   {
@@ -79,10 +128,10 @@ export const experiences = [
     duration: "3 months",
     current: false,
     highlights: [
-      { title: "Red Team Tools", desc: "Developed automated tools for threat detection and assessment." },
-      { title: "Vulnerability Assessments", desc: "Performed comprehensive security assessments and pen testing." },
-      { title: "AWS Security", desc: "Conducted AWS Rules assessments for cloud security." },
-      { title: "LLM Integration", desc: "Research on AI implementation for cybersecurity applications." },
+      { title: "Red Team Tools", desc: "Developed automated tools for threat detection and assessment.", mainExp: "development", importance: 4 },
+      { title: "Vulnerability Assessments", desc: "Performed comprehensive security assessments and pen testing.", mainExp: "security", importance: 5 },
+      { title: "AWS Security", desc: "Conducted AWS Rules assessments for cloud security.", mainExp: "security", importance: 4 },
+      { title: "LLM Integration", desc: "Research on AI implementation for cybersecurity applications.", mainExp: "research", importance: 4 },
     ],
   },
 ];

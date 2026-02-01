@@ -1,15 +1,86 @@
 import { useRef, useEffect, useState } from 'react';
 import anime from 'animejs';
 import * as d3 from 'd3';
-import { experiences } from '@/data/portfolioData';
-import { Briefcase, Code, Users, Lightbulb, TrendingUp, Info } from 'lucide-react';
+import {
+  experiences,
+  RESPONSIBILITY_CATEGORIES,
+  DEFAULT_IMPORTANCE,
+  type ResponsibilityScores,
+  type MainExpCategory,
+  type ExperienceHighlight,
+} from '@/data/portfolioData';
+import { Briefcase, Code, Users, Lightbulb, TrendingUp, Info, Handshake, Target, Package, MessageCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface CategoryScores {
-  security: number;
-  development: number;
-  research: number;
-  leadership: number;
+type CategoryKey = MainExpCategory;
+
+const SCALE_MAX = 5; // Fixed 0–5 scale so chart is not inflated/deflated by data max; fair representation.
+
+/** Raw counts per category. */
+function getCountsFromHighlights(highlights: ExperienceHighlight[]): ResponsibilityScores {
+  const counts: ResponsibilityScores = {
+    security: 0,
+    development: 0,
+    research: 0,
+    leadership: 0,
+    collaboration: 0,
+    strategy: 0,
+    delivery: 0,
+    advisory: 0,
+  };
+  highlights.forEach((h) => {
+    counts[h.mainExp]++;
+  });
+  return counts;
+}
+
+/** Average importance per category (for derivation display). 0 if no highlights in category. */
+function getAvgImportanceFromHighlights(highlights: ExperienceHighlight[]): ResponsibilityScores {
+  const sums: ResponsibilityScores = {
+    security: 0,
+    development: 0,
+    research: 0,
+    leadership: 0,
+    collaboration: 0,
+    strategy: 0,
+    delivery: 0,
+    advisory: 0,
+  };
+  const counts = getCountsFromHighlights(highlights);
+  highlights.forEach((h) => {
+    const imp = h.importance ?? DEFAULT_IMPORTANCE;
+    sums[h.mainExp] += imp;
+  });
+  return RESPONSIBILITY_CATEGORIES.reduce(
+    (acc, c) => ({ ...acc, [c]: counts[c] > 0 ? sums[c] / counts[c] : 0 }),
+    {} as ResponsibilityScores
+  );
+}
+
+/** Score = min(5, round(avg importance in category)). Importance of the job is reflected; same 0–5 scale. */
+function computeScoresFromHighlights(highlights: ExperienceHighlight[]): ResponsibilityScores {
+  const counts = getCountsFromHighlights(highlights);
+  const sums: ResponsibilityScores = {
+    security: 0,
+    development: 0,
+    research: 0,
+    leadership: 0,
+    collaboration: 0,
+    strategy: 0,
+    delivery: 0,
+    advisory: 0,
+  };
+  highlights.forEach((h) => {
+    const imp = h.importance ?? DEFAULT_IMPORTANCE;
+    sums[h.mainExp] += imp;
+  });
+  return RESPONSIBILITY_CATEGORIES.reduce(
+    (acc, c) => {
+      const avg = counts[c] > 0 ? sums[c] / counts[c] : 0;
+      return { ...acc, [c]: Math.min(SCALE_MAX, Math.round(avg)) };
+    },
+    {} as ResponsibilityScores
+  );
 }
 
 interface RoleMetrics {
@@ -17,8 +88,9 @@ interface RoleMetrics {
   title: string;
   company: string;
   period: string;
-  scores: CategoryScores;
-  rawCounts: CategoryScores;
+  scores: ResponsibilityScores;
+  counts: ResponsibilityScores;
+  avgImportance: ResponsibilityScores; // avg importance per category (for derivation)
   totalResponsibilities: number;
   scopeScore: number;
   isActive: boolean;
@@ -87,40 +159,20 @@ const Experience = () => {
     });
   }, [activeRole]);
 
-  const categorizeHighlight = (title: string): keyof CategoryScores => {
-    const lower = title.toLowerCase();
-    if (lower.includes('lead') || lower.includes('team') || lower.includes('mentor') || lower.includes('recruit') || lower.includes('training') || lower.includes('coordinate')) {
-      return 'leadership';
-    }
-    if (lower.includes('development') || lower.includes('api') || lower.includes('python') || lower.includes('android') || lower.includes('automation') || lower.includes('tools') || lower.includes('implement')) {
-      return 'development';
-    }
-    if (lower.includes('research') || lower.includes('design') || lower.includes('architecture') || lower.includes('poc') || lower.includes('analysis') || lower.includes('strategy')) {
-      return 'research';
-    }
-    return 'security';
-  };
-
   const calculateRoleMetrics = (): RoleMetrics[] => {
-    const maxResponsibilities = Math.max(...experiences.map(e => e.highlights.length));
-    
+    const allSums = experiences.map((e) => {
+      const s = computeScoresFromHighlights(e.highlights);
+      return RESPONSIBILITY_CATEGORIES.reduce((sum, c) => sum + s[c], 0);
+    });
+    const maxSum = Math.max(...allSums, 1);
+
     return [...experiences].reverse().map((exp, i) => {
-      const rawCounts: CategoryScores = { leadership: 0, development: 0, research: 0, security: 0 };
-      
-      exp.highlights.forEach(h => {
-        const cat = categorizeHighlight(h.title);
-        rawCounts[cat]++;
-      });
-
+      const counts = getCountsFromHighlights(exp.highlights);
+      const scores = computeScoresFromHighlights(exp.highlights);
+      const avgImportance = getAvgImportanceFromHighlights(exp.highlights);
       const totalResponsibilities = exp.highlights.length;
-      const scopeScore = (totalResponsibilities / maxResponsibilities) * 100;
-
-      const scores: CategoryScores = {
-        security: rawCounts.security,
-        development: rawCounts.development,
-        research: rawCounts.research,
-        leadership: rawCounts.leadership,
-      };
+      const sumScores = RESPONSIBILITY_CATEGORIES.reduce((s, c) => s + scores[c], 0);
+      const scopeScore = Math.round((sumScores / maxSum) * 100);
 
       return {
         index: i,
@@ -128,7 +180,8 @@ const Experience = () => {
         company: exp.company.split('/')[0].trim(),
         period: exp.period,
         scores,
-        rawCounts,
+        counts,
+        avgImportance,
         totalResponsibilities,
         scopeScore,
         isActive: experiences.length - 1 - i === activeRole,
@@ -138,6 +191,14 @@ const Experience = () => {
   };
 
   const [showCombined, setShowCombined] = useState(true);
+  const [chartKey, setChartKey] = useState(0);
+
+  useEffect(() => {
+    const ro = new ResizeObserver(() => setChartKey((k) => k + 1));
+    const el = chartRef.current?.parentElement;
+    if (el) ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -149,10 +210,12 @@ const Experience = () => {
     if (!container) return;
 
     const width = container.clientWidth;
-    const height = 340;
+    const isNarrow = width < 640;
+    const height = isNarrow ? 320 : 380;
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = Math.min(width, height) / 2 - 60;
+    const padding = isNarrow ? 72 : 80;
+    const radius = Math.min(width, height) / 2 - padding;
 
     svg.attr('width', width).attr('height', height);
 
@@ -160,42 +223,60 @@ const Experience = () => {
       .attr('transform', `translate(${centerX},${centerY})`);
 
     const allData = calculateRoleMetrics();
-    const categories = ['security', 'development', 'research', 'leadership'] as const;
-    
-    const categoryLabels: Record<typeof categories[number], string> = {
+    const categories = RESPONSIBILITY_CATEGORIES;
+
+    const categoryLabelsLong: Record<CategoryKey, string> = {
       security: 'Security',
       development: 'Development',
       research: 'Research',
       leadership: 'Leadership',
+      collaboration: 'Collaboration',
+      strategy: 'Strategy',
+      delivery: 'Delivery',
+      advisory: 'Advisory',
     };
+    const categoryLabelsShort: Record<CategoryKey, string> = {
+      security: 'Sec',
+      development: 'Dev',
+      research: 'Res',
+      leadership: 'Lead',
+      collaboration: 'Collab',
+      strategy: 'Strat',
+      delivery: 'Deliv',
+      advisory: 'Adv',
+    };
+    const categoryLabels = isNarrow ? categoryLabelsShort : categoryLabelsLong;
 
-    const roleColors = ['#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b'];
+    const roleColors = ['#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
 
-    const maxValue = Math.max(
-      ...allData.flatMap(d => categories.map(c => d.scores[c]))
-    );
-    const levels = 5;
+    // Fixed scale 0–5 so no one looks over/underestimated; same yardstick for all roles
+    const maxValue = SCALE_MAX;
+    const levels = SCALE_MAX;
     const angleSlice = (Math.PI * 2) / categories.length;
+    const labelRadius = radius + (isNarrow ? 22 : 30);
+    const axisLabelFontSize = isNarrow ? '9px' : '11px';
 
     for (let level = 1; level <= levels; level++) {
       const levelRadius = (radius / levels) * level;
-      const levelValue = Math.round((maxValue / levels) * level);
-      
+      const levelValue = level; // 1, 2, 3, 4, 5
+
       g.append('circle')
         .attr('cx', 0)
         .attr('cy', 0)
         .attr('r', levelRadius)
         .attr('fill', 'none')
-        .attr('stroke', 'rgba(255,255,255,0.1)')
-        .attr('stroke-dasharray', '3,3');
+        .attr('stroke', 'rgba(255,255,255,0.08)')
+        .attr('stroke-dasharray', '2,2');
 
-      g.append('text')
-        .attr('x', 5)
-        .attr('y', -levelRadius - 2)
-        .attr('fill', 'rgba(255,255,255,0.4)')
-        .attr('font-size', '9px')
-        .attr('font-family', 'monospace')
-        .text(levelValue);
+      if (!isNarrow) {
+        g.append('text')
+          .attr('x', 5)
+          .attr('y', -levelRadius - 2)
+          .attr('fill', 'rgba(255,255,255,0.35)')
+          .attr('font-size', '9px')
+          .attr('font-family', 'monospace')
+          .text(levelValue);
+      }
     }
 
     categories.forEach((cat, i) => {
@@ -208,19 +289,19 @@ const Experience = () => {
         .attr('y1', 0)
         .attr('x2', x)
         .attr('y2', y)
-        .attr('stroke', 'rgba(255,255,255,0.15)')
+        .attr('stroke', 'rgba(255,255,255,0.12)')
         .attr('stroke-width', 1);
 
-      const labelX = Math.cos(angle) * (radius + 25);
-      const labelY = Math.sin(angle) * (radius + 25);
+      const labelX = Math.cos(angle) * labelRadius;
+      const labelY = Math.sin(angle) * labelRadius;
 
       g.append('text')
         .attr('x', labelX)
         .attr('y', labelY)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
-        .attr('fill', 'rgba(255,255,255,0.7)')
-        .attr('font-size', '11px')
+        .attr('fill', 'rgba(255,255,255,0.75)')
+        .attr('font-size', axisLabelFontSize)
         .attr('font-weight', '500')
         .text(categoryLabels[cat]);
     });
@@ -241,24 +322,32 @@ const Experience = () => {
       .style('box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
 
     const radarLine = d3.lineRadial<number>()
-      .radius(d => (d / maxValue) * radius)
-      .angle((_, i) => i * angleSlice)
+      .radius(d => (d / SCALE_MAX) * radius)
+      .angle((_, i) => angleSlice * i - Math.PI / 2)
       .curve(d3.curveLinearClosed);
 
-    const dataToRender = showCombined ? allData : [allData[experiences.length - 1 - activeRole]];
+    // Combined: draw active role LAST so its path is on top and receives hover (fixes wrong-tooltip bug)
+    const dataToRender = showCombined
+      ? [...allData].sort((a, b) => (a.isActive ? 1 : 0) - (b.isActive ? 1 : 0))
+      : [allData[experiences.length - 1 - activeRole]];
 
-    dataToRender.forEach((role, roleIndex) => {
+    // Each experience has a fixed color (exp 0 = first color, exp 1 = second, etc.)
+    const getColorForRole = (role: RoleMetrics) =>
+      roleColors[experiences.length - 1 - role.index];
+
+    dataToRender.forEach((role) => {
       const values = categories.map(c => role.scores[c]);
-      const color = showCombined ? roleColors[roleIndex % roleColors.length] : '#22c55e';
+      const color = getColorForRole(role);
       const opacity = showCombined ? (role.isActive ? 1 : 0.4) : 0.8;
 
       g.append('path')
         .datum(values)
         .attr('fill', color)
-        .attr('fill-opacity', opacity * 0.15)
+        .attr('fill-opacity', role.isActive || !showCombined ? 0.2 : opacity * 0.12)
         .attr('stroke', color)
         .attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5)
         .attr('stroke-opacity', opacity)
+        .attr('stroke-linejoin', 'round')
         .attr('d', radarLine)
         .attr('cursor', 'pointer')
         .on('click', () => {
@@ -268,27 +357,31 @@ const Experience = () => {
         })
         .on('mouseover', function(event) {
           d3.select(this).attr('stroke-width', 3);
-          
-          const coords = categories.map(c => `${categoryLabels[c]}: ${role.scores[c]}`).join(' | ');
-          
+          const coords = categories.map(c => {
+            const avg = role.avgImportance[c];
+            const avgStr = avg > 0 ? avg.toFixed(1) : '0';
+            return `${categoryLabelsLong[c]}: ${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5`;
+          }).join(' · ');
           tooltip.html(`
             <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
               <div style="font-weight: 600; font-size: 13px; color: ${color};">${role.title}</div>
               <div style="color: #888; font-size: 11px; margin-top: 2px;">${role.company} | ${role.period}</div>
             </div>
             <div style="margin-bottom: 8px;">
-              <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">Responsibility Scores:</div>
-              ${categories.map(c => `
-                <div style="display: flex; justify-content: space-between; margin: 3px 0;">
-                  <span style="color: #888;">${categoryLabels[c]}:</span>
-                  <span style="font-weight: bold; color: white;">${role.scores[c]}</span>
+              <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">Score = min(5, round(avg importance)). Scale 0–5:</div>
+              ${categories.map(c => {
+                const avg = role.avgImportance[c];
+                const avgStr = avg > 0 ? avg.toFixed(1) : '0';
+                return `
+                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                  <span style="color: #888;">${categoryLabelsLong[c]}:</span>
+                  <span style="font-weight: bold; color: white;">${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5</span>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
-            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; font-size: 10px;">
-              <div style="color: #22c55e; font-family: monospace; word-break: break-all;">
-                (${coords})
-              </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; font-size: 10px;">
+              <div style="color: #22c55e; font-family: monospace; word-break: break-all;">${coords}</div>
             </div>
           `)
             .style('visibility', 'visible')
@@ -308,7 +401,7 @@ const Experience = () => {
       categories.forEach((cat, catIndex) => {
         const angle = angleSlice * catIndex - Math.PI / 2;
         const value = role.scores[cat];
-        const pointRadius = (value / maxValue) * radius;
+        const pointRadius = (value / SCALE_MAX) * radius;
         const x = Math.cos(angle) * pointRadius;
         const y = Math.sin(angle) * pointRadius;
 
@@ -329,28 +422,35 @@ const Experience = () => {
     });
 
     if (showCombined) {
+      const legendX = isNarrow ? width / 2 - 70 : width - 160;
+      const legendY = isNarrow ? height - 52 : 16;
       const legendG = svg.append('g')
-        .attr('transform', `translate(${width - 150}, 20)`);
+        .attr('transform', `translate(${legendX}, ${legendY})`);
 
+      const itemWidth = isNarrow ? 70 : 140;
+      const cols = isNarrow ? 2 : 1;
       allData.forEach((role, i) => {
-        const color = roleColors[i % roleColors.length];
-        const yPos = i * 18;
+        const color = roleColors[experiences.length - 1 - i];
+        const row = Math.floor(i / cols);
+        const colIndex = i % cols;
+        const xPos = colIndex * itemWidth;
+        const yPos = row * 18;
 
         legendG.append('rect')
-          .attr('x', 0)
+          .attr('x', xPos)
           .attr('y', yPos)
-          .attr('width', 12)
-          .attr('height', 12)
+          .attr('width', 10)
+          .attr('height', 10)
           .attr('fill', color)
           .attr('rx', 2)
           .attr('opacity', role.isActive ? 1 : 0.5);
 
         legendG.append('text')
-          .attr('x', 18)
-          .attr('y', yPos + 10)
+          .attr('x', xPos + 14)
+          .attr('y', yPos + 8)
           .attr('fill', role.isActive ? 'white' : 'rgba(255,255,255,0.5)')
-          .attr('font-size', '10px')
-          .text(role.company.substring(0, 12));
+          .attr('font-size', isNarrow ? '9px' : '10px')
+          .text(role.company.substring(0, isNarrow ? 10 : 14));
       });
     }
 
@@ -358,22 +458,32 @@ const Experience = () => {
       d3.selectAll('.exp-tooltip').remove();
     };
 
-  }, [activeRole, showCombined]);
+  }, [activeRole, showCombined, chartKey]);
 
   const currentExp = experiences[activeRole];
+  const currentScores = computeScoresFromHighlights(currentExp.highlights);
+  const currentCounts = getCountsFromHighlights(currentExp.highlights);
+  const currentAvgImportance = getAvgImportanceFromHighlights(currentExp.highlights);
 
-  const getCategoryIcon = (title: string) => {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('lead') || lowerTitle.includes('team') || lowerTitle.includes('mentor') || lowerTitle.includes('recruit')) {
-      return Users;
-    }
-    if (lowerTitle.includes('development') || lowerTitle.includes('api') || lowerTitle.includes('python') || lowerTitle.includes('android')) {
-      return Code;
-    }
-    if (lowerTitle.includes('research') || lowerTitle.includes('design') || lowerTitle.includes('architecture')) {
-      return Lightbulb;
-    }
-    return Briefcase;
+  const MAIN_EXP_LABELS: Record<CategoryKey, string> = {
+    security: 'Security',
+    development: 'Development',
+    research: 'Research',
+    leadership: 'Leadership',
+    collaboration: 'Collaboration',
+    strategy: 'Strategy',
+    delivery: 'Delivery',
+    advisory: 'Advisory',
+  };
+  const MAIN_EXP_ICONS: Record<CategoryKey, typeof Briefcase> = {
+    security: Briefcase,
+    development: Code,
+    research: Lightbulb,
+    leadership: Users,
+    collaboration: Handshake,
+    strategy: Target,
+    delivery: Package,
+    advisory: MessageCircle,
   };
 
   const getRoleLevel = (index: number) => {
@@ -440,24 +550,58 @@ const Experience = () => {
 
           {showMethodology && (
             <div className="mb-4 p-3 rounded-lg bg-green-500/5 border border-green-500/20 text-xs">
-              <p className="font-medium text-green-500 mb-2">Radar Chart Quantization</p>
+              <p className="font-medium text-green-500 mb-2">Responsibility Radar (8 axes)</p>
               <p className="text-muted-foreground leading-relaxed">
-                This radar chart visualizes <span className="text-green-500/80">responsibility distribution</span> across 
-                four key domains, inspired by the <span className="text-green-500/80">ResQu (Responsibility Quantification) Model</span>. 
-                Each axis represents a category, and the distance from center shows the count:
+                Each responsibility has a <span className="text-green-500/80">MAIN EXP</span> (category) and an <span className="text-green-500/80">importance</span> (1–5). 
+                Score per category = <span className="text-green-500/80">min(5, round(avg importance))</span> in that category—so importance of the job is reflected, not just count. 
+                Chart uses a <span className="text-green-500/80">fixed 0–5 scale</span>.
               </p>
-              <div className="mt-2 p-2 rounded bg-background/50 font-mono text-green-500/80">
-                Coordinates = (Security, Development, Research, Leadership)
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                Methodology draws on formal responsibility quantification: ResQu (human–automation responsibility), 
+                axiomatic responsibility ascription (member-level values and aggregation), and FeAR (causal responsibility in multi-agent settings).
+              </p>
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px]">
+                <a href="https://arxiv.org/abs/1810.12644" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">ResQu · arXiv:1810.12644</a>
+                <a href="https://arxiv.org/abs/2111.06711" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">Axiomatic · arXiv:2111.06711</a>
+                <a href="https://arxiv.org/abs/2305.15003" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">FeAR · arXiv:2305.15003</a>
               </div>
               <p className="text-muted-foreground mt-2">
-                Combined view overlays all positions to show growth trajectory. 
-                Selected view focuses on a single role for detailed analysis.
+                Combined view overlays all positions; Selected view focuses on one role.
               </p>
             </div>
           )}
 
-          <div className="w-full overflow-hidden">
-            <svg ref={chartRef} className="w-full" />
+          <div className="flex flex-col lg:flex-row gap-4 w-full overflow-hidden min-h-[280px] sm:min-h-[320px]">
+            {/* Left: calculation derivation for selected role — how scores were derived */}
+            <div className="lg:min-w-[200px] lg:max-w-[260px] flex-shrink-0 p-3 rounded-lg bg-background/50 border border-border/30 text-xs">
+              <p className="font-medium text-foreground mb-1.5">How the score was derived</p>
+              <p className="text-muted-foreground mb-2 leading-tight">
+                Score = min(5, round(avg <span className="font-semibold text-foreground">importance</span> in that category). Importance 1–5 per responsibility; scale fixed 0–5.
+              </p>
+              <p className="text-muted-foreground/80 font-medium mb-2 truncate" title={`${currentExp.title} @ ${currentExp.company}`}>
+                {currentExp.title} @ {currentExp.company.split('/')[0].trim()}
+              </p>
+              <ul className="space-y-1.5">
+                {RESPONSIBILITY_CATEGORIES.map((cat) => {
+                  const count = currentCounts[cat];
+                  const avgImp = currentAvgImportance[cat];
+                  const score = currentScores[cat];
+                  const label = MAIN_EXP_LABELS[cat];
+                  const avgStr = avgImp > 0 ? avgImp.toFixed(1) : '0';
+                  return (
+                    <li key={cat} className="flex items-center justify-between gap-2 text-muted-foreground">
+                      <span className="truncate">{label}:</span>
+                      <span className="flex-shrink-0 font-mono text-green-500/90 text-right">
+                        {count} resp., avg {avgStr} → {score}/5
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <svg ref={chartRef} className="w-full h-full max-w-full" preserveAspectRatio="xMidYMid meet" />
+            </div>
           </div>
         </div>
 
@@ -502,15 +646,15 @@ const Experience = () => {
                 </span>
               )}
               <span className="px-2 py-1 rounded text-xs font-mono bg-foreground/5 text-muted-foreground border border-border/50">
-                {currentExp.highlights.length} responsibilities
+                {currentExp.highlights.length} responsibilities · Score sum {RESPONSIBILITY_CATEGORIES.reduce((s, c) => s + currentScores[c], 0)}/40
               </span>
             </div>
-            
+
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">
               {currentExp.title}
               <span className="text-muted-foreground"> @ {currentExp.company}</span>
             </h3>
-            
+
             <div className="flex flex-wrap items-center gap-3 font-mono text-sm text-muted-foreground">
               <span>{currentExp.period}</span>
               <span className="text-border">|</span>
@@ -521,7 +665,7 @@ const Experience = () => {
           <ScrollArea className="h-[350px] sm:h-[400px] pr-2 sm:pr-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {currentExp.highlights.map((highlight, index) => {
-                const IconComponent = getCategoryIcon(highlight.title);
+                const IconComponent = MAIN_EXP_ICONS[highlight.mainExp];
                 return (
                   <div 
                     key={index} 
@@ -533,7 +677,15 @@ const Experience = () => {
                         <IconComponent className="w-4 h-4 text-muted-foreground group-hover:text-green-500 transition-colors" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-foreground mb-1 leading-tight group-hover:text-green-500/90 transition-colors">{highlight.title}</h4>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h4 className="font-medium text-sm text-foreground leading-tight group-hover:text-green-500/90 transition-colors">{highlight.title}</h4>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-500/90 border border-green-500/20">
+                            {MAIN_EXP_LABELS[highlight.mainExp]}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-foreground/5 text-muted-foreground border border-border/50" title="Importance 1–5">
+                            imp. {highlight.importance ?? DEFAULT_IMPORTANCE}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground leading-relaxed">{highlight.desc}</p>
                       </div>
                     </div>
