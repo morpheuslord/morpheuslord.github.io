@@ -116,10 +116,10 @@ const Experience = () => {
       const scopeScore = (totalResponsibilities / maxResponsibilities) * 100;
 
       const scores: CategoryScores = {
-        security: (rawCounts.security / Math.max(totalResponsibilities, 1)) * 100,
-        development: (rawCounts.development / Math.max(totalResponsibilities, 1)) * 100,
-        research: (rawCounts.research / Math.max(totalResponsibilities, 1)) * 100,
-        leadership: (rawCounts.leadership / Math.max(totalResponsibilities, 1)) * 100,
+        security: rawCounts.security,
+        development: rawCounts.development,
+        research: rawCounts.research,
+        leadership: rawCounts.leadership,
       };
 
       return {
@@ -179,12 +179,19 @@ const Experience = () => {
       .range([0, innerWidth])
       .padding(0.3);
 
+    const maxCategoryValue = Math.max(
+      ...data.flatMap(d => [d.scores.security, d.scores.development, d.scores.research, d.scores.leadership])
+    );
+    const yMax = Math.max(maxCategoryValue + 1, 6);
+
     const yScale = d3.scaleLinear()
-      .domain([0, 100])
+      .domain([0, yMax])
       .range([innerHeight, 0]);
 
+    const yTicks = d3.range(0, yMax + 1, Math.ceil(yMax / 5));
+
     g.selectAll('.grid-line')
-      .data([0, 25, 50, 75, 100])
+      .data(yTicks)
       .join('line')
       .attr('class', 'grid-line')
       .attr('x1', 0)
@@ -195,7 +202,7 @@ const Experience = () => {
       .attr('stroke-dasharray', '4,4');
 
     g.selectAll('.y-label')
-      .data([0, 25, 50, 75, 100])
+      .data(yTicks)
       .join('text')
       .attr('class', 'y-label')
       .attr('x', -8)
@@ -205,7 +212,7 @@ const Experience = () => {
       .attr('fill', 'rgba(255,255,255,0.4)')
       .attr('font-size', '9px')
       .attr('font-family', 'monospace')
-      .text(d => `${d}%`);
+      .text(d => d);
 
     const tooltip = d3.select('body').append('div')
       .attr('class', 'exp-tooltip')
@@ -272,6 +279,8 @@ const Experience = () => {
         .on('mouseover', function(event, d) {
           d3.select(this).transition().duration(150).attr('r', 8);
           
+          const pct = ((d.value / d.total) * 100).toFixed(0);
+          
           tooltip.html(`
             <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
               <div style="font-weight: 600; font-size: 13px; color: #22c55e;">${d.title}</div>
@@ -283,16 +292,18 @@ const Experience = () => {
                 <span style="width: 10px; height: 10px; border-radius: 50%; background: ${colors[category]};"></span>
                 <span style="font-weight: 500;">${categoryLabels[category]}</span>
               </div>
-              <div style="font-size: 24px; font-weight: bold; color: ${colors[category]};">${d.value.toFixed(1)}%</div>
+              <div style="font-size: 24px; font-weight: bold; color: ${colors[category]};">${d.value} tasks</div>
             </div>
             
             <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; font-size: 11px;">
-              <div style="font-weight: 500; margin-bottom: 6px; color: #aaa;">Calculation Method (ResQu-inspired):</div>
-              <div style="font-family: monospace; color: #22c55e;">
-                Score = (${d.raw} / ${d.total}) × 100 = ${d.value.toFixed(1)}%
+              <div style="font-weight: 500; margin-bottom: 6px; color: #aaa;">Responsibility Breakdown:</div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: #888;">Total responsibilities:</span>
+                <span style="font-weight: bold; color: #22c55e;">${d.total}</span>
               </div>
-              <div style="margin-top: 6px; color: #666;">
-                ${d.raw} ${category} tasks out of ${d.total} total responsibilities
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #888;">${categoryLabels[category]}:</span>
+                <span style="font-weight: bold; color: ${colors[category]};">${d.value} (${pct}%)</span>
               </div>
             </div>
           `)
@@ -395,7 +406,7 @@ const Experience = () => {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm font-medium text-foreground">Responsibility Distribution</p>
+                <p className="text-sm font-medium text-foreground">Responsibility Growth</p>
                 <button 
                   onClick={() => setShowMethodology(!showMethodology)}
                   className="p-1 rounded hover:bg-foreground/10 transition-colors"
@@ -430,16 +441,16 @@ const Experience = () => {
             <div className="mb-4 p-3 rounded-lg bg-green-500/5 border border-green-500/20 text-xs">
               <p className="font-medium text-green-500 mb-2">Quantization Methodology</p>
               <p className="text-muted-foreground leading-relaxed">
-                Scores are calculated using a normalized responsibility distribution approach inspired by the 
-                <span className="text-green-500/80"> ResQu (Responsibility Quantification) Model</span>. 
-                Each category score represents the proportion of responsibilities in that domain:
+                This chart shows <span className="text-green-500/80">absolute responsibility counts</span> across 
+                four key domains, inspired by the <span className="text-green-500/80">ResQu (Responsibility Quantification) Model</span>. 
+                Each line tracks the actual number of tasks in that category over time:
               </p>
               <div className="mt-2 p-2 rounded bg-background/50 font-mono text-green-500/80">
-                Score(category) = (tasks in category / total responsibilities) × 100
+                Y-axis = Number of responsibilities in each category
               </div>
               <p className="text-muted-foreground mt-2">
-                This provides an objective, normalized view of responsibility distribution across different skill areas, 
-                enabling fair comparison across roles regardless of total scope.
+                This provides an objective view of responsibility growth, clearly showing how both scope and 
+                specialization have increased throughout career progression.
               </p>
             </div>
           )}
