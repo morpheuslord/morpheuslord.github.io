@@ -322,18 +322,26 @@ const Experience = () => {
       .style('max-width', '280px')
       .style('box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
 
-    // Custom radar polygon path generator - ensures proper closure
+    // Custom radar polygon path generator - explicit SVG path for proper connection
     const radarPath = (values: number[]): string => {
+      if (values.length === 0) return '';
+      
       const points = values.map((v, i) => {
         const angle = angleSlice * i - Math.PI / 2;
         const r = (v / SCALE_MAX) * radius;
-        return [Math.cos(angle) * r, Math.sin(angle) * r];
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        return { x, y };
       });
-      // Close the path by connecting back to first point
-      if (points.length > 0) {
-        points.push(points[0]);
+      
+      // Build SVG path: M (move to first), L (line to each subsequent), Z (close)
+      let path = `M ${points[0].x},${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        path += ` L ${points[i].x},${points[i].y}`;
       }
-      return d3.line()(points as [number, number][]) || '';
+      path += ' Z'; // Close the path back to start
+      
+      return path;
     };
 
     // Combined: draw active role LAST so its path is on top and receives hover (fixes wrong-tooltip bug)
