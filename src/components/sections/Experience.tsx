@@ -247,7 +247,8 @@ const Experience = () => {
     };
     const categoryLabels = isNarrow ? categoryLabelsShort : categoryLabelsLong;
 
-    const roleColors = ['#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
+    // Complementary colors for monochrome theme - cyan, blue, violet, rose
+    const roleColors = ['#06b6d4', '#3b82f6', '#8b5cf6', '#f472b6', '#a855f7', '#0ea5e9', '#818cf8', '#e879f9'];
 
     // Fixed scale 0–5 so no one looks over/underestimated; same yardstick for all roles
     const maxValue = SCALE_MAX;
@@ -311,7 +312,7 @@ const Experience = () => {
       .style('position', 'absolute')
       .style('visibility', 'hidden')
       .style('background', 'rgba(10,10,10,0.95)')
-      .style('border', '1px solid rgba(34,197,94,0.3)')
+      .style('border', '1px solid rgba(6,182,212,0.3)')
       .style('border-radius', '10px')
       .style('padding', '14px')
       .style('font-size', '12px')
@@ -321,10 +322,19 @@ const Experience = () => {
       .style('max-width', '280px')
       .style('box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
 
-    const radarLine = d3.lineRadial<number>()
-      .radius(d => (d / SCALE_MAX) * radius)
-      .angle((_, i) => angleSlice * i - Math.PI / 2)
-      .curve(d3.curveLinearClosed);
+    // Custom radar polygon path generator - ensures proper closure
+    const radarPath = (values: number[]): string => {
+      const points = values.map((v, i) => {
+        const angle = angleSlice * i - Math.PI / 2;
+        const r = (v / SCALE_MAX) * radius;
+        return [Math.cos(angle) * r, Math.sin(angle) * r];
+      });
+      // Close the path by connecting back to first point
+      if (points.length > 0) {
+        points.push(points[0]);
+      }
+      return d3.line()(points as [number, number][]) || '';
+    };
 
     // Combined: draw active role LAST so its path is on top and receives hover (fixes wrong-tooltip bug)
     const dataToRender = showCombined
@@ -341,14 +351,13 @@ const Experience = () => {
       const opacity = showCombined ? (role.isActive ? 1 : 0.4) : 0.8;
 
       g.append('path')
-        .datum(values)
         .attr('fill', color)
         .attr('fill-opacity', role.isActive || !showCombined ? 0.2 : opacity * 0.12)
         .attr('stroke', color)
         .attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5)
         .attr('stroke-opacity', opacity)
         .attr('stroke-linejoin', 'round')
-        .attr('d', radarLine)
+        .attr('d', radarPath(values))
         .attr('cursor', 'pointer')
         .on('click', () => {
           if (showCombined) {
@@ -381,7 +390,7 @@ const Experience = () => {
               }).join('')}
             </div>
             <div style="background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; font-size: 10px;">
-              <div style="color: #22c55e; font-family: monospace; word-break: break-all;">${coords}</div>
+              <div style="color: #06b6d4; font-family: monospace; word-break: break-all;">${coords}</div>
             </div>
           `)
             .style('visibility', 'visible')
@@ -498,7 +507,7 @@ const Experience = () => {
           <p className="section-title exp-header opacity-0">Where I've Worked</p>
           <h2 className="section-heading exp-header opacity-0">Experience</h2>
           <div className="exp-header opacity-0 flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
-            <TrendingUp className="w-4 h-4 text-green-500" />
+            <TrendingUp className="w-4 h-4 text-cyan-500" />
             <span>2+ years of continuous growth</span>
           </div>
         </div>
@@ -527,7 +536,7 @@ const Experience = () => {
                   data-testid="button-view-combined"
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
                     showCombined 
-                      ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                      ? 'bg-cyan-500/20 text-cyan-500 border border-cyan-500/30' 
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -538,7 +547,7 @@ const Experience = () => {
                   data-testid="button-view-selected"
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
                     !showCombined 
-                      ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                      ? 'bg-cyan-500/20 text-cyan-500 border border-cyan-500/30' 
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -549,21 +558,21 @@ const Experience = () => {
           </div>
 
           {showMethodology && (
-            <div className="mb-4 p-3 rounded-lg bg-green-500/5 border border-green-500/20 text-xs">
-              <p className="font-medium text-green-500 mb-2">Responsibility Radar (8 axes)</p>
+            <div className="mb-4 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20 text-xs">
+              <p className="font-medium text-cyan-500 mb-2">Responsibility Radar (8 axes)</p>
               <p className="text-muted-foreground leading-relaxed">
-                Each responsibility has a <span className="text-green-500/80">MAIN EXP</span> (category) and an <span className="text-green-500/80">importance</span> (1–5). 
-                Score per category = <span className="text-green-500/80">min(5, round(avg importance))</span> in that category—so importance of the job is reflected, not just count. 
-                Chart uses a <span className="text-green-500/80">fixed 0–5 scale</span>.
+                Each responsibility has a <span className="text-cyan-500/80">MAIN EXP</span> (category) and an <span className="text-cyan-500/80">importance</span> (1–5). 
+                Score per category = <span className="text-cyan-500/80">min(5, round(avg importance))</span> in that category—so importance of the job is reflected, not just count. 
+                Chart uses a <span className="text-cyan-500/80">fixed 0–5 scale</span>.
               </p>
               <p className="text-muted-foreground mt-2 leading-relaxed">
                 Methodology draws on formal responsibility quantification: ResQu (human–automation responsibility), 
                 axiomatic responsibility ascription (member-level values and aggregation), and FeAR (causal responsibility in multi-agent settings).
               </p>
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px]">
-                <a href="https://arxiv.org/abs/1810.12644" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">ResQu · arXiv:1810.12644</a>
-                <a href="https://arxiv.org/abs/2111.06711" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">Axiomatic · arXiv:2111.06711</a>
-                <a href="https://arxiv.org/abs/2305.15003" target="_blank" rel="noopener noreferrer" className="text-green-500/90 hover:underline">FeAR · arXiv:2305.15003</a>
+                <a href="https://arxiv.org/abs/1810.12644" target="_blank" rel="noopener noreferrer" className="text-cyan-500/90 hover:underline">ResQu · arXiv:1810.12644</a>
+                <a href="https://arxiv.org/abs/2111.06711" target="_blank" rel="noopener noreferrer" className="text-cyan-500/90 hover:underline">Axiomatic · arXiv:2111.06711</a>
+                <a href="https://arxiv.org/abs/2305.15003" target="_blank" rel="noopener noreferrer" className="text-cyan-500/90 hover:underline">FeAR · arXiv:2305.15003</a>
               </div>
               <p className="text-muted-foreground mt-2">
                 Combined view overlays all positions; Selected view focuses on one role.
@@ -591,7 +600,7 @@ const Experience = () => {
                   return (
                     <li key={cat} className="flex items-center justify-between gap-2 text-muted-foreground">
                       <span className="truncate">{label}:</span>
-                      <span className="flex-shrink-0 font-mono text-green-500/90 text-right">
+                      <span className="flex-shrink-0 font-mono text-cyan-500/90 text-right">
                         {count} resp., avg {avgStr} → {score}/5
                       </span>
                     </li>
@@ -613,7 +622,7 @@ const Experience = () => {
               data-testid={`button-experience-tab-${exp.id}`}
               className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 ${
                 activeRole === index
-                  ? 'bg-green-500/10 text-foreground border border-green-500/30'
+                  ? 'bg-cyan-500/10 text-foreground border border-cyan-500/30'
                   : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground border border-transparent'
               }`}
             >
@@ -623,7 +632,7 @@ const Experience = () => {
                 <p className="font-mono text-[10px] text-muted-foreground/70">{exp.period}</p>
               </div>
               {exp.current && (
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse flex-shrink-0" />
               )}
             </button>
           ))}
@@ -634,14 +643,14 @@ const Experience = () => {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className={`px-2 py-1 rounded text-xs font-medium ${
                 activeRole === 0 
-                  ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
+                  ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20' 
                   : 'bg-foreground/5 text-muted-foreground border border-border/50'
               }`}>
                 {getRoleLevel(activeRole)}
               </span>
               {currentExp.current && (
-                <span className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
                   Active
                 </span>
               )}
@@ -669,17 +678,17 @@ const Experience = () => {
                 return (
                   <div 
                     key={index} 
-                    className="exp-detail group p-3 sm:p-4 rounded-lg bg-background/50 border border-border/30 hover:border-green-500/30 hover:bg-background/80 transition-all duration-300"
+                    className="exp-detail group p-3 sm:p-4 rounded-lg bg-background/50 border border-border/30 hover:border-cyan-500/30 hover:bg-background/80 transition-all duration-300"
                     data-testid={`card-highlight-${index}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-md bg-foreground/5 group-hover:bg-green-500/10 transition-colors flex-shrink-0">
-                        <IconComponent className="w-4 h-4 text-muted-foreground group-hover:text-green-500 transition-colors" />
+                      <div className="p-2 rounded-md bg-foreground/5 group-hover:bg-cyan-500/10 transition-colors flex-shrink-0">
+                        <IconComponent className="w-4 h-4 text-muted-foreground group-hover:text-cyan-500 transition-colors" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h4 className="font-medium text-sm text-foreground leading-tight group-hover:text-green-500/90 transition-colors">{highlight.title}</h4>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-500/90 border border-green-500/20">
+                          <h4 className="font-medium text-sm text-foreground leading-tight group-hover:text-cyan-500/90 transition-colors">{highlight.title}</h4>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-500/90 border border-cyan-500/20">
                             {MAIN_EXP_LABELS[highlight.mainExp]}
                           </span>
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-foreground/5 text-muted-foreground border border-border/50" title="Importance 1–5">
