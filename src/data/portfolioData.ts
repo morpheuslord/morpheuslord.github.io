@@ -103,6 +103,8 @@ export const experiences: Array<{
       { title: "PoC Development", desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits.", mainExp: "research", importance: 5 },
       { title: "Automation Development", desc: "Built sophisticated automation tools for testing and monitoring.", mainExp: "development", importance: 5 },
       { title: "Technical Writing", desc: "Provided proofreading for technical reports and research papers.", mainExp: "research", importance: 3 },
+      { title: "Research Assistance and Guidance", desc: "Provided research assistance and mentorship to students and professionals.", mainExp: "advisory", importance: 4 },
+      { title: "Student Project Development", desc: "Guided and developed student projects in cybersecurity and development domains.", mainExp: "leadership", importance: 4 },
     ],
   },
   {
@@ -118,6 +120,9 @@ export const experiences: Array<{
       { title: "SBOM Tools", desc: "Evaluated Software Bill of Materials tools for integration.", mainExp: "development", importance: 3 },
       { title: "Terraform Projects", desc: "Deployed security-focused infrastructure using IaC.", mainExp: "delivery", importance: 4 },
       { title: "Vulnerability Research", desc: "Conducted in-depth security research and exploit development.", mainExp: "research", importance: 5 },
+      { title: "G.O.A.T Project Development", desc: "Led development of the G.O.A.T security project initiative.", mainExp: "development", importance: 5 },
+      { title: "AWS and Azure Development", desc: "Developed cloud-native solutions and infrastructure on AWS and Azure platforms.", mainExp: "development", importance: 4 },
+      { title: "Containerized App Development", desc: "Built and deployed containerized applications using Docker and orchestration tools.", mainExp: "delivery", importance: 4 },
     ],
   },
   {
@@ -132,6 +137,8 @@ export const experiences: Array<{
       { title: "Vulnerability Assessments", desc: "Performed comprehensive security assessments and pen testing.", mainExp: "security", importance: 5 },
       { title: "AWS Security", desc: "Conducted AWS Rules assessments for cloud security.", mainExp: "security", importance: 4 },
       { title: "LLM Integration", desc: "Research on AI implementation for cybersecurity applications.", mainExp: "research", importance: 4 },
+      { title: "Network Assessment and Testing", desc: "Performed network security assessments and penetration testing.", mainExp: "security", importance: 4 },
+      { title: "Cloud Web Testing", desc: "Conducted security testing for cloud-hosted web applications.", mainExp: "security", importance: 4 },
     ],
   },
 ];
