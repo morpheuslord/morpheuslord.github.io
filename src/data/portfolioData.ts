@@ -5,14 +5,14 @@ export type ImportanceLevel = 1 | 2 | 3 | 4 | 5;
 
 /** Main EXP category: each responsibility maps to one of these. Radar score 1–5 = min(5, round(avg importance in category)). */
 export const RESPONSIBILITY_CATEGORIES = [
-  'security',
-  'development',
-  'research',
-  'leadership',
-  'collaboration',
-  'strategy',
-  'delivery',
-  'advisory',
+  "security",
+  "development",
+  "research",
+  "leadership",
+  "collaboration",
+  "strategy",
+  "delivery",
+  "advisory",
 ] as const;
 
 export type MainExpCategory = (typeof RESPONSIBILITY_CATEGORIES)[number];
@@ -78,18 +78,78 @@ export const experiences: Array<{
     duration: "1.5+ months",
     current: true,
     highlights: [
-      { title: "Python & API Development", desc: "Developed secure backend systems and tooling using Python and REST APIs.", mainExp: "development", importance: 4 },
-      { title: "Agentic AI Systems", desc: "Designed autonomous agents for internal security automation and threat response.", mainExp: "development", importance: 5 },
-      { title: "MCP-Based Architecture", desc: "Worked on modular control pipelines for process-level control.", mainExp: "strategy", importance: 4 },
-      { title: "Client-Facing Research", desc: "Collaborated with clients to deliver research-driven automation.", mainExp: "collaboration", importance: 5 },
-      { title: "Security Automation", desc: "Built automated scripts for vulnerability validation and pipeline integration.", mainExp: "security", importance: 4 },
-      { title: "Training & Mentorship", desc: "Providing training and guidance to cybersecurity trainees.", mainExp: "advisory", importance: 5 },
-      { title: "Application Pentesting", desc: "Lead a Team in performing application pentesting.", mainExp: "security", importance: 5 },
-      { title: "Android Development", desc: "Lead a Team in developing a secure backend for a mobile application.", mainExp: "development", importance: 4 },
-      { title: "Recruting", desc: "Recruiting and managing a team of cybersecurity professionals and interns.", mainExp: "leadership", importance: 5 },
-      { title: "Team Lead in MVP Projects", desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery.", mainExp: "delivery", importance: 5 },
-      { title: "Architectural Design Leadership", desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices.", mainExp: "strategy", importance: 5 },
-      { title: "Cross-Domain Research", desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas.", mainExp: "research", importance: 5 },
+      {
+        title: "Python & API Development",
+        desc: "Developed secure backend systems and tooling using Python and REST APIs.",
+        mainExp: "development",
+        importance: 4,
+      },
+      {
+        title: "Agentic AI Systems",
+        desc: "Designed autonomous agents for internal security automation and threat response.",
+        mainExp: "development",
+        importance: 5,
+      },
+      {
+        title: "MCP-Based Architecture",
+        desc: "Worked on modular control pipelines for process-level control.",
+        mainExp: "strategy",
+        importance: 4,
+      },
+      {
+        title: "Client-Facing Research",
+        desc: "Collaborated with clients to deliver research-driven automation.",
+        mainExp: "collaboration",
+        importance: 5,
+      },
+      {
+        title: "Security Automation",
+        desc: "Built automated scripts for vulnerability validation and pipeline integration.",
+        mainExp: "security",
+        importance: 4,
+      },
+      {
+        title: "Training & Mentorship",
+        desc: "Providing training and guidance to cybersecurity trainees.",
+        mainExp: "advisory",
+        importance: 5,
+      },
+      {
+        title: "Application Pentesting",
+        desc: "Lead a Team in performing application pentesting.",
+        mainExp: "security",
+        importance: 5,
+      },
+      {
+        title: "Android Development",
+        desc: "Lead a Team in developing a secure backend for a mobile application.",
+        mainExp: "development",
+        importance: 4,
+      },
+      {
+        title: "Recruting",
+        desc: "Recruiting and managing a team of cybersecurity professionals and interns.",
+        mainExp: "leadership",
+        importance: 5,
+      },
+      {
+        title: "Team Lead in MVP Projects",
+        desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery.",
+        mainExp: "delivery",
+        importance: 5,
+      },
+      {
+        title: "Architectural Design Leadership",
+        desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices.",
+        mainExp: "strategy",
+        importance: 5,
+      },
+      {
+        title: "Cross-Domain Research",
+        desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas.",
+        mainExp: "research",
+        importance: 5,
+      },
     ],
   },
   {
@@ -100,11 +160,42 @@ export const experiences: Array<{
     duration: "7 months",
     current: false,
     highlights: [
-      { title: "PoC Development", desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits.", mainExp: "research", importance: 5 },
-      { title: "Automation Development", desc: "Built sophisticated automation tools for testing and monitoring.", mainExp: "development", importance: 5 },
-      { title: "Technical Writing", desc: "Provided proofreading for technical reports and research papers.", mainExp: "research", importance: 3 },
-      { title: "Research Assistance and Guidance", desc: "Provided research assistance and mentorship to students and professionals.", mainExp: "advisory", importance: 4 },
-      { title: "Student Project Development", desc: "Guided and developed student projects in cybersecurity and development domains.", mainExp: "leadership", importance: 4 },
+      {
+        title: "PoC Development",
+        desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits.",
+        mainExp: "research",
+        importance: 5,
+      },
+      {
+        title: "Automation Development",
+        desc: "Built sophisticated automation tools for testing and monitoring.",
+        mainExp: "development",
+        importance: 5,
+      },
+      {
+        title: "Technical Writing",
+        desc: "Provided proofreading for technical reports and research papers.",
+        mainExp: "research",
+        importance: 3,
+      },
+      {
+        title: "Research Assistance and Guidance",
+        desc: "Provided research assistance and mentorship to students and professionals.",
+        mainExp: "advisory",
+        importance: 4,
+      },
+      {
+        title: "Student Project Development",
+        desc: "Guided and developed student projects in cybersecurity and development domains.",
+        mainExp: "advisory",
+        importance: 4,
+      },
+      {
+        title: "Cybersecurity Training",
+        desc: "Conducted cybersecurity training sessions and workshops.",
+        mainExp: "security",
+        importance: 3,
+      },
     ],
   },
   {
@@ -115,14 +206,54 @@ export const experiences: Array<{
     duration: "8 months",
     current: false,
     highlights: [
-      { title: "Azure and AWS Security", desc: "Managed cloud infrastructure security and compliance assessments.", mainExp: "security", importance: 5 },
-      { title: "Linux Optimization", desc: "Optimized system initialization and security hardening.", mainExp: "development", importance: 4 },
-      { title: "SBOM Tools", desc: "Evaluated Software Bill of Materials tools for integration.", mainExp: "development", importance: 3 },
-      { title: "Terraform Projects", desc: "Deployed security-focused infrastructure using IaC.", mainExp: "delivery", importance: 4 },
-      { title: "Vulnerability Research", desc: "Conducted in-depth security research and exploit development.", mainExp: "research", importance: 5 },
-      { title: "G.O.A.T Project Development", desc: "Led development of the G.O.A.T security project initiative.", mainExp: "development", importance: 5 },
-      { title: "AWS and Azure Development", desc: "Developed cloud-native solutions and infrastructure on AWS and Azure platforms.", mainExp: "development", importance: 4 },
-      { title: "Containerized App Development", desc: "Built and deployed containerized applications using Docker and orchestration tools.", mainExp: "delivery", importance: 4 },
+      {
+        title: "Azure and AWS Security",
+        desc: "Managed cloud infrastructure security and compliance assessments.",
+        mainExp: "security",
+        importance: 5,
+      },
+      {
+        title: "Linux Optimization",
+        desc: "Optimized system initialization and security hardening.",
+        mainExp: "development",
+        importance: 4,
+      },
+      {
+        title: "SBOM Tools",
+        desc: "Evaluated Software Bill of Materials tools for integration.",
+        mainExp: "development",
+        importance: 3,
+      },
+      {
+        title: "Terraform Projects",
+        desc: "Deployed security-focused infrastructure using IaC.",
+        mainExp: "advisory",
+        importance: 4,
+      },
+      {
+        title: "Vulnerability Research",
+        desc: "Conducted in-depth security research and exploit development.",
+        mainExp: "research",
+        importance: 5,
+      },
+      {
+        title: "G.O.A.T Project Development",
+        desc: "Led development of the G.O.A.T security project initiative.",
+        mainExp: "development",
+        importance: 5,
+      },
+      {
+        title: "AWS and Azure Development",
+        desc: "Developed cloud-native solutions and infrastructure on AWS and Azure platforms.",
+        mainExp: "development",
+        importance: 4,
+      },
+      {
+        title: "Containerized App Development",
+        desc: "Built and deployed containerized applications using Docker and orchestration tools.",
+        mainExp: "delivery",
+        importance: 4,
+      },
     ],
   },
   {
@@ -133,12 +264,42 @@ export const experiences: Array<{
     duration: "3 months",
     current: false,
     highlights: [
-      { title: "Red Team Tools", desc: "Developed automated tools for threat detection and assessment.", mainExp: "development", importance: 4 },
-      { title: "Vulnerability Assessments", desc: "Performed comprehensive security assessments and pen testing.", mainExp: "security", importance: 5 },
-      { title: "AWS Security", desc: "Conducted AWS Rules assessments for cloud security.", mainExp: "security", importance: 4 },
-      { title: "LLM Integration", desc: "Research on AI implementation for cybersecurity applications.", mainExp: "research", importance: 4 },
-      { title: "Network Assessment and Testing", desc: "Performed network security assessments and penetration testing.", mainExp: "security", importance: 4 },
-      { title: "Cloud Web Testing", desc: "Conducted security testing for cloud-hosted web applications.", mainExp: "security", importance: 4 },
+      {
+        title: "Red Team Tools",
+        desc: "Developed automated tools for threat detection and assessment.",
+        mainExp: "development",
+        importance: 4,
+      },
+      {
+        title: "Vulnerability Assessments",
+        desc: "Performed comprehensive security assessments and pen testing.",
+        mainExp: "security",
+        importance: 5,
+      },
+      {
+        title: "AWS Security",
+        desc: "Conducted AWS Rules assessments for cloud security.",
+        mainExp: "security",
+        importance: 4,
+      },
+      {
+        title: "LLM Integration",
+        desc: "Research on AI implementation for cybersecurity applications.",
+        mainExp: "research",
+        importance: 4,
+      },
+      {
+        title: "Network Assessment and Testing",
+        desc: "Performed network security assessments and penetration testing.",
+        mainExp: "security",
+        importance: 4,
+      },
+      {
+        title: "Cloud Web Testing",
+        desc: "Conducted security testing for cloud-hosted web applications.",
+        mainExp: "security",
+        importance: 4,
+      },
     ],
   },
 ];
@@ -212,38 +373,55 @@ export const certifications = [
 ];
 
 export const achievements = [
-  { title: "TryHackMe Elite", badge: "Top 1%", desc: "Top-tier cybersecurity challenges" },
-  { title: "Research Scholar", badge: "6+ Papers", desc: "Published cybersecurity research" },
-  { title: "Open Source Contributor", badge: "9+ Projects", desc: "Security tools development" },
+  {
+    title: "TryHackMe Elite",
+    badge: "Top 1%",
+    desc: "Top-tier cybersecurity challenges",
+  },
+  {
+    title: "Research Scholar",
+    badge: "6+ Papers",
+    desc: "Published cybersecurity research",
+  },
+  {
+    title: "Open Source Contributor",
+    badge: "9+ Projects",
+    desc: "Security tools development",
+  },
 ];
 
 export const projects = [
   {
     id: 1,
     title: "GPT-Vuln-Analyzer",
-    description: "AI integration into security operations - PoC demonstrating LLM-powered vulnerability analysis.",
+    description:
+      "AI integration into security operations - PoC demonstrating LLM-powered vulnerability analysis.",
     github: "https://github.com/morpheuslord/GPT_Vuln-analyzer",
     tags: ["Python", "AI", "Security"],
   },
   {
     id: 2,
     title: "Startup-SBOM",
-    description: "SBOM based on complete reverse engineering of the Linux boot process.",
+    description:
+      "SBOM based on complete reverse engineering of the Linux boot process.",
     github: "https://github.com/morpheuslord/WinFiHack",
     tags: ["Python", "Linux", "SBOM"],
   },
   {
     id: 3,
     title: "QuadraInspect",
-    description: "Automated approach for APK analysis with comprehensive security checks.",
+    description:
+      "Automated approach for APK analysis with comprehensive security checks.",
     github: "https://github.com/morpheuslord/netlify-personal-site",
     tags: ["Python", "Mobile Security", "Analysis"],
   },
   {
     id: 4,
     title: "Brute Framework",
-    description: "All-in-one hackers framework for Windows-based security testing.",
-    github: "https://github.com/morpheuslord/Brute-Hacking-Framework-SourceCode",
+    description:
+      "All-in-one hackers framework for Windows-based security testing.",
+    github:
+      "https://github.com/morpheuslord/Brute-Hacking-Framework-SourceCode",
     tags: ["Python", "Framework", "Windows"],
   },
   {
@@ -263,14 +441,16 @@ export const projects = [
   {
     id: 7,
     title: "CVE-LLM-Dataset",
-    description: "Test dataset demonstrating LLM training dataset structure for CVEs.",
+    description:
+      "Test dataset demonstrating LLM training dataset structure for CVEs.",
     github: "https://github.com/morpheuslord/CVE-llm_dataset",
     tags: ["Dataset", "LLM", "CVE"],
   },
   {
     id: 8,
     title: "C2C-Server",
-    description: "Command & Control server demonstrating real-life attack scenarios.",
+    description:
+      "Command & Control server demonstrating real-life attack scenarios.",
     github: "https://github.com/morpheuslord/C2C-Server",
     tags: ["Python", "C2", "Red Team"],
   },
@@ -284,9 +464,18 @@ export const projects = [
   {
     id: 10,
     title: "Komo.do-Hub",
-    description: "A Mobile application interface for the Komodo Container Management Platform",
+    description:
+      "A Mobile application interface for the Komodo Container Management Platform",
     github: "https://github.com/morpheuslord/komo.do-hub",
-    tags: ["Android", "Komodo", "Container Management","Java", "Node.js", "React Native", "React"],
+    tags: [
+      "Android",
+      "Komodo",
+      "Container Management",
+      "Java",
+      "Node.js",
+      "React Native",
+      "React",
+    ],
   },
 ];
 
@@ -341,19 +530,22 @@ export const testimonials = [
     id: 1,
     name: "Matthias Luft",
     role: "Mentor during internship",
-    quote: "Chiranjeevi showed a lot of talent, focus, and determination in the area of penetration testing and hacking. I greatly enjoyed working with him and hope to do so again in the future!",
+    quote:
+      "Chiranjeevi showed a lot of talent, focus, and determination in the area of penetration testing and hacking. I greatly enjoyed working with him and hope to do so again in the future!",
   },
   {
     id: 2,
     name: "Saumay Srivastava",
     role: "Colleague",
-    quote: "I have known Chiranjeevi for more than 3 years and his dedication to actively learn and evolve in the whole domain is commendable. Chiranjeevi is proficient in Recon, Linux based exploitation and Red team domains.",
+    quote:
+      "I have known Chiranjeevi for more than 3 years and his dedication to actively learn and evolve in the whole domain is commendable. Chiranjeevi is proficient in Recon, Linux based exploitation and Red team domains.",
   },
   {
     id: 3,
     name: "Shyam R",
     role: "Lecturer and Client",
-    quote: "I am delighted to recommend Chiranjeevi for his outstanding capabilities as a research writer specializing in cybersecurity. He has consistently demonstrated exceptional expertise and dedication.",
+    quote:
+      "I am delighted to recommend Chiranjeevi for his outstanding capabilities as a research writer specializing in cybersecurity. He has consistently demonstrated exceptional expertise and dedication.",
   },
 ];
 
