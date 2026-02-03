@@ -34,11 +34,22 @@ export const DEFAULT_IMPORTANCE: ImportanceLevel = 3;
 export type ExperienceHighlight = {
   title: string;
   desc: string;
-  /** MAIN EXP: which of the 8 responsibility categories this highlight falls under. */
+  /** MAIN EXP: primary category (used when mainExpCategories has one item or for backward compatibility). */
   mainExp: MainExpCategory;
+  /**
+   * Optional: multiple categories this responsibility belongs to.
+   * When set, the responsibility contributes its full importance to each category (full-weight-per-axis).
+   */
+  mainExpCategories?: MainExpCategory[];
   /** Importance of this responsibility in the role (1–5). Score per category = min(5, round(avg importance)). Default 3. */
   importance?: ImportanceLevel;
 };
+
+/** Resolve the list of categories for a highlight (multi or single). Use this for counts/sums. */
+export function getHighlightCategories(h: ExperienceHighlight): MainExpCategory[] {
+  if (h.mainExpCategories && h.mainExpCategories.length > 0) return h.mainExpCategories;
+  return [h.mainExp];
+}
 
 export const personalInfo = {
   name: "Chiranjeevi Naidu",
@@ -82,72 +93,84 @@ export const experiences: Array<{
         title: "Python & API Development",
         desc: "Developed secure backend systems and tooling using Python and REST APIs.",
         mainExp: "development",
+        mainExpCategories: ["development", "security"],
         importance: 4,
       },
       {
         title: "Agentic AI Systems",
         desc: "Designed autonomous agents for internal security automation and threat response.",
         mainExp: "development",
+        mainExpCategories: ["development", "security"],
         importance: 5,
       },
       {
         title: "MCP-Based Architecture",
         desc: "Worked on modular control pipelines for process-level control.",
         mainExp: "strategy",
+        mainExpCategories: ["strategy", "development"],
         importance: 4,
       },
       {
         title: "Client-Facing Research",
         desc: "Collaborated with clients to deliver research-driven automation.",
         mainExp: "collaboration",
+        mainExpCategories: ["collaboration", "research"],
         importance: 5,
       },
       {
         title: "Security Automation",
         desc: "Built automated scripts for vulnerability validation and pipeline integration.",
         mainExp: "security",
+        mainExpCategories: ["security", "development"],
         importance: 4,
       },
       {
         title: "Training & Mentorship",
         desc: "Providing training and guidance to cybersecurity trainees.",
         mainExp: "advisory",
+        mainExpCategories: ["advisory", "leadership"],
         importance: 5,
       },
       {
         title: "Application Pentesting",
         desc: "Lead a Team in performing application pentesting.",
         mainExp: "security",
+        mainExpCategories: ["security", "leadership"],
         importance: 5,
       },
       {
         title: "Android Development",
         desc: "Lead a Team in developing a secure backend for a mobile application.",
         mainExp: "development",
+        mainExpCategories: ["development", "delivery"],
         importance: 4,
       },
       {
         title: "Recruting",
         desc: "Recruiting and managing a team of cybersecurity professionals and interns.",
         mainExp: "leadership",
+        mainExpCategories: ["leadership", "advisory"],
         importance: 5,
       },
       {
         title: "Team Lead in MVP Projects",
         desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery.",
         mainExp: "delivery",
+        mainExpCategories: ["delivery", "leadership"],
         importance: 5,
       },
       {
         title: "Architectural Design Leadership",
         desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices.",
         mainExp: "strategy",
+        mainExpCategories: ["strategy", "leadership"],
         importance: 5,
       },
       {
         title: "Cross-Domain Research",
         desc: "Led research initiatives across diverse domains beyond cybersecurity including Dating platforms, Insurance, Cloud Automation, Crypto, and other innovative areas.",
         mainExp: "research",
+        mainExpCategories: ["research", "strategy"],
         importance: 5,
       },
     ],
@@ -164,36 +187,42 @@ export const experiences: Array<{
         title: "PoC Development",
         desc: "Designed Proof-of-Concepts for novel vulnerabilities and exploits.",
         mainExp: "research",
-        importance: 5,
+        mainExpCategories: ["collaboration", "security"],
+        importance: 4,
       },
       {
         title: "Automation Development",
         desc: "Built sophisticated automation tools for testing and monitoring.",
         mainExp: "development",
-        importance: 5,
+        mainExpCategories: ["development", "security"],
+        importance: 4,
       },
       {
         title: "Technical Writing",
         desc: "Provided proofreading for technical reports and research papers.",
         mainExp: "research",
+        mainExpCategories: ["research", "advisory"],
         importance: 3,
       },
       {
         title: "Research Assistance and Guidance",
         desc: "Provided research assistance and mentorship to students and professionals.",
         mainExp: "advisory",
+        mainExpCategories: ["strategy", "research"],
         importance: 4,
       },
       {
         title: "Student Project Development",
         desc: "Guided and developed student projects in cybersecurity and development domains.",
         mainExp: "advisory",
-        importance: 4,
+        mainExpCategories: ["advisory", "development"],
+        importance: 3,
       },
       {
         title: "Cybersecurity Training",
         desc: "Conducted cybersecurity training sessions and workshops.",
         mainExp: "security",
+        mainExpCategories: ["leadership", "advisory"],
         importance: 3,
       },
     ],
@@ -210,48 +239,56 @@ export const experiences: Array<{
         title: "Azure and AWS Security",
         desc: "Managed cloud infrastructure security and compliance assessments.",
         mainExp: "security",
-        importance: 5,
+        mainExpCategories: ["security", "advisory"],
+        importance: 4,
       },
       {
         title: "Linux Optimization",
         desc: "Optimized system initialization and security hardening.",
         mainExp: "development",
+        mainExpCategories: ["research", "security"],
         importance: 4,
       },
       {
         title: "SBOM Tools",
         desc: "Evaluated Software Bill of Materials tools for integration.",
         mainExp: "development",
+        mainExpCategories: ["research", "delivery", "strategy", "security"],
         importance: 3,
       },
       {
         title: "Terraform Projects",
         desc: "Deployed security-focused infrastructure using IaC.",
         mainExp: "advisory",
+        mainExpCategories: ["advisory", "delivery"],
         importance: 4,
       },
       {
         title: "Vulnerability Research",
         desc: "Conducted in-depth security research and exploit development.",
         mainExp: "research",
-        importance: 5,
+        mainExpCategories: ["strategy", "security"],
+        importance: 4,
       },
       {
         title: "G.O.A.T Project Development",
         desc: "Led development of the G.O.A.T security project initiative.",
         mainExp: "development",
-        importance: 5,
+        mainExpCategories: ["collaboration", "security"],
+        importance: 4,
       },
       {
         title: "AWS and Azure Development",
         desc: "Developed cloud-native solutions and infrastructure on AWS and Azure platforms.",
         mainExp: "development",
+        mainExpCategories: ["collaboration", "security"],
         importance: 4,
       },
       {
         title: "Containerized App Development",
         desc: "Built and deployed containerized applications using Docker and orchestration tools.",
         mainExp: "delivery",
+        mainExpCategories: ["delivery", "development"],
         importance: 4,
       },
     ],
@@ -268,36 +305,42 @@ export const experiences: Array<{
         title: "Red Team Tools",
         desc: "Developed automated tools for threat detection and assessment.",
         mainExp: "development",
+        mainExpCategories: ["development", "security"],
         importance: 4,
       },
       {
         title: "Vulnerability Assessments",
         desc: "Performed comprehensive security assessments and pen testing.",
         mainExp: "security",
-        importance: 5,
+        mainExpCategories: ["security", "research"],
+        importance: 4,
       },
       {
         title: "AWS Security",
         desc: "Conducted AWS Rules assessments for cloud security.",
         mainExp: "security",
+        mainExpCategories: ["security", "advisory"],
         importance: 4,
       },
       {
         title: "LLM Integration",
         desc: "Research on AI implementation for cybersecurity applications.",
         mainExp: "research",
+        mainExpCategories: ["research", "development"],
         importance: 4,
       },
       {
         title: "Network Assessment and Testing",
         desc: "Performed network security assessments and penetration testing.",
         mainExp: "security",
+        mainExpCategories: ["security", "delivery"],
         importance: 4,
       },
       {
         title: "Cloud Web Testing",
         desc: "Conducted security testing for cloud-hosted web applications.",
         mainExp: "security",
+        mainExpCategories: ["security", "development"],
         importance: 4,
       },
     ],

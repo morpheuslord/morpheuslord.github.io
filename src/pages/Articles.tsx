@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import anime from 'animejs';
-import { articles, articleCategories, authorStats, Article } from '@/data/articlesData';
+import { articles, articleCategories, authorStats, getArticleCategories } from '@/data/articlesData';
 import { ArrowLeft, ExternalLink, Clock, Calendar, Search, Brain, Shield, Code, Cloud, BookOpen } from 'lucide-react';
 
 const Articles = () => {
@@ -16,8 +16,8 @@ const Articles = () => {
       article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Direct category matching
-    const matchesCategory = !selectedCategory || article.category === selectedCategory;
+    // Multi-category: match if any of the article's categories match
+    const matchesCategory = !selectedCategory || getArticleCategories(article).includes(selectedCategory);
     
     return matchesSearch && matchesCategory;
   });
@@ -180,9 +180,11 @@ const Articles = () => {
                   className="article-card opacity-0 group card-cyber rounded-xl p-6 hover:border-foreground/20 transition-all duration-300"
                 >
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs px-2 py-1 rounded bg-primary/20 text-primary font-mono">
-                      {article.category}
-                    </span>
+                    {getArticleCategories(article).map((cat) => (
+                      <span key={cat} className="text-xs px-2 py-1 rounded bg-primary/20 text-primary font-mono">
+                        {cat}
+                      </span>
+                    ))}
                   </div>
                   <h3 className="font-semibold text-foreground mb-3 group-hover:text-foreground/80 transition-colors line-clamp-2">
                     {article.title}
@@ -266,10 +268,12 @@ const Articles = () => {
                   className="article-item flex flex-col md:flex-row md:items-center gap-4 p-6 rounded-xl bg-secondary/10 border border-border/30 hover:border-foreground/20 hover:bg-secondary/20 transition-all duration-300 group"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs px-2 py-0.5 rounded bg-secondary/50 text-muted-foreground font-mono">
-                        {article.category}
-                      </span>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      {getArticleCategories(article).map((cat) => (
+                        <span key={cat} className="text-xs px-2 py-0.5 rounded bg-secondary/50 text-muted-foreground font-mono">
+                          {cat}
+                        </span>
+                      ))}
                       {article.featured && (
                         <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary font-mono">
                           Featured

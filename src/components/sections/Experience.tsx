@@ -5,6 +5,7 @@ import {
   experiences,
   RESPONSIBILITY_CATEGORIES,
   DEFAULT_IMPORTANCE,
+  getHighlightCategories,
   type ResponsibilityScores,
   type MainExpCategory,
   type ExperienceHighlight,
@@ -16,7 +17,7 @@ type CategoryKey = MainExpCategory;
 
 const SCALE_MAX = 5; // Fixed 0–5 scale so chart is not inflated/deflated by data max; fair representation.
 
-/** Raw counts per category. */
+/** Raw counts per category. When a responsibility has multiple categories, it counts +1 in each (full-weight-per-axis). */
 function getCountsFromHighlights(highlights: ExperienceHighlight[]): ResponsibilityScores {
   const counts: ResponsibilityScores = {
     security: 0,
@@ -29,7 +30,8 @@ function getCountsFromHighlights(highlights: ExperienceHighlight[]): Responsibil
     advisory: 0,
   };
   highlights.forEach((h) => {
-    counts[h.mainExp]++;
+    const cats = getHighlightCategories(h);
+    cats.forEach((c) => { counts[c]++; });
   });
   return counts;
 }
@@ -49,7 +51,8 @@ function getAvgImportanceFromHighlights(highlights: ExperienceHighlight[]): Resp
   const counts = getCountsFromHighlights(highlights);
   highlights.forEach((h) => {
     const imp = h.importance ?? DEFAULT_IMPORTANCE;
-    sums[h.mainExp] += imp;
+    const cats = getHighlightCategories(h);
+    cats.forEach((c) => { sums[c] += imp; });
   });
   return RESPONSIBILITY_CATEGORIES.reduce(
     (acc, c) => ({ ...acc, [c]: counts[c] > 0 ? sums[c] / counts[c] : 0 }),
@@ -72,7 +75,8 @@ function computeScoresFromHighlights(highlights: ExperienceHighlight[]): Respons
   };
   highlights.forEach((h) => {
     const imp = h.importance ?? DEFAULT_IMPORTANCE;
-    sums[h.mainExp] += imp;
+    const cats = getHighlightCategories(h);
+    cats.forEach((c) => { sums[c] += imp; });
   });
   return RESPONSIBILITY_CATEGORIES.reduce(
     (acc, c) => {
@@ -569,8 +573,9 @@ const Experience = () => {
             <div className="mb-4 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20 text-xs">
               <p className="font-medium text-cyan-500 mb-2">Responsibility Radar (8 axes)</p>
               <p className="text-muted-foreground leading-relaxed">
-                Each responsibility has a <span className="text-cyan-500/80">MAIN EXP</span> (category) and an <span className="text-cyan-500/80">importance</span> (1–5). 
-                Score per category = <span className="text-cyan-500/80">min(5, round(avg importance))</span> in that category—so importance of the job is reflected, not just count. 
+                Each responsibility has one or more <span className="text-cyan-500/80">categories</span> and an <span className="text-cyan-500/80">importance</span> (1–5). 
+                When a responsibility spans <span className="text-cyan-500/80">multiple categories</span>, it contributes its <span className="text-cyan-500/80">full importance</span> to each (full-weight-per-axis): 
+                score per category = <span className="text-cyan-500/80">min(5, round(avg importance in that category))</span>. 
                 Chart uses a <span className="text-cyan-500/80">fixed 0–5 scale</span>.
               </p>
               <p className="text-muted-foreground mt-2 leading-relaxed">
@@ -593,7 +598,7 @@ const Experience = () => {
             <div className="lg:min-w-[200px] lg:max-w-[260px] flex-shrink-0 p-3 rounded-lg bg-background/50 border border-border/30 text-xs">
               <p className="font-medium text-foreground mb-1.5">How the score was derived</p>
               <p className="text-muted-foreground mb-2 leading-tight">
-                Score = min(5, round(avg <span className="font-semibold text-foreground">importance</span> in that category). Importance 1–5 per responsibility; scale fixed 0–5.
+                Score = min(5, round(avg <span className="font-semibold text-foreground">importance</span> in that category). Multi-category responsibilities count fully in each category; importance 1–5; scale 0–5.
               </p>
               <p className="text-muted-foreground/80 font-medium mb-2 truncate" title={`${currentExp.title} @ ${currentExp.company}`}>
                 {currentExp.title} @ {currentExp.company.split('/')[0].trim()}
@@ -682,7 +687,8 @@ const Experience = () => {
           <ScrollArea className="h-[350px] sm:h-[400px] pr-2 sm:pr-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {currentExp.highlights.map((highlight, index) => {
-                const IconComponent = MAIN_EXP_ICONS[highlight.mainExp];
+                const categories = getHighlightCategories(highlight);
+                const IconComponent = MAIN_EXP_ICONS[categories[0]];
                 return (
                   <div 
                     key={index} 
@@ -696,9 +702,11 @@ const Experience = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h4 className="font-medium text-sm text-foreground leading-tight group-hover:text-cyan-500/90 transition-colors">{highlight.title}</h4>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-500/90 border border-cyan-500/20">
-                            {MAIN_EXP_LABELS[highlight.mainExp]}
-                          </span>
+                          {categories.map((cat) => (
+                            <span key={cat} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-500/90 border border-cyan-500/20">
+                              {MAIN_EXP_LABELS[cat]}
+                            </span>
+                          ))}
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-foreground/5 text-muted-foreground border border-border/50" title="Importance 1–5">
                             imp. {highlight.importance ?? DEFAULT_IMPORTANCE}
                           </span>
