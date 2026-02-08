@@ -106,9 +106,17 @@
 }
 
 @keyframes progressPulse {
-    0% { width: 50%; }
-    50% { width: 70%; }
-    100% { width: 60%; }
+    0% {
+        width: 50%;
+    }
+
+    50% {
+        width: 70%;
+    }
+
+    100% {
+        width: 60%;
+    }
 }
 
 .back1,
@@ -198,13 +206,30 @@
 }
 
 /* Add default styling for all keyboard surfaces */
-.front2, .back2, .top2, .left2, .right2, .bottom2,
-.front4, .front5, .front6,
-.back4, .back5, .back6,
-.top4, .top5, .top6,
-.left4, .left5, .left6,
-.right4, .right5, .right6,
-.bottom4, .bottom5, .bottom6 {
+.front2,
+.back2,
+.top2,
+.left2,
+.right2,
+.bottom2,
+.front4,
+.front5,
+.front6,
+.back4,
+.back5,
+.back6,
+.top4,
+.top5,
+.top6,
+.left4,
+.left5,
+.left6,
+.right4,
+.right5,
+.right6,
+.bottom4,
+.bottom5,
+.bottom6 {
     background-color: #8b7355;
 }
 
@@ -228,9 +253,17 @@
 }
 
 @keyframes discPulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 /* Hover effects */
