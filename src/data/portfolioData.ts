@@ -447,7 +447,7 @@ export const projects = [
     title: "Startup-SBOM",
     description:
       "SBOM based on complete reverse engineering of the Linux boot process.",
-    github: "https://github.com/morpheuslord/WinFiHack",
+    github: "https://github.com/morpheuslord/Startup-SBOM",
     tags: ["Python", "Linux", "SBOM"],
   },
   {
@@ -455,7 +455,7 @@ export const projects = [
     title: "QuadraInspect",
     description:
       "Automated approach for APK analysis with comprehensive security checks.",
-    github: "https://github.com/morpheuslord/netlify-personal-site",
+    github: "https://github.com/morpheuslord/QuadraInspect",
     tags: ["Python", "Mobile Security", "Analysis"],
   },
   {
