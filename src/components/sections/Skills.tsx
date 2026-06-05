@@ -25,9 +25,9 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({ 
-          width: Math.max(width, 300), 
-          height: Math.max(height, 400) 
+        setDimensions({
+          width: Math.max(width, 300),
+          height: Math.max(height, 400)
         });
       }
     };
@@ -44,20 +44,17 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
     svg.selectAll('*').remove();
 
     const { width } = dimensions;
-    
-    // Responsive spacing based on screen size
     const isMobile = width < 640;
     const isTablet = width >= 640 && width < 1024;
-    const margin = { 
-      top: isMobile ? 10 : 20, 
-      right: isMobile ? 10 : 20, 
-      bottom: isMobile ? 10 : 20, 
-      left: isMobile ? 60 : 180 
+    const margin = {
+      top: isMobile ? 10 : 20,
+      right: isMobile ? 10 : 20,
+      bottom: isMobile ? 10 : 20,
+      left: isMobile ? 60 : 180
     };
 
-    // Identify shared skills (appearing in 2+ employments)
+    // Map each skill to its employments and find the primary (highest level) one
     const skillToEmployments = new Map<string, Array<{ expIndex: number; level: number; color: string }>>();
-    
     experiences.forEach((exp, expIndex) => {
       Object.keys(exp.skills).forEach(skillName => {
         if (!skillToEmployments.has(skillName)) {
@@ -71,78 +68,63 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       });
     });
 
-    const sharedSkills = Array.from(skillToEmployments.entries())
-      .filter(([_, employments]) => employments.length > 1)
-      .map(([skillName, employments]) => ({
-        skillName,
-        employments,
-        // Use average level and a mixed color
-        avgLevel: Math.round(employments.reduce((sum, e) => sum + e.level, 0) / employments.length),
-        colors: employments.map(e => e.color)
-      }));
+    // Determine primary employment for each skill (highest level)
+    const skillPrimary = new Map<string, number>();
+    skillToEmployments.forEach((emps, skillName) => {
+      const best = emps.reduce((a, b) => b.level > a.level ? b : a, emps[0]);
+      skillPrimary.set(skillName, best.expIndex);
+    });
 
-    // Build hierarchical tree data structure
-    // Root -> Employment (with unique skills) + Shared Skills
+    // Build tree: each skill appears ONCE under its primary employment
     const treeData: any = {
       name: 'Skills',
-      children: [
-        // Employment nodes with only unique skills
-        ...experiences.map((exp, i) => {
-          const titleParts = exp.title.split(' – ');
-          const jobTitle = titleParts[0].split(' ').slice(0, 2).join(' ');
-          const companyName = titleParts[1] || '';
-          const shortName = companyName ? `${jobTitle} @ ${companyName}` : jobTitle;
-          const uniqueSkills = Object.keys(exp.skills).filter(skillName => {
-            const employments = skillToEmployments.get(skillName);
-            return !employments || employments.length === 1;
-          });
-          
-          return {
-            name: shortName,
-            fullName: exp.title,
-            type: 'employment',
-            color: exp.color,
-            expData: exp,
-            expIndex: i,
-            children: uniqueSkills.length > 0 ? uniqueSkills.map(skillName => ({
+      children: experiences.map((exp, i) => {
+        const titleParts = exp.title.split(' – ');
+        const jobTitle = titleParts[0].split(' ').slice(0, 2).join(' ');
+        const companyName = titleParts[1] || '';
+        const shortName = companyName ? `${jobTitle} @ ${companyName}` : jobTitle;
+
+        // Only include skills whose primary employment is this one
+        const mySkills = Object.keys(exp.skills).filter(
+          skillName => skillPrimary.get(skillName) === i
+        );
+
+        return {
+          name: shortName,
+          fullName: exp.title,
+          type: 'employment',
+          color: exp.color,
+          expData: exp,
+          expIndex: i,
+          children: mySkills.length > 0 ? mySkills.map(skillName => {
+            const emps = skillToEmployments.get(skillName)!;
+            const isShared = emps.length > 1;
+            return {
               name: skillName,
               type: 'skill',
               color: exp.color,
               level: Math.round(exp.skills[skillName] * 100),
-              isUnique: true
-            })) : undefined
-          };
-        }),
-        // Shared Skills node
-        ...(sharedSkills.length > 0 ? [{
-          name: 'Shared Skills',
-          type: 'shared-category',
-          color: '#888',
-          children: sharedSkills.map(({ skillName, avgLevel, colors }) => ({
-            name: skillName,
-            type: 'shared-skill',
-            color: colors[0], // Use first employment's color as primary
-            level: avgLevel,
-            colors: colors,
-            employments: skillToEmployments.get(skillName)!.map(e => e.expIndex)
-          }))
-        }] : [])
-      ]
+              isShared,
+              // Other employments that also use this skill (for connection lines)
+              otherEmployments: isShared
+                ? emps.filter(e => e.expIndex !== i).map(e => e.expIndex)
+                : [],
+              allColors: emps.map(e => e.color),
+            };
+          }) : undefined
+        };
+      })
     };
 
-    // Compute the tree height with increased spacing to reduce congestion
+    // Compute tree layout
     const root = d3.hierarchy(treeData);
-    const dx = isMobile ? 12 : 15; // Increased vertical spacing
+    const dx = isMobile ? 12 : 15;
     const dy = (width - margin.left - margin.right) / (root.height + 1);
 
-    // Create a tree layout
     const tree = d3.tree().nodeSize([dx, dy]);
-
-    // Sort the tree and apply the layout
     root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
     tree(root);
 
-    // Compute the extent of the tree
     let x0 = Infinity;
     let x1 = -x0;
     root.each(d => {
@@ -150,10 +132,8 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       if (d.x < x0) x0 = d.x;
     });
 
-    // Compute the adjusted height of the tree
     const treeHeight = x1 - x0 + dx * 2;
 
-    // Set up SVG with responsive viewBox
     svg.attr('width', width)
       .attr('height', treeHeight)
       .attr('viewBox', [-dy / 3, x0 - dx, width, treeHeight])
@@ -161,92 +141,72 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       .style('height', 'auto')
       .style('font', isMobile ? '7px' : isTablet ? '8px' : '9px JetBrains Mono, monospace');
 
-    // Create a container group for zoom/pan
     const g = svg.append('g');
-    
-    // Set up zoom behavior with touch support
+
+    // Zoom/pan
     const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.2, 4]) // Allow zoom from 20% to 400%
+      .scaleExtent([0.2, 4])
       .filter((event) => {
-        // Allow zoom on wheel, pinch, and middle mouse button
-        // Allow pan on left mouse button drag or touch drag
-        if (event.type === 'wheel') return !event.ctrlKey; // Prevent page scroll when zooming
-        if (event.type === 'mousedown' && (event as MouseEvent).button === 1) return true; // Middle mouse
-        if (event.type === 'touchstart' || event.type === 'touchmove') return true; // Touch
-        if (event.type === 'mousedown' && (event as MouseEvent).button === 0) return true; // Left mouse for pan
+        if (event.type === 'wheel') return !event.ctrlKey;
         return true;
       })
       .on('zoom', (event) => {
         g.attr('transform', event.transform.toString());
       });
-
-    // Apply zoom to SVG
     svg.call(zoom as any);
-    
-    // Set initial transform for better mobile view - zoomed out and centered
+
     const initialScale = isMobile ? 0.5 : 1;
     const initialTransform = d3.zoomIdentity
       .translate(width / 2 - (width / 2) * initialScale, treeHeight / 2 - (treeHeight / 2) * initialScale)
       .scale(initialScale);
-    
     svg.call(zoom.transform as any, initialTransform);
-    
-    // Prevent default touch behaviors that interfere with zoom
-    svg.on('touchstart', (event) => {
-      event.preventDefault();
-    });
 
-    // Store node references by expIndex for shared skill links
+    svg.on('touchstart', (event) => event.preventDefault());
+
+    // Index employment nodes and skill nodes for cross-links
     const employmentNodes = new Map<number, any>();
     const sharedSkillNodes: any[] = [];
-    
+
     root.each((d: any) => {
       if (d.data.type === 'employment' && d.data.expIndex !== undefined) {
         employmentNodes.set(d.data.expIndex, d);
       }
-      if (d.data.type === 'shared-skill') {
+      if (d.data.type === 'skill' && d.data.isShared) {
         sharedSkillNodes.push(d);
       }
     });
 
-    // Add tree links (parent-child relationships) - including root connections
+    // Draw tree links (parent-child)
     const treeLinks = root.links();
     const link = g.append('g')
       .attr('fill', 'none')
-      .attr('stroke-opacity', 0.3) // Reduced opacity to reduce visual clutter
-      .attr('stroke-width', isMobile ? 1 : 1.2) // Thinner lines
+      .attr('stroke-opacity', 0.3)
+      .attr('stroke-width', isMobile ? 1 : 1.2)
       .selectAll('path')
       .data(treeLinks)
       .join('path')
       .attr('stroke', (d: any) => {
-        // Root connections use grey and are more visible
-        if (!d.source.parent) {
-          return '#888';
-        }
-        // Use the source node's color (employment color)
+        if (!d.source.parent) return '#888';
         return d.source.data.color || '#555';
       })
       .attr('stroke-width', (d: any) => {
-        // Make root connections slightly thicker for visibility
-        if (!d.source.parent) {
-          return isMobile ? 1.5 : 2;
-        }
+        if (!d.source.parent) return isMobile ? 1.5 : 2;
         return isMobile ? 1.2 : 1.5;
       })
       .attr('d', d3.linkHorizontal()
         .x((d: any) => d.y)
         .y((d: any) => d.x));
 
-    // Add additional links from shared skills to all relevant employments
-    const sharedSkillLinks: any[] = [];
+    // Build cross-links: dashed lines from shared skills to their OTHER employment nodes
+    const crossLinkData: Array<{ skillNode: any; empNode: any; color: string }> = [];
     sharedSkillNodes.forEach((skillNode: any) => {
-      if (skillNode.data.employments) {
-        skillNode.data.employments.forEach((expIndex: number) => {
+      if (skillNode.data.otherEmployments) {
+        skillNode.data.otherEmployments.forEach((expIndex: number) => {
           const empNode = employmentNodes.get(expIndex);
           if (empNode) {
-            sharedSkillLinks.push({
-              source: skillNode,
-              target: empNode,
+            crossLinkData.push({
+              skillNode,
+              empNode,
               color: empNode.data.color
             });
           }
@@ -254,26 +214,25 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       }
     });
 
-    // Add curved links for shared skills to employments
-    const sharedLinksGroup = g.append('g')
+    // Draw cross-links as smooth dashed curves (same style as tree links)
+    const crossLinkSelection = g.append('g')
       .attr('fill', 'none')
-      .attr('stroke-opacity', 0.25) // Reduced opacity
-      .attr('stroke-width', isMobile ? 1 : 1.2) // Thinner lines
-      .attr('stroke-dasharray', '4,4');
-    
-    const sharedLinks = sharedLinksGroup
+      .attr('stroke-opacity', 0.3)
+      .attr('stroke-width', isMobile ? 0.8 : 1.2)
+      .attr('stroke-dasharray', '6,4')
       .selectAll('path')
-      .data(sharedSkillLinks)
+      .data(crossLinkData)
       .join('path')
-      .attr('stroke', (d: any) => d.color || '#888')
+      .attr('stroke', (d: any) => d.color)
       .attr('d', (d: any) => {
+        // Use the same smooth horizontal link generator as tree links
         const linkGen = d3.linkHorizontal()
-          .x((d: any) => d.y)
-          .y((d: any) => d.x);
-        return linkGen({ source: d.source, target: d.target } as any);
+          .x((p: any) => p.y)
+          .y((p: any) => p.x);
+        return linkGen({ source: d.skillNode, target: d.empNode } as any);
       });
 
-    // Add nodes (including root)
+    // Draw nodes
     const node = g.append('g')
       .attr('stroke-linejoin', 'round')
       .attr('stroke-width', 3)
@@ -282,36 +241,19 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       .join('g')
       .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
-    // Add circles for nodes (including root node)
+    // Node circles
     node.append('circle')
       .attr('fill', (d: any) => {
-        // Root node
-        if (!d.parent) {
-          return '#666';
-        }
-        if (d.data.type === 'employment') {
-          return d.data.color || '#555';
-        }
-        if (d.data.type === 'shared-category') {
-          return '#888';
-        }
-        if (d.data.type === 'shared-skill') {
-          return d.data.color || '#777';
-        }
-        if (d.data.type === 'skill') {
-          return d.data.color || '#999';
-        }
+        if (!d.parent) return '#666';
+        if (d.data.type === 'employment') return d.data.color || '#555';
+        if (d.data.type === 'skill') return d.data.color || '#999';
         return d.children ? '#555' : '#999';
       })
       .attr('r', (d: any) => {
-        const baseSize = isMobile ? 0.6 : isTablet ? 0.75 : 0.85; // Reduced node sizes
-        // Root node
-        if (!d.parent) {
-          return 5 * baseSize;
-        }
+        const baseSize = isMobile ? 0.6 : isTablet ? 0.75 : 0.85;
+        if (!d.parent) return 5 * baseSize;
         if (d.data.type === 'employment') return 4 * baseSize;
-        if (d.data.type === 'shared-category') return 3.5 * baseSize;
-        if (d.data.type === 'shared-skill') return 3 * baseSize;
+        if (d.data.type === 'skill' && d.data.isShared) return 3 * baseSize;
         if (d.data.type === 'skill') return 2.5 * baseSize;
         return (d.children ? 3 : 2) * baseSize;
       })
@@ -325,158 +267,118 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
         return 1.5;
       });
 
-    // Add text labels (including root)
+    // Text labels
     node.append('text')
       .attr('dy', '0.31em')
       .attr('x', (d: any) => {
-        // Root node
         if (!d.parent) return -10;
         if (d.data.type === 'employment') return -10;
-        if (d.data.type === 'shared-category') return -10;
-        if (d.data.type === 'shared-skill') return 8;
         if (d.data.type === 'skill') return 8;
         return d.children ? -8 : 8;
       })
       .attr('text-anchor', (d: any) => {
-        // Root node
         if (!d.parent) return 'end';
-        if (d.data.type === 'employment' || d.data.type === 'shared-category') return 'end';
-        if (d.data.type === 'skill' || d.data.type === 'shared-skill') return 'start';
+        if (d.data.type === 'employment') return 'end';
+        if (d.data.type === 'skill') return 'start';
         return d.children ? 'end' : 'start';
       })
       .text((d: any) => d.data.name)
       .attr('fill', (d: any) => {
-        // Root node
-        if (!d.parent) {
-          return '#aaa';
-        }
+        if (!d.parent) return '#aaa';
         if (d.data.type === 'employment') {
           const rgb = hexToRgb(d.data.color);
           return rgb ? `rgb(${Math.min(255, rgb.r + 40)}, ${Math.min(255, rgb.g + 40)}, ${Math.min(255, rgb.b + 40)})` : d.data.color;
         }
-        if (d.data.type === 'shared-category') {
-          return '#888';
-        }
-        if (d.data.type === 'shared-skill') {
-          return d.data.color || '#666';
-        }
         return d.data.color || '#333';
       })
       .attr('font-weight', (d: any) => {
-        // Root node
         if (!d.parent) return '700';
         if (d.data.type === 'employment') return '700';
         if (d.data.type === 'skill') return '500';
         return d.children ? '600' : '400';
       });
 
-    // Store original text colors for restoration
+    // Store original text colors
     const originalTextColors = new Map();
-    node.select('text').each(function(d: any) {
+    node.select('text').each(function (d: any) {
       originalTextColors.set(d, d3.select(this).attr('fill'));
     });
 
-    // Add hover interactions
+    // Hover interactions
     node.append('rect')
       .attr('fill', 'none')
       .attr('width', 200)
       .attr('height', 20)
-      .attr('x', (d: any) => {
-        if (d.data.type === 'employment') return -200;
-        return -10;
-      })
+      .attr('x', (d: any) => d.data.type === 'employment' ? -200 : -10)
       .attr('y', -10)
       .attr('pointer-events', 'all')
       .style('cursor', (d: any) => d.data.type === 'employment' ? 'pointer' : 'default')
       .on('pointerenter', (event, d: any) => {
-        // Dim all nodes and links first
+        // Dim everything
         node.select('text').attr('fill', 'hsl(0, 0%, 50%)');
         link.attr('stroke-opacity', 0.1);
-        sharedLinks.attr('stroke-opacity', 0.1);
-        
-        // Highlight primary node (hovered node)
+        crossLinkSelection.attr('stroke-opacity', 0.05);
+
+        // Highlight hovered node
         node.filter((n: any) => n === d)
           .select('text')
-          .attr('fill', (n: any) => {
-            const origColor = originalTextColors.get(n);
-            return origColor || n.data.color || '#333';
-          })
+          .attr('fill', (n: any) => originalTextColors.get(n) || n.data.color || '#333')
           .attr('font-weight', 'bold');
-        
-        // Highlight secondary nodes (related nodes)
+
+        // Highlight related nodes
         node.filter((n: any) => {
-          // Same parent (siblings)
           if (d.parent && n.parent === d.parent && n !== d) return true;
-          // Children
           if (d.children && n.parent === d) return true;
-          // Parent
           if (n.children && d.parent === n) return true;
-          // For shared skills, highlight related employments
-          if (d.data.type === 'shared-skill' && d.data.employments && n.data.type === 'employment') {
-            return d.data.employments.includes(n.data.expIndex);
+          // For shared skills: highlight the other employment nodes they connect to
+          if (d.data.type === 'skill' && d.data.isShared && n.data.type === 'employment') {
+            return d.data.otherEmployments?.includes(n.data.expIndex);
           }
-          // For employments, highlight connected shared skills
-          if (d.data.type === 'employment' && n.data.type === 'shared-skill' && n.data.employments) {
-            return n.data.employments.includes(d.data.expIndex);
+          // For employment: highlight shared skills that connect TO this employment
+          if (d.data.type === 'employment' && n.data.type === 'skill' && n.data.isShared) {
+            return n.data.otherEmployments?.includes(d.data.expIndex);
           }
           return false;
         })
-        .select('text')
-        .attr('fill', (n: any) => {
-          const origColor = originalTextColors.get(n);
-          return origColor || n.data.color || '#333';
-        })
-        .attr('opacity', 0.9);
-        
-        // Highlight related tree links
-        link.filter((l: any) => {
-          return (l.source === d && l.target.parent === d) || 
-                 (l.target === d && l.source === d.parent);
-        })
-        .raise()
-        .attr('stroke-opacity', 0.8)
-        .attr('stroke-width', 2.5);
-        
-        // Highlight related shared skill links
-        if (d.data.type === 'shared-skill') {
-          // Highlight links from this shared skill to its employments
-          sharedLinks.filter((l: any) => l.source === d)
+          .select('text')
+          .attr('fill', (n: any) => originalTextColors.get(n) || n.data.color || '#333')
+          .attr('opacity', 0.9);
+
+        // Highlight tree links
+        link.filter((l: any) =>
+          (l.source === d && l.target.parent === d) ||
+          (l.target === d && l.source === d.parent)
+        )
+          .raise()
+          .attr('stroke-opacity', 0.8)
+          .attr('stroke-width', 2.5);
+
+        // Highlight cross-links
+        if (d.data.type === 'skill' && d.data.isShared) {
+          crossLinkSelection.filter((l: any) => l.skillNode === d)
             .raise()
             .attr('stroke-opacity', 0.6)
             .attr('stroke-width', 2);
         } else if (d.data.type === 'employment') {
-          // Highlight links from shared skills to this employment
-          sharedLinks.filter((l: any) => l.target === d)
+          crossLinkSelection.filter((l: any) => l.empNode === d)
             .raise()
-            .attr('stroke-opacity', 0.6)
-            .attr('stroke-width', 2);
+            .attr('stroke-opacity', 0.5)
+            .attr('stroke-width', 1.5);
         }
       })
       .on('pointerout', () => {
-        // Restore all text colors
-        node.select('text').each(function(n: any) {
-          const origColor = originalTextColors.get(n);
+        node.select('text').each(function (n: any) {
           d3.select(this)
-            .attr('fill', origColor || n.data.color || '#333')
+            .attr('fill', originalTextColors.get(n) || n.data.color || '#333')
             .attr('opacity', 1)
             .attr('font-weight', (n: any) => {
               if (n.data.type === 'employment') return '700';
-              if (n.data.type === 'skill' || n.data.type === 'shared-skill') return '500';
-              if (n.data.type === 'shared-category') return '600';
+              if (n.data.type === 'skill') return '500';
               return n.children ? '600' : '400';
             });
         });
-        
-        // Restore all links
-        link
-          .order()
-          .attr('stroke-opacity', 0.4)
-          .attr('stroke-width', 1.5);
-        
-        sharedLinks
-          .order()
-          .attr('stroke-opacity', 0.3)
-          .attr('stroke-width', 1.2);
+        link.order().attr('stroke-opacity', 0.3).attr('stroke-width', 1.5);
+        crossLinkSelection.order().attr('stroke-opacity', 0.2).attr('stroke-width', isMobile ? 0.8 : 1);
       })
       .on('click', (event, d: any) => {
         if (d.data.type === 'employment' && d.data.expData) {
@@ -484,15 +386,12 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
         }
       });
 
-    return () => {
-      // Cleanup if needed
-    };
+    return () => { };
   }, [dimensions, onExperienceClick]);
 
   return (
     <div ref={containerRef} className="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-xl border border-border bg-card/30 overflow-hidden relative">
       <svg ref={svgRef} className="w-full h-full touch-none" />
-      {/* Zoom/Pan Instructions */}
       <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground border border-border/50 pointer-events-none">
         <div className="flex items-center gap-2">
           <span>🔍 Scroll to zoom</span>
@@ -530,11 +429,11 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 // Skill Detail Panel Component
-const SkillDetailPanel = ({ 
-  category, 
-  onClose 
-}: { 
-  category: SkillCategory; 
+const SkillDetailPanel = ({
+  category,
+  onClose
+}: {
+  category: SkillCategory;
   onClose: () => void;
 }) => {
   const Icon = iconMap[category.icon] || Code;
@@ -545,7 +444,7 @@ const SkillDetailPanel = ({
       <div className="p-6 border-b border-border/50">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div 
+            <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: `${category.color}20` }}
             >
@@ -556,14 +455,14 @@ const SkillDetailPanel = ({
               <p className="text-sm text-muted-foreground mt-0.5">{category.description}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center hover:bg-secondary transition-colors"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
-        
+
         {/* Stats */}
         <div className="flex items-center gap-6 mt-4 text-sm font-mono">
           <span className="text-muted-foreground">
@@ -578,16 +477,16 @@ const SkillDetailPanel = ({
       {/* Skills List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {category.skills.map((skill) => (
-          <div 
+          <div
             key={skill.name}
             className="p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-border/50 transition-colors"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <span className="font-medium text-foreground text-sm">{skill.name}</span>
-                <span 
+                <span
                   className="text-xs px-2 py-0.5 rounded-full font-mono"
-                  style={{ 
+                  style={{
                     backgroundColor: `${getLevelColor(skill.level)}20`,
                     color: getLevelColor(skill.level)
                   }}
@@ -599,12 +498,12 @@ const SkillDetailPanel = ({
                 {skill.level}%
               </span>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-2">
-              <div 
+              <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{ 
+                style={{
                   width: `${skill.level}%`,
                   backgroundColor: category.color
                 }}
@@ -622,7 +521,7 @@ const SkillDetailPanel = ({
             {skill.tools && skill.tools.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {skill.tools.map((tool) => (
-                  <span 
+                  <span
                     key={tool}
                     className="text-xs px-2 py-0.5 rounded bg-secondary/50 text-muted-foreground font-mono"
                   >
@@ -639,11 +538,11 @@ const SkillDetailPanel = ({
 };
 
 // Experience Detail Panel
-const ExperienceDetailPanel = ({ 
-  experience, 
-  onClose 
-}: { 
-  experience: typeof experiences[0]; 
+const ExperienceDetailPanel = ({
+  experience,
+  onClose
+}: {
+  experience: typeof experiences[0];
   onClose: () => void;
 }) => {
   const skillsList = Object.entries(experience.skills).sort((a, b) => b[1] - a[1]);
@@ -654,7 +553,7 @@ const ExperienceDetailPanel = ({
       <div className="p-6 border-b border-border/50">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div 
+            <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: `${experience.color}20` }}
             >
@@ -666,14 +565,14 @@ const ExperienceDetailPanel = ({
               <p className="text-xs font-mono mt-1" style={{ color: experience.color }}>{experience.period}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center hover:bg-secondary transition-colors"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
-        
+
         <div className="flex items-center gap-6 mt-4 text-sm font-mono">
           <span className="text-muted-foreground">{skillsList.length} skills developed</span>
         </div>
@@ -682,7 +581,7 @@ const ExperienceDetailPanel = ({
       {/* Skills List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {skillsList.map(([skillName, level]) => (
-          <div 
+          <div
             key={skillName}
             className="p-3 rounded-lg bg-secondary/30 border border-border/30 hover:border-border/50 transition-colors"
           >
@@ -691,7 +590,7 @@ const ExperienceDetailPanel = ({
               <span className="text-xs font-mono text-muted-foreground">{Math.round(level * 100)}%</span>
             </div>
             <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{ width: `${level * 100}%`, backgroundColor: experience.color }}
               />
@@ -756,7 +655,7 @@ const Skills = () => {
           <p className="section-title skills-header opacity-0">Technical Expertise</p>
           <h2 className="section-heading skills-header opacity-0">Skill Ontology</h2>
           <p className="text-muted-foreground skills-header opacity-0 max-w-2xl mx-auto">
-            {activeTab === 'ontology' 
+            {activeTab === 'ontology'
               ? 'Employment-based knowledge graph — click employment nodes to explore skills gained'
               : 'Click a category to view detailed skills and proficiency levels'
             }
@@ -766,19 +665,17 @@ const Skills = () => {
         {/* Tab Switcher */}
         <div className="skills-header opacity-0 flex justify-center mb-8">
           <div className="inline-flex rounded-lg border border-border p-1 bg-card">
-            <button 
+            <button
               onClick={() => setActiveTab('ontology')}
-              className={`px-5 py-2.5 rounded-md text-sm font-mono transition-all ${
-                activeTab === 'ontology' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-5 py-2.5 rounded-md text-sm font-mono transition-all ${activeTab === 'ontology' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               Skill Ontology
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('detailed')}
-              className={`px-5 py-2.5 rounded-md text-sm font-mono transition-all ${
-                activeTab === 'detailed' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-5 py-2.5 rounded-md text-sm font-mono transition-all ${activeTab === 'detailed' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               Detailed View
             </button>
@@ -791,7 +688,7 @@ const Skills = () => {
           {activeTab === 'ontology' && (
             <div className="relative">
               <EmploymentSkillOntology onExperienceClick={handleExperienceClick} />
-              
+
               {/* Enhanced Legend - Hidden on small screens */}
               <div className="absolute bottom-4 left-4 p-4 bg-card/95 border border-border/60 rounded-xl backdrop-blur-md shadow-xl hidden md:block">
                 <p className="text-xs font-mono text-foreground/80 mb-3 font-semibold tracking-wider uppercase">Employment Timeline</p>
@@ -801,18 +698,18 @@ const Skills = () => {
                     const glowStyle = rgb ? {
                       boxShadow: `0 0 8px ${exp.color}40, 0 0 4px ${exp.color}60`
                     } : {};
-                    
+
                     return (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         className="flex items-center gap-3 group cursor-pointer hover:translate-x-1 transition-transform duration-200"
                       >
-                        <div 
-                          className="w-3 h-3 rounded-full transition-all duration-200 group-hover:scale-125" 
-                          style={{ 
+                        <div
+                          className="w-3 h-3 rounded-full transition-all duration-200 group-hover:scale-125"
+                          style={{
                             backgroundColor: exp.color,
                             ...glowStyle
-                          }} 
+                          }}
                         />
                         <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-mono">
                           {(() => {
@@ -852,15 +749,14 @@ const Skills = () => {
                 {skillCategories.map((category) => {
                   const Icon = iconMap[category.icon] || Code;
                   const isSelected = selectedCategory?.id === category.id;
-                  
+
                   return (
                     <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`card-cyber rounded-xl p-5 cursor-pointer transition-all duration-300 group ${
-                        isSelected ? 'ring-2' : 'hover:border-foreground/20'
-                      }`}
-                      style={{ 
+                      className={`card-cyber rounded-xl p-5 cursor-pointer transition-all duration-300 group ${isSelected ? 'ring-2' : 'hover:border-foreground/20'
+                        }`}
+                      style={{
                         borderColor: isSelected ? category.color : undefined,
                         // @ts-ignore - ringColor applied via outline
                         outlineColor: isSelected ? category.color : undefined,
@@ -868,7 +764,7 @@ const Skills = () => {
                       }}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div 
+                        <div
                           className="w-10 h-10 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform"
                           style={{ backgroundColor: `${category.color}20` }}
                         >
@@ -879,17 +775,17 @@ const Skills = () => {
                           <p className="text-xs text-muted-foreground">{category.skills.length} skills</p>
                         </div>
                       </div>
-                      
+
                       {!selectedCategory && (
                         <>
                           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{category.description}</p>
-                          
+
                           {/* Top skills preview */}
                           <div className="space-y-1.5">
                             {category.skills.slice(0, 3).map((skill) => (
                               <div key={skill.name} className="flex items-center justify-between">
                                 <span className="text-xs text-muted-foreground font-mono truncate flex-1">{skill.name}</span>
-                                <span 
+                                <span
                                   className="text-xs font-mono ml-2"
                                   style={{ color: getLevelColor(skill.level) }}
                                 >

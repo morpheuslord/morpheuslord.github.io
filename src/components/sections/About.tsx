@@ -55,7 +55,7 @@ const About = () => {
     { icon: Shield, label: 'Certifications', value: 'CEH V12, CND V2' },
     { icon: Code, label: 'Projects', value: '9+ Completed' },
     { icon: Brain, label: 'Research', value: '6+ Papers' },
-    { icon: Terminal, label: 'Experience', value: '2+ Years' },
+    { icon: Terminal, label: 'Experience', value: '~3 Years' },
   ];
 
   return (
@@ -73,12 +73,12 @@ const About = () => {
             <div className="aspect-square max-w-md mx-auto relative">
               {/* Decorative Background */}
               <div className="absolute inset-4 bg-gradient-to-br from-foreground/5 to-transparent rounded-2xl" />
-              
+
               {/* Main Card */}
               <div className="absolute inset-0 card-cyber rounded-2xl p-8 flex flex-col justify-center">
                 <div className="grid grid-cols-2 gap-4">
                   {cards.map((card, index) => (
-                    <div 
+                    <div
                       key={card.label}
                       className="about-card opacity-0 p-4 bg-card-elevated rounded-lg border border-border/50 hover:border-foreground/20 transition-all duration-300 group"
                     >
@@ -100,27 +100,27 @@ const About = () => {
           <div className="about-content opacity-0">
             <div className="space-y-6">
               <p className="text-muted-foreground leading-relaxed">
-                I am a <span className="text-foreground font-medium">cybersecurity engineer</span> with a strong foundation in offensive security, 
+                I am a <span className="text-foreground font-medium">Security Engineer</span> with a strong foundation in offensive security,
                 holding a BCA in Cybersecurity from Jain University along with <span className="text-foreground">CEH v12</span> and <span className="text-foreground">CND</span> certifications.
               </p>
-              
+
               <p className="text-muted-foreground leading-relaxed">
-                At <span className="text-foreground font-medium">Cygne Noir Cyber</span>, I work across product development and applied research, 
-                contributing to the design and implementation of Python-based security tools and API-driven systems. 
-                My responsibilities span from building automation frameworks to supporting client-facing engagements 
+                At <span className="text-foreground font-medium">Cygne Noir Cyber</span>, I work across product development and applied research,
+                contributing to the design and implementation of Python-based security tools and API-driven systems.
+                My responsibilities span from building automation frameworks to supporting client-facing engagements
                 involving secure backend development and threat detection capabilities.
               </p>
-              
+
               <p className="text-muted-foreground leading-relaxed">
-                Beyond my core role, I actively develop custom scripts, publish technical content, and contribute 
-                to community learning platforms. I rank among the <span className="text-foreground font-medium">top 1% on TryHackMe</span> and 
+                Beyond my core role, I actively develop custom scripts, publish technical content, and contribute
+                to community learning platforms. I rank among the <span className="text-foreground font-medium">top 1% on TryHackMe</span> and
                 continue to refine my skills in penetration testing, bug hunting, and secure application architecture.
               </p>
 
               {/* CTA */}
               <div className="pt-4">
-                <a 
-                  href="#contact" 
+                <a
+                  href="#contact"
                   className="btn-hero"
                 >
                   Let's Talk

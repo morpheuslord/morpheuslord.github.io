@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { ExternalLink, Shield, Bot, Code, FileSearch, Zap, CheckCircle } from 'lucide-react';
+import { ExternalLink, Shield, Bot, Code, FileSearch, Server, Zap, CheckCircle } from 'lucide-react';
 
 const services = [
   {
@@ -20,6 +20,12 @@ const services = [
     title: "Security Tool Development",
     description: "Custom Python-based security tools, automation scripts, and API development for your specific needs.",
     features: ["Python Tools", "REST APIs", "Automation", "Custom Scripts"],
+  },
+  {
+    icon: Server,
+    title: "Backend & API Development",
+    description: "End-to-end Python backend systems, secure REST API design, cloud deployment across AWS and Azure, and scalable architecture for early-stage products and MVPs.",
+    features: ["Python · FastAPI/Flask", "AWS · Azure", "MongoDB · E2EE", "Scalable Architecture"],
   },
   {
     icon: FileSearch,
