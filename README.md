@@ -39,7 +39,7 @@ src/
 ├── data/                # Static data (portfolio, skills, articles)
 ├── hooks/               # Custom React hooks
 ├── pages/               # Route pages (Index, Articles, NotFound)
-└── lib/                 # Utility functions
+└── lib/                 # Utility function
 ```
 
 ## Development
