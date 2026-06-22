@@ -39,28 +39,43 @@ const Services = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const runAnimations = () => {
+      anime({
+        targets: '.services-header',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 800,
+        easing: 'easeOutExpo',
+      });
+
+      anime({
+        targets: '.service-card',
+        opacity: [0, 1],
+        translateY: [40, 0],
+        scale: [0.98, 1],
+        delay: anime.stagger(100, { start: 300 }),
+        duration: 700,
+        easing: 'easeOutExpo',
+      });
+    };
+
+    const node = sectionRef.current;
+    if (!node) return;
+
+    // If the section is already in view on mount, the observer may not fire —
+    // run immediately so the card never gets stuck at opacity-0.
+    const rect = node.getBoundingClientRect();
+    const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    if (alreadyVisible) {
+      runAnimations();
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            anime({
-              targets: '.services-header',
-              opacity: [0, 1],
-              translateY: [30, 0],
-              duration: 800,
-              easing: 'easeOutExpo',
-            });
-
-            anime({
-              targets: '.service-card',
-              opacity: [0, 1],
-              translateY: [40, 0],
-              scale: [0.98, 1],
-              delay: anime.stagger(100, { start: 300 }),
-              duration: 700,
-              easing: 'easeOutExpo',
-            });
-
+            runAnimations();
             observer.unobserve(entry.target);
           }
         });
@@ -68,9 +83,7 @@ const Services = () => {
       { threshold: 0.15 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    observer.observe(node);
 
     return () => observer.disconnect();
   }, []);
@@ -148,14 +161,14 @@ const Services = () => {
               href="https://www.fiverr.com/chiranjeevinaid?public_mode=true"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-hero inline-flex items-center gap-2"
+              className="btn-hero relative z-10 inline-flex items-center gap-2"
             >
               Hire Me on Fiverr
               <ExternalLink className="w-4 h-4" />
             </a>
             <a 
               href="#contact"
-              className="btn-ghost"
+              className="btn-ghost relative z-10"
             >
               Or Contact Directly
             </a>
