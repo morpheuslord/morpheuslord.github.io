@@ -58,18 +58,18 @@ export const personalInfo = {
   email: "chiranjeevi.naidu@proton.me",
   linkedin: "https://www.linkedin.com/in/chiranjeevi-g-naidu/",
   github: "https://github.com/morpheuslord",
-  bio: `I am a Security Engineer and Backend Developer with 3+ years of experience across cybersecurity, production backend development, agentic AI systems, and technical leadership. At Cygne Noir Cyber I serve as Security Engineer & Backend Lead — sole developer of a production-grade backend system designed to scale to millions of users, with full ownership of cloud infrastructure across AWS and Azure, security architecture, and client delivery.
+  bio: `I am a Security Engineer and Backend Developer with 3+ years of experience across cybersecurity, production backend development, agentic AI systems, and technical leadership. At Cygne Noir Cyber I serve as Security Engineer & Backend Lead — sole developer of a production-grade backend system designed to scale to millions of users, with full ownership of cloud infrastructure across AWS and Azure, security architecture, and client delivery. Alongside this, I work part-time as a Full Stack Engineer at Golden Fork Ventures, building compliance and operations systems and deploying them on self-hosted Proxmox infrastructure running on custom hardware.
 
-My technical depth spans offensive security (CEH v12, CND), full-stack API development, E2EE systems, DevSecOps, and AI-driven automation. I build custom security tooling, design agentic workflows, and lead cross-functional teams — combining the ability to find vulnerabilities and the ability to build systems that resist them.
+My technical depth spans offensive security (CEH v12, CND), full-stack API development, E2EE systems, DevSecOps, self-hosted infrastructure, and AI-driven automation. I build custom security tooling, design agentic workflows, and lead cross-functional teams — combining the ability to find vulnerabilities and the ability to build systems that resist them.
 
-I publish actively on HackerNoon (27 articles, 199,521+ reads), hold 6 research publications, and rank in the top 1% on TryHackMe.`,
+I publish actively on HackerNoon (27 articles, 199,521+ reads), hold 7 research publications, and rank in the top 1% on TryHackMe.`,
 };
 
 export const stats = [
   { label: "Certifications", value: "CEH V12, CND V2" },
   { label: "Projects", value: "9+" },
-  { label: "Research Papers", value: "6+" },
-  { label: "Experience", value: "~3 Years" },
+  { label: "Research Papers", value: "7+" },
+  { label: "Experience", value: "3+ Years" },
 ];
 
 export const experiences: Array<{
@@ -228,6 +228,51 @@ export const experiences: Array<{
           mainExp: "leadership",
           mainExpCategories: ["leadership", "delivery"],
           importance: 5,
+        },
+      ],
+    },
+    {
+      id: 5,
+      title: "Full Stack Engineer",
+      company: "Golden Fork Ventures",
+      period: "Feb 2026 - Present",
+      duration: "6+ months · Part-time · Remote",
+      current: true,
+      highlights: [
+        {
+          title: "Compliance Systems Development",
+          desc: "Developing and maintaining software systems necessary for regulatory and operational compliance across Golden Fork Ventures.",
+          mainExp: "development",
+          mainExpCategories: ["development", "security"],
+          importance: 5,
+        },
+        {
+          title: "Day-to-Day Operations Software",
+          desc: "Building and maintaining full-stack systems that power day-to-day business operations, from internal tooling to operational workflows.",
+          mainExp: "development",
+          mainExpCategories: ["development", "delivery"],
+          importance: 5,
+        },
+        {
+          title: "Custom Hardware Deployment",
+          desc: "Deploying production systems on custom hardware — provisioning, configuring, and maintaining on-premise deployments tailored to operational needs.",
+          mainExp: "delivery",
+          mainExpCategories: ["delivery", "development"],
+          importance: 5,
+        },
+        {
+          title: "Self-Hosted Proxmox Infrastructure",
+          desc: "Running self-hosted server infrastructure on Proxmox VE — hypervisor management, LXC/VM isolation per service, and secure remote access for deployed systems.",
+          mainExp: "development",
+          mainExpCategories: ["development", "strategy"],
+          importance: 4,
+        },
+        {
+          title: "System Maintenance & Reliability",
+          desc: "Maintaining deployed systems end-to-end, ensuring uptime, applying updates, and keeping compliance-critical services reliable.",
+          mainExp: "delivery",
+          mainExpCategories: ["delivery", "advisory"],
+          importance: 4,
         },
       ],
     },
@@ -472,7 +517,7 @@ export const achievements = [
   },
   {
     title: "Research Scholar",
-    badge: "6+ Papers",
+    badge: "7+ Papers",
     desc: "Published cybersecurity research",
   },
   {
@@ -607,6 +652,12 @@ export const researchPapers = [
     title: "ML-Driven Secure Communication for 6G Networks",
     description: "Machine learning for next-generation network security.",
     link: "https://link.springer.com/chapter/10.1007/978-3-031-85008-0_6",
+  },
+  {
+    id: 7,
+    title: "Hybrid Quantum-Classical Neural Network Incorporating Attention Mechanisms for Anomaly Detection",
+    description: "Hybrid quantum-classical architecture applied to anomaly detection.",
+    link: "https://link.springer.com/chapter/10.1007/978-3-032-20447-9_13",
   },
 ];
 

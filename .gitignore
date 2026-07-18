@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local resume workspace (not committed)
+resume/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

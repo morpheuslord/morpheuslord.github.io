@@ -222,6 +222,36 @@ export const experiences: Experience[] = [
       "Modular Control Pipelines": 0.8,
       "Agentic Workflow Design": 0.85,
     }
+  },
+  {
+    title: "Full Stack Engineer – Golden Fork Ventures",
+    period: "Feb 2026 - Present",
+    color: "#feca57",
+    skills: {
+      "Python": 0.95,
+      "FastAPI": 0.85,
+      "JavaScript": 0.75,
+      "React/Next.js": 0.75,
+      "Node.js": 0.75,
+      "REST API Design": 0.85,
+      "MongoDB": 0.75,
+      "SQLite3": 0.75,
+      "Git/GitHub": 0.9,
+      "Shell Scripting/Bash": 0.85,
+      "Linux Administration": 0.9,
+      "Docker/Docker Compose": 0.85,
+      // Self-hosted infrastructure focus
+      "Proxmox VE": 0.85,
+      "LXC Containers": 0.85,
+      "Self-Hosted Infrastructure": 0.85,
+      "Custom Hardware Deployment": 0.8,
+      "Tailscale (Mesh VPN)": 0.8,
+      "VPS Management": 0.8,
+      "System Architecture Design": 0.85,
+      "Compliance & Regulatory": 0.8,
+      "CI/CD": 0.6,
+      "Technical Documentation": 0.9,
+    }
   }
 ];
 
@@ -279,11 +309,16 @@ export const skillGraphs: SkillGraph[] = [
       "Azure",
       "CI/CD",
       "Infrastructure as Code",
-      "MongoDB"
+      "MongoDB",
+      "Proxmox VE",
+      "LXC Containers",
+      "Self-Hosted Infrastructure",
+      "Tailscale (Mesh VPN)",
+      "VPS Management"
     ],
-    values: [0.8, 0.85, 0.8, 0.9, 0.5, 0.6, 0.7, 0.7],
+    values: [0.8, 0.85, 0.8, 0.9, 0.5, 0.6, 0.7, 0.7, 0.85, 0.85, 0.85, 0.8, 0.8],
     color: "#4ecdc4",
-    description: "Cloud platforms, containerization, and infrastructure as code."
+    description: "Cloud platforms, containerization, self-hosted infrastructure, and infrastructure as code."
   },
   {
     header: "AI & Machine Learning",
@@ -396,6 +431,11 @@ export const skillCategories: SkillCategory[] = [
       { name: "CI/CD", level: 60, description: "Continuous integration and deployment pipelines.", tools: ["GitHub Actions", "Jenkins", "GitLab CI"] },
       { name: "Infrastructure as Code", level: 70, description: "Declarative infrastructure management.", tools: ["Terraform", "Ansible", "CloudFormation"] },
       { name: "MongoDB", level: 70, description: "NoSQL document database.", tools: ["Atlas", "Mongoose", "Aggregations"] },
+      { name: "Proxmox VE", level: 85, description: "Type-1 hypervisor for self-hosted virtualization and container hosting.", tools: ["LXC", "VMs", "Backups", "Clustering"] },
+      { name: "LXC Containers", level: 85, description: "Lightweight per-service container isolation on self-hosted hypervisors.", tools: ["Templates", "Snapshots", "Resource Limits"] },
+      { name: "Self-Hosted Infrastructure", level: 85, description: "Designing and operating self-hosted server environments on custom hardware for production workloads.", tools: ["Proxmox VE", "Custom Hardware", "Reverse Proxies", "On-Prem Deployment"] },
+      { name: "Tailscale (Mesh VPN)", level: 80, description: "Zero-config mesh VPN for secure remote access to self-hosted services.", tools: ["WireGuard", "ACLs", "Subnet Routing"] },
+      { name: "VPS Management", level: 80, description: "Provisioning, hardening, and maintaining virtual private servers.", tools: ["SSH Hardening", "Nginx", "systemd", "Firewalls"] },
     ],
   },
   {

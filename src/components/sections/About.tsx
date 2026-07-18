@@ -54,8 +54,8 @@ const About = () => {
   const cards = [
     { icon: Shield, label: 'Certifications', value: 'CEH V12, CND V2' },
     { icon: Code, label: 'Projects', value: '9+ Completed' },
-    { icon: Brain, label: 'Research', value: '6+ Papers' },
-    { icon: Terminal, label: 'Experience', value: '~3 Years' },
+    { icon: Brain, label: 'Research', value: '7+ Papers' },
+    { icon: Terminal, label: 'Experience', value: '3+ Years' },
   ];
 
   return (
