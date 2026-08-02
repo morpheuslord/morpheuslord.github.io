@@ -529,6 +529,21 @@ export const achievements = [
 
 export const projects = [
   {
+    id: 11,
+    title: "PICOTTY",
+    description:
+      "Networked serial console system for managing fleets of headless machines - real-time console output, USB HID keystroke injection, and macro/runbook automation from a single web dashboard.",
+    github: "https://github.com/morpheuslord/PICOTTY",
+    tags: [
+      "CircuitPython",
+      "Python",
+      "Embedded",
+      "Raspberry Pi Pico",
+      "Hardware",
+      "Infrastructure",
+    ],
+  },
+  {
     id: 1,
     title: "GPT-Vuln-Analyzer",
     description:
