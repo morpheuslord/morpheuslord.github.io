@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { personalInfo, stats } from '@/data/portfolioData';
-import { Shield, Cloud, Brain, Terminal } from 'lucide-react';
+import { personalInfo } from '@/data/portfolioData';
+import AsciiStage from './AsciiStage';
 
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -16,15 +16,6 @@ const About = () => {
               opacity: [0, 1],
               translateX: [-50, 0],
               duration: 1000,
-              easing: 'easeOutExpo',
-            });
-
-            anime({
-              targets: '.about-card',
-              opacity: [0, 1],
-              translateY: [40, 0],
-              delay: anime.stagger(100, { start: 300 }),
-              duration: 800,
               easing: 'easeOutExpo',
             });
 
@@ -51,12 +42,6 @@ const About = () => {
     return () => observer.disconnect();
   }, []);
 
-  const cards = [
-    { icon: Cloud, label: 'Cloud Security', value: 'AWS & Azure' },
-    { icon: Terminal, label: 'DevSecOps', value: 'CI/CD Gates' },
-    { icon: Shield, label: 'Certifications', value: 'CEH v12, CND' },
-    { icon: Brain, label: 'Research', value: '7 Papers' },
-  ];
 
   return (
     <section id="about" ref={sectionRef} className="section">
@@ -71,24 +56,7 @@ const About = () => {
           {/* Left - Image/Visual */}
           <div className="about-image-wrapper opacity-0 relative">
             <div className="aspect-square max-w-md mx-auto relative">
-              {/* Decorative Background */}
-              <div className="absolute inset-4 bg-gradient-to-br from-foreground/5 to-transparent rounded-2xl" />
-
-              {/* Main Card */}
-              <div className="absolute inset-0 card-cyber rounded-2xl p-8 flex flex-col justify-center">
-                <div className="grid grid-cols-2 gap-4">
-                  {cards.map((card, index) => (
-                    <div
-                      key={card.label}
-                      className="about-card opacity-0 p-4 bg-card-elevated rounded-lg border border-border/50 hover:border-foreground/20 transition-all duration-300 group"
-                    >
-                      <card.icon className="w-6 h-6 mb-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      <p className="font-mono text-xs text-muted-foreground mb-1">{card.label}</p>
-                      <p className="font-medium text-sm">{card.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <AsciiStage />
 
               {/* Decorative Elements */}
               <div className="absolute -top-4 -right-4 w-32 h-32 border border-border/30 rounded-2xl" />
@@ -100,33 +68,29 @@ const About = () => {
           <div className="about-content opacity-0">
             <div className="space-y-6">
               <p className="text-muted-foreground leading-relaxed">
-                I am a <span className="text-foreground font-medium">Lead Security Engineer</span>, three years in,
-                working in cloud security and DevSecOps at <span className="text-foreground font-medium">Cygne Noir Cyber</span>.
-                I own how our managed security platform is built and what stops bad code reaching production.
+                I'm a <span className="text-foreground font-medium">Lead Security Engineer</span> in Bengaluru, three
+                years into the field. I work in <span className="text-foreground">cloud security and DevSecOps</span>,
+                which in practice means I decide how things get secured, what tooling we use, and which risks are
+                worth accepting. I also lead the security research and train the people joining the team.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                Every client runs on their own EC2 instance inside their own AWS account, and their code never
-                leaves it. That was a deliberate call. It is the difference between telling a client their data is
-                separated from everyone else's and being able to show them why it cannot be otherwise. Access goes
-                through <span className="text-foreground">Twingate</span> instead of a VPN, so nobody is sitting on
-                standing SSH into a client box.
+                I started in <span className="text-foreground">commerce</span>. Cybersecurity was what I kept
+                reading about instead, so I moved across, graduated studying it, and picked up{' '}
+                <span className="text-foreground">CEH v12</span> and <span className="text-foreground">CND</span>{' '}
+                along the way. The first real work was offensive security, and the two years I later spent running
+                application and API pentests are why I can usually tell a finding that matters from one that just
+                scores highly. Backend development came alongside it, and I still write the production code I'm
+                responsible for securing. Seven published papers, and security writing past 100,000 reads.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                Running the scanners is the easy part. <span className="text-foreground">Trivy, Prowler, Checkov,
-                ScoutSuite, Semgrep, Gitleaks and Kubescape</span> between them find more than anyone can fix, so
-                everything lands in <span className="text-foreground">DefectDojo</span>, syncs both ways with JIRA,
-                and gets ranked by <span className="text-foreground">EPSS, CISA KEV and SSVC</span> rather than raw
-                CVSS. A critical nobody is exploiting should not jump the queue ahead of something already being
-                used in the wild.
-              </p>
-
-              <p className="text-muted-foreground leading-relaxed">
-                What makes me useful is that I write the code I secure. I shipped a production backend on my own,
-                FastAPI on Supabase and Redis, plus the security architecture around it. I also spent two years
-                running a small application and API pentest function and signing off the client reports, which is
-                where my sense of which findings actually matter came from. That part is background now, not the job.
+                Outside work I drown in new tech. My <span className="text-foreground">homelab</span> started as one
+                mini PC and turned into a Proxmox cluster, and most of what I end up trusting at work got broken there
+                first. When something irritates me enough I build a fix for it.{' '}
+                <span className="text-foreground">PICOTTY</span> came out of a machine dropping off the network and me
+                not wanting to walk over with a keyboard; Hackaday and CNX Software picked it up, which I wasn't
+                expecting.
               </p>
 
               {/* CTA */}

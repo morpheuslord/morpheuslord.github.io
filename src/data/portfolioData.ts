@@ -64,16 +64,12 @@ export const personalInfo = {
   blog: "https://hackernoon.com/u/morpheuslord",
   /** The five-second answer. Rendered above the fold. */
   headline:
-    "I run cloud security and DevSecOps for a managed security platform. Every client gets their own AWS account, and nothing they scan ever leaves it. I also write the backends I secure, which is rarer than it should be.",
-  bio: `I am a Lead Security Engineer, three years in, working in cloud security, DevSecOps and secure architecture.
+    "I run cloud security and DevSecOps for a managed security platform. Every client gets their own AWS account, and nothing they scan ever leaves it. I also write the backends I secure.",
+  bio: `I'm a Lead Security Engineer in Bengaluru, three years into the field. I work in cloud security and DevSecOps, which in practice means I decide how things get secured, what tooling we use, and which risks are worth accepting. I also lead the security research and train the people joining the team.
 
-Day to day that means I own how our managed security platform is built and what stops bad code reaching production. Each client runs on a single EC2 instance inside their own AWS account. Their code and cloud metadata never leave that boundary, which was a deliberate call: it is the difference between promising tenants are separated and being able to show it. Access goes through Twingate rather than a VPN, so nobody holds standing SSH into a client box.
+I started in commerce. Cybersecurity was what I kept reading about instead, so I moved across, graduated studying it, and picked up CEH v12 and CND along the way. The first real work was offensive security, and the two years I later spent running application and API pentests are why I can usually tell a finding that matters from one that just scores highly. Backend development came alongside it, and I still write the production code I'm responsible for securing. Seven published papers, and security writing past 100,000 reads.
 
-The scanners are the easy part. Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape all run, and between them they produce far more findings than any client can realistically fix. So everything lands in DefectDojo, gets normalised, syncs both ways with JIRA, and gets ranked by EPSS, CISA KEV and SSVC instead of raw CVSS. A theoretical critical nobody is exploiting should not outrank something already being used in the wild. I own the SOC 2 readiness work too.
-
-The part that makes me useful is that I write the code I secure. I built and shipped a production app backend on my own, FastAPI on Supabase and Redis, built to scale, along with the security architecture around it. I also spent two years running a small application and API pentest function, setting the methodology and signing the client reports. That is where my sense of which findings actually matter comes from. It is background now, not the job.
-
-On the side I am a part-time Full Stack Engineer at Golden Fork Ventures, building their compliance and operations software and running it myself on Proxmox. Seven published papers, security writing past 100,000 reads on HackerNoon, CEH v12 and CND.`,
+Outside work I drown in new tech. My homelab started as one mini PC and turned into a Proxmox cluster, and most of what I end up trusting at work got broken there first. When something irritates me enough I build a fix for it. PICOTTY came out of a machine dropping off the network and me not wanting to walk over with a keyboard; Hackaday and CNX Software picked it up, which I wasn't expecting. I also build and run compliance software part-time for Golden Fork Ventures, on hardware I look after myself.`,
 };
 
 export const stats = [
@@ -872,7 +868,6 @@ export const testimonials = [
 ];
 
 export const navLinks = [
-  { name: "Now", href: "#now" },
   { name: "About", href: "#about" },
   { name: "Experience", href: "#experience" },
   { name: "Skills", href: "#skills" },

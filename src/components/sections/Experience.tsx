@@ -198,9 +198,19 @@ const Experience = () => {
   const [chartKey, setChartKey] = useState(0);
 
   useEffect(() => {
-    const ro = new ResizeObserver(() => setChartKey((k) => k + 1));
     const el = chartRef.current?.parentElement;
-    if (el) ro.observe(el);
+    if (!el) return;
+    // Only redraw on a real width change. Drawing sets the svg width/height
+    // attributes, which can nudge the observer again; an unguarded redraw loop
+    // tears down the hover handlers and the tooltip mid-interaction.
+    let lastWidth = el.clientWidth;
+    const ro = new ResizeObserver(() => {
+      const w = el.clientWidth;
+      if (Math.abs(w - lastWidth) < 2) return;
+      lastWidth = w;
+      setChartKey((k) => k + 1);
+    });
+    ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
@@ -380,6 +390,7 @@ const Experience = () => {
       roleColors[experiences.length - 1 - role.index];
 
     // Visuals per role, so hover can dim every other role and sync the legend.
+    const hitSpecs: Array<{ role: RoleMetrics; color: string; values: number[] }> = [];
     const roleVisuals = new Map<number, {
       path: PathSel;
       dots: CircleSel[];
@@ -437,23 +448,7 @@ const Experience = () => {
         .attr('stroke-opacity', baseStrokeOpacity)
         .attr('stroke-linejoin', 'round')
         .attr('d', radarPath(values))
-        .attr('cursor', 'pointer')
-        // Low fill opacity still needs to catch the pointer across the whole shape.
-        .attr('pointer-events', 'all')
-        .on('click', () => {
-          if (showCombined) setActiveRole(experiences.length - 1 - role.index);
-        })
-        .on('mouseover', (event: MouseEvent) => {
-          focusHandler(role.index);
-          showRoleTooltip(event, role, color);
-        })
-        .on('mousemove', (event: MouseEvent) => {
-          tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
-        })
-        .on('mouseout', () => {
-          focusHandler(null);
-          tooltip.style('visibility', 'hidden');
-        });
+        .attr('pointer-events', 'none');
 
       const dots: CircleSel[] = [];
       categories.forEach((cat, catIndex) => {
@@ -469,29 +464,41 @@ const Experience = () => {
           .attr('stroke', 'white')
           .attr('stroke-width', role.isActive || !showCombined ? 2 : 0)
           .attr('opacity', baseStrokeOpacity)
-          .attr('cursor', 'pointer')
-          .attr('pointer-events', 'all')
-          .on('click', () => {
-            if (showCombined) setActiveRole(experiences.length - 1 - role.index);
-          })
-          // Vertices sit above their own polygon, so without these they would
-          // punch dead holes in the hover area.
-          .on('mouseover', (event: MouseEvent) => {
-            focusHandler(role.index);
-            showRoleTooltip(event, role, color);
-          })
-          .on('mousemove', (event: MouseEvent) => {
-            tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
-          })
-          .on('mouseout', () => {
-            focusHandler(null);
-            tooltip.style('visibility', 'hidden');
-          });
+          .attr('pointer-events', 'none');
 
         dots.push(dot);
       });
 
       roleVisuals.set(role.index, { path, dots, swatch: null, label: null, isActive: role.isActive });
+      hitSpecs.push({ role, color, values });
+    });
+
+    // Hit testing runs on the outline, not the fill. Every role gets a fat
+    // transparent stroke over its own edge, so hovering picks the role whose
+    // line you are actually near instead of whichever filled shape is largest.
+    hitSpecs.forEach(({ role, color, values }) => {
+      g.append('path')
+        .attr('d', radarPath(values))
+        .attr('fill', 'none')
+        .attr('stroke', 'transparent')
+        .attr('stroke-width', isNarrow ? 14 : 18)
+        .attr('stroke-linejoin', 'round')
+        .attr('pointer-events', 'stroke')
+        .attr('cursor', 'pointer')
+        .on('click', () => {
+          if (showCombined) setActiveRole(experiences.length - 1 - role.index);
+        })
+        .on('mouseover', (event: MouseEvent) => {
+          focusHandler(role.index);
+          showRoleTooltip(event, role, color);
+        })
+        .on('mousemove', (event: MouseEvent) => {
+          tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
+        })
+        .on('mouseout', () => {
+          focusHandler(null);
+          tooltip.style('visibility', 'hidden');
+        });
     });
 
     if (showCombined) {

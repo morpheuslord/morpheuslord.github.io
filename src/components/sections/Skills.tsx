@@ -1,6 +1,7 @@
-import { useRef, useEffect, useState, useCallback, useMemo, useLayoutEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import anime from 'animejs';
-import { Code, Shield, Cloud, Brain, BookOpen, Workflow, X, ChevronRight } from 'lucide-react';
+import * as d3 from 'd3';
+import { Code, Shield, Cloud, Brain, BookOpen, Workflow, X } from 'lucide-react';
 import { skillCategories, experiences, SkillCategory } from '@/data/skillsData';
 
 // Helper function to convert hex to RGB
@@ -13,347 +14,398 @@ const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   } : null;
 };
 
-// Employment-based Skill Ontology, laid out as a mindmap.
+// Employment-based Skill Ontology.
 //
-// Layout follows dev.to/frankwisniewski/create-a-mindmap: flex columns place
-// the nodes, SVG only draws bezier curves between measured DOM rects, and a
-// ResizeObserver redraws them.
+// d3 hierarchy + zoom/pan, drawn as boxes. The bordered container is a
+// viewport onto a much larger canvas, not the whole drawing.
 //
-// The point of this graph is the overlap, not the tree. A skill is drawn once,
-// under the role that uses it most heavily, but 79 of the 119 skills are used
-// by more than one role, and each of those draws a dashed cross-link back to
-// every other role that uses it. Hovering anything isolates its relationships.
+// Roles start collapsed. All 119 skills on screen at once is unreadable at any
+// zoom that fits the viewport, so the default view is 6 large boxes and you
+// open the branches you care about. Type is sized to be legible at 1:1.
 //
-// Branches expand on click, and more than one can be open at a time, because
-// two open branches is what makes the shared skills between them visible.
+// Solid links run role to skill. Dashed links run from a shared skill back to
+// every other role that also uses it, which is the ontology part: 79 of the
+// 119 skills have two or more roles pointing at them.
 
-const bezier = (x1: number, y1: number, x2: number, y2: number) =>
-  `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`;
-
-type Connector = {
-  id: string;
-  d: string;
+type OntNode = {
+  name: string;
+  type: 'root' | 'employment' | 'skill';
   color: string;
-  dashed: boolean;
-  roles: number[];
-  skill?: string;
+  sub?: string;
+  level?: number;
+  expData?: typeof experiences[0];
+  expIndex?: number;
+  skillCount?: number;
+  isOpen?: boolean;
+  isShared?: boolean;
+  otherEmployments?: number[];
+  children?: OntNode[];
+  boxW?: number;
+  boxH?: number;
 };
 
 const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (exp: typeof experiences[0]) => void }) => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const nodeRefs = useRef<Record<string, HTMLElement | null>>({});
+  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 1000, height: 640 });
   const [expanded, setExpanded] = useState<number[]>([]);
-  const [hover, setHover] = useState<{ kind: 'role' | 'skill'; role?: number; skill?: string } | null>(null);
-  const [connectors, setConnectors] = useState<Connector[]>([]);
-  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
+  const [focusRole, setFocusRole] = useState<number | null>(null);
 
-  // Every role that uses a skill, plus the one that owns it (highest level).
-  const { roles, usedBy } = useMemo(() => {
-    const used = new Map<string, number[]>();
+  useEffect(() => {
+    const update = () => {
+      if (!containerRef.current) return;
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      setDimensions({ width: Math.max(width, 320), height: Math.max(height, 360) });
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const toggleRole = useCallback((i: number) => {
+    setFocusRole(i);
+    setExpanded((prev) => (prev.includes(i) ? prev.filter((k) => k !== i) : [...prev, i]));
+  }, []);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+
+    const { width, height } = dimensions;
+    const isMobile = width < 640;
+
+    const usedBy = new Map<string, number[]>();
     const bestLevel = new Map<string, number>();
     const owner = new Map<string, number>();
     experiences.forEach((exp, i) => {
-      Object.entries(exp.skills).forEach(([name, level]) => {
-        if (!used.has(name)) used.set(name, []);
-        used.get(name)!.push(i);
-        if (!bestLevel.has(name) || level > bestLevel.get(name)!) {
-          bestLevel.set(name, level);
+      Object.entries(exp.skills).forEach(([name, lvl]) => {
+        if (!usedBy.has(name)) usedBy.set(name, []);
+        usedBy.get(name)!.push(i);
+        if (!bestLevel.has(name) || lvl > bestLevel.get(name)!) {
+          bestLevel.set(name, lvl);
           owner.set(name, i);
         }
       });
     });
+    const totalShared = [...usedBy.values()].filter((v) => v.length > 1).length;
 
-    const built = experiences
-      .map((exp, i) => ({ exp, i }))
-      .reverse()
-      .map(({ exp, i }, pos) => {
-        const [title, company] = exp.title.split(' – ');
-        const owned = Object.keys(exp.skills)
-          .filter((n) => owner.get(n) === i)
-          .sort((a, b) => exp.skills[b] - exp.skills[a]);
-        return {
-          key: i,
-          title,
-          company: company ?? '',
-          period: exp.period,
-          color: exp.color,
-          exp,
-          side: (pos % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
-          total: Object.keys(exp.skills).length,
-          shared: Object.keys(exp.skills).filter((n) => (used.get(n) ?? []).length > 1).length,
-          skills: owned.map((n) => ({
-            name: n,
-            level: Math.round(exp.skills[n] * 100),
-            others: (used.get(n) ?? []).filter((r) => r !== i),
-          })),
-        };
-      });
-    return { roles: built, usedBy: used };
-  }, []);
-
-  const roleByKey = useMemo(() => new Map(roles.map((r) => [r.key, r])), [roles]);
-
-  const measure = useCallback(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    const wb = wrap.getBoundingClientRect();
-    const box = (id: string) => {
-      const el = nodeRefs.current[id];
-      if (!el) return null;
-      const r = el.getBoundingClientRect();
-      return {
-        left: r.left - wb.left,
-        right: r.right - wb.left,
-        cy: r.top - wb.top + r.height / 2,
-      };
+    const treeData: OntNode = {
+      name: 'Skills',
+      sub: `${usedBy.size} skills · ${totalShared} shared across roles`,
+      type: 'root',
+      color: '#9a9a9a',
+      // skillsData lists roles oldest first. Render newest at the top, but keep
+      // the original index as expIndex: skill ownership and the cross-links
+      // key off it.
+      children: experiences
+        .map((exp, i) => ({ exp, i }))
+        .reverse()
+        .map(({ exp, i }) => {
+          const [title, company] = exp.title.split(' – ');
+          const owned = Object.keys(exp.skills)
+            .filter((n) => owner.get(n) === i)
+            .sort((a, b) => exp.skills[b] - exp.skills[a]);
+          const isOpen = expanded.includes(i);
+          return {
+            name: title,
+            sub: `${company ? company + ' · ' : ''}${exp.period}`,
+            type: 'employment' as const,
+            color: exp.color,
+            expData: exp,
+            expIndex: i,
+            skillCount: Object.keys(exp.skills).length,
+            isOpen,
+            children: isOpen
+              ? owned.map((n) => ({
+                  name: n,
+                  type: 'skill' as const,
+                  color: exp.color,
+                  level: Math.round(exp.skills[n] * 100),
+                  isShared: (usedBy.get(n) ?? []).length > 1,
+                  otherEmployments: (usedBy.get(n) ?? []).filter((r) => r !== i),
+                }))
+              : undefined,
+          };
+        }),
     };
 
-    const root = box('root');
-    if (!root) return;
-    const next: Connector[] = [];
+    const root = d3.hierarchy<OntNode>(treeData);
+    const dx = isMobile ? 34 : 38;
+    d3.tree<OntNode>()
+      .nodeSize([dx, 1])
+      // Separation is a multiple of the row pitch, so it has to clear the box
+      // height. Role boxes are 54px on a 38px pitch: at separation 1 they
+      // overlapped each other in the collapsed view.
+      .separation((a, b) => {
+        const touchesRole = a.data.type === 'employment' || b.data.type === 'employment';
+        if (touchesRole) return 3.2;
+        return a.parent === b.parent ? 1.15 : 2.4;
+      })(root);
 
-    roles.forEach((role) => {
-      const rb = box(`role-${role.key}`);
-      if (!rb) return;
-      const left = role.side === 'left';
+    let x0 = Infinity, x1 = -Infinity;
+    root.each((d) => {
+      if (d.x! > x1) x1 = d.x!;
+      if (d.x! < x0) x0 = d.x!;
+    });
 
-      next.push({
-        id: `root-${role.key}`,
-        d: bezier(left ? root.left : root.right, root.cy, left ? rb.right : rb.left, rb.cy),
-        color: role.color,
-        dashed: false,
-        roles: [role.key],
-      });
+    svg.attr('width', width).attr('height', height);
+    const outer = svg.append('g');
+    const g = outer.append('g').attr('transform', `translate(0, ${-x0 + dx * 2})`);
 
-      if (!expanded.includes(role.key)) return;
+    const linkG = g.append('g').attr('fill', 'none');
+    const crossG = g.append('g').attr('fill', 'none');
+    const nodeG = g.append('g');
 
-      role.skills.forEach((sk) => {
-        const sb = box(`skill-${role.key}-${sk.name}`);
-        if (!sb) return;
+    const nodes = root.descendants();
+    const nodeSel = nodeG.selectAll<SVGGElement, d3.HierarchyNode<OntNode>>('g')
+      .data(nodes)
+      .join('g')
+      .attr('cursor', (d) => (d.data.type === 'employment' ? 'pointer' : 'default'));
 
-        next.push({
-          id: `own-${role.key}-${sk.name}`,
-          d: bezier(left ? rb.left : rb.right, rb.cy, left ? sb.right : sb.left, sb.cy),
-          color: role.color,
-          dashed: false,
-          roles: [role.key],
-          skill: sk.name,
-        });
+    nodeSel.each(function (d) {
+      const el = d3.select(this);
+      const isRoot = d.data.type === 'root';
+      const isEmp = d.data.type === 'employment';
+      const big = isRoot || isEmp;
+      const padX = big ? 14 : 10;
+      const padY = big ? 10 : 7;
+      const textX = padX + 10;
 
-        // The ontology part: link this skill back to every other role using it.
-        sk.others.forEach((otherKey) => {
-          const ob = box(`role-${otherKey}`);
-          const other = roleByKey.get(otherKey);
-          if (!ob || !other) return;
-          const skillAnchorX = left ? sb.right : sb.left;
-          const roleAnchorX = other.side === 'left' ? ob.left : ob.right;
-          next.push({
-            id: `x-${role.key}-${sk.name}-${otherKey}`,
-            d: bezier(skillAnchorX, sb.cy, roleAnchorX, ob.cy),
-            color: other.color,
-            dashed: true,
-            roles: [role.key, otherKey],
-            skill: sk.name,
-          });
-        });
+      const text = el.append('text')
+        .attr('x', textX)
+        .attr('font-family', 'JetBrains Mono, ui-monospace, monospace')
+        .attr('dominant-baseline', 'middle');
+
+      if (d.data.sub) {
+        text.append('tspan')
+          .attr('x', textX).attr('dy', '-0.4em')
+          .attr('fill', isRoot ? '#f2f2f2' : d.data.color)
+          .attr('font-size', isRoot ? '17px' : '16px')
+          .attr('font-weight', '700')
+          .text(d.data.name);
+        text.append('tspan')
+          .attr('x', textX).attr('dy', '1.5em')
+          .attr('fill', 'rgba(255,255,255,0.55)')
+          .attr('font-size', '12px')
+          .attr('font-weight', '400')
+          .text(isEmp
+            ? `${d.data.sub}  ·  ${d.data.skillCount} skills`
+            : d.data.sub);
+      } else {
+        text.append('tspan')
+          .attr('x', textX).attr('dy', '0em')
+          .attr('fill', 'rgba(255,255,255,0.92)')
+          .attr('font-size', isMobile ? '13px' : '14px')
+          .text(d.data.name);
+        if (d.data.level !== undefined) {
+          text.append('tspan')
+            .attr('fill', 'rgba(255,255,255,0.42)')
+            .attr('font-size', '12px')
+            .text(`   ${d.data.level}`);
+        }
+      }
+
+      const bb = (text.node() as SVGTextElement).getBBox();
+      // getBBox can report 0 before layout settles; fall back to a character
+      // estimate so the columns never collapse on top of each other.
+      const estimate = d.data.name.length * (big ? 9.4 : 8.2) + 40;
+      const textW = bb.width > 1 ? bb.width : estimate;
+      const textH = bb.height > 1 ? bb.height : (d.data.sub ? 34 : 16);
+
+      const extra = isEmp ? 44 : 0; // room for the open/close chevron
+      const w = textW + padX * 2 + 10 + extra;
+      const h = Math.max(textH + padY * 2, big ? 54 : 30);
+      d.data.boxW = w;
+      d.data.boxH = h;
+
+      el.insert('rect', 'text')
+        .attr('x', 8).attr('y', -h / 2)
+        .attr('width', w).attr('height', h)
+        .attr('rx', big ? 10 : 6)
+        .attr('fill', isRoot ? 'rgba(26,26,30,0.98)' : isEmp ? 'rgba(21,21,25,0.98)' : 'rgba(18,18,21,0.96)')
+        .attr('stroke', isRoot ? 'rgba(255,255,255,0.4)' : d.data.color)
+        .attr('stroke-opacity', big ? 1 : 0.5)
+        .attr('stroke-width', big ? 1.8 : 1.1);
+
+      el.insert('rect', 'text')
+        .attr('x', 8).attr('y', -h / 2)
+        .attr('width', big ? 5 : 3).attr('height', h)
+        .attr('fill', isRoot ? 'rgba(255,255,255,0.55)' : d.data.color);
+
+      text.raise();
+
+      if (isEmp) {
+        const cx = 8 + w - 22;
+        el.append('circle')
+          .attr('cx', cx).attr('cy', 0).attr('r', 13)
+          .attr('fill', d.data.isOpen ? d.data.color : 'rgba(255,255,255,0.07)')
+          .attr('fill-opacity', d.data.isOpen ? 0.22 : 1)
+          .attr('stroke', d.data.color).attr('stroke-opacity', 0.6);
+        el.append('text')
+          .attr('x', cx).attr('y', 1)
+          .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+          .attr('font-size', '15px').attr('font-weight', '700')
+          .attr('font-family', 'monospace')
+          .attr('fill', d.data.color)
+          .attr('pointer-events', 'none')
+          .text(d.data.isOpen ? '–' : '+');
+      }
+
+      if (d.data.isShared && d.data.otherEmployments?.length) {
+        const n = d.data.otherEmployments.length + 1;
+        el.append('circle')
+          .attr('cx', 8 + w + 13).attr('cy', 0).attr('r', 10)
+          .attr('fill', 'rgba(255,255,255,0.09)')
+          .attr('stroke', d.data.color).attr('stroke-opacity', 0.55);
+        el.append('text')
+          .attr('x', 8 + w + 13).attr('y', 1)
+          .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+          .attr('font-size', '11px').attr('font-family', 'monospace')
+          .attr('fill', 'rgba(255,255,255,0.8)')
+          .attr('pointer-events', 'none')
+          .text(n);
+      }
+    });
+
+    const slot = (d: d3.HierarchyNode<OntNode>) =>
+      (d.data.boxW ?? 0) + 8 + (d.data.isShared ? 30 : 0);
+    const colWidth: number[] = [];
+    nodes.forEach((d) => { colWidth[d.depth] = Math.max(colWidth[d.depth] ?? 0, slot(d)); });
+    const colGap = isMobile ? 70 : 110;
+    const colX: number[] = [];
+    let acc = 40;
+    for (let depth = 0; depth <= root.height; depth++) {
+      colX[depth] = acc;
+      acc += (colWidth[depth] ?? 0) + colGap;
+    }
+    nodes.forEach((d) => { d.y = colX[d.depth]; });
+    nodeSel.attr('transform', (d) => `translate(${d.y},${d.x})`);
+
+    const rightEdge = (d: d3.HierarchyNode<OntNode>) => d.y! + 8 + (d.data.boxW ?? 0);
+    const leftEdge = (d: d3.HierarchyNode<OntNode>) => d.y! + 8;
+    const curve = (xa: number, ya: number, xb: number, yb: number) =>
+      `M${xa},${ya}C${(xa + xb) / 2},${ya} ${(xa + xb) / 2},${yb} ${xb},${yb}`;
+
+    const treeLinks = linkG.selectAll('path')
+      .data(root.links())
+      .join('path')
+      .attr('stroke', (d) => d.source.data.color || '#666')
+      .attr('stroke-opacity', 0.5)
+      .attr('stroke-width', (d) => (d.source.data.type === 'root' ? 2.4 : 1.6))
+      .attr('d', (d) => curve(rightEdge(d.source), d.source.x!, leftEdge(d.target), d.target.x!));
+
+    const empByIndex = new Map<number, d3.HierarchyNode<OntNode>>();
+    root.each((d) => {
+      if (d.data.type === 'employment' && d.data.expIndex !== undefined) empByIndex.set(d.data.expIndex, d);
+    });
+
+    type Cross = { skill: d3.HierarchyNode<OntNode>; emp: d3.HierarchyNode<OntNode>; color: string };
+    const crossData: Cross[] = [];
+    root.each((d) => {
+      if (d.data.type !== 'skill' || !d.data.isShared) return;
+      d.data.otherEmployments?.forEach((idx) => {
+        const emp = empByIndex.get(idx);
+        if (emp) crossData.push({ skill: d, emp, color: emp.data.color });
       });
     });
 
-    setConnectors(next);
-    setSvgSize((prev) =>
-      prev.w === wrap.scrollWidth && prev.h === wrap.scrollHeight
-        ? prev
-        : { w: wrap.scrollWidth, h: wrap.scrollHeight }
-    );
-  }, [roles, expanded, roleByKey]);
+    const crossLinks = crossG.selectAll('path')
+      .data(crossData)
+      .join('path')
+      .attr('stroke', (d) => d.color)
+      .attr('stroke-opacity', 0.16)
+      .attr('stroke-width', 1.2)
+      .attr('stroke-dasharray', '6,5')
+      .attr('d', (d) => curve(rightEdge(d.emp), d.emp.x!, leftEdge(d.skill), d.skill.x!));
 
-  useLayoutEffect(() => { measure(); }, [measure]);
-
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(wrap);
-    window.addEventListener('resize', measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measure);
+    const resetAll = () => {
+      nodeSel.attr('opacity', 1);
+      treeLinks.attr('stroke-opacity', 0.5).attr('stroke-width', (d) => (d.source.data.type === 'root' ? 2.4 : 1.6));
+      crossLinks.attr('stroke-opacity', 0.16).attr('stroke-width', 1.2);
     };
-  }, [measure]);
 
-  // What the current hover makes relevant.
-  const focus = useMemo(() => {
-    if (!hover) return null;
-    if (hover.kind === 'skill' && hover.skill) {
-      return {
-        roles: new Set(usedBy.get(hover.skill) ?? []),
-        skills: new Set([hover.skill]),
-      };
-    }
-    if (hover.kind === 'role' && hover.role !== undefined) {
-      const r = roleByKey.get(hover.role);
-      const skills = new Set(Object.keys(r?.exp.skills ?? {}));
-      return { roles: new Set([hover.role]), skills };
-    }
-    return null;
-  }, [hover, usedBy, roleByKey]);
+    nodeSel
+      .on('pointerenter', (_e, d) => {
+        const related = new Set<d3.HierarchyNode<OntNode>>([d]);
+        if (d.parent) related.add(d.parent);
+        d.children?.forEach((c) => related.add(c));
+        if (d.data.type === 'skill') {
+          d.data.otherEmployments?.forEach((i) => {
+            const e = empByIndex.get(i);
+            if (e) related.add(e);
+          });
+        }
+        if (d.data.type === 'employment') {
+          crossData.forEach((c) => { if (c.emp === d) related.add(c.skill); });
+        }
+        nodeSel.attr('opacity', (n) => (related.has(n) ? 1 : 0.13));
+        treeLinks
+          .attr('stroke-opacity', (l) => (related.has(l.source) && related.has(l.target) ? 0.95 : 0.05))
+          .attr('stroke-width', (l) => (related.has(l.source) && related.has(l.target) ? 2.4 : 1.2));
+        crossLinks
+          .attr('stroke-opacity', (c) => (c.skill === d || c.emp === d ? 0.9 : 0.03))
+          .attr('stroke-width', (c) => (c.skill === d || c.emp === d ? 2 : 1));
+      })
+      .on('pointerleave', resetAll)
+      .on('click', (event: MouseEvent, d) => {
+        if (d.data.type !== 'employment' || d.data.expIndex === undefined) return;
+        if (event.shiftKey && d.data.expData) {
+          onExperienceClick(d.data.expData);
+          return;
+        }
+        toggleRole(d.data.expIndex);
+      })
+      .on('dblclick', (event: MouseEvent, d) => {
+        event.stopPropagation();
+        if (d.data.type === 'employment' && d.data.expData) onExperienceClick(d.data.expData);
+      });
 
-  const connectorLive = (c: Connector) => {
-    if (!focus) return true;
-    if (c.skill) return focus.skills.has(c.skill) && c.roles.some((r) => focus.roles.has(r));
-    return c.roles.some((r) => focus.roles.has(r));
-  };
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.15, 2.5])
+      .on('zoom', (event) => outer.attr('transform', event.transform.toString()));
+    svg.call(zoom);
 
-  const setRef = (id: string) => (el: HTMLElement | null) => { nodeRefs.current[id] = el; };
-  const toggle = (key: number) =>
-    setExpanded((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+    // Open at 1:1 so the boxes read as skills, not texture, and park the view
+    // on whichever role was last toggled (the root on first paint).
+    const scale = isMobile ? 0.8 : 1;
+    const target = focusRole !== null ? empByIndex.get(focusRole) : root;
+    const ty = ((target?.x ?? 0) - x0 + dx * 2) * scale;
+    const tx = (target && focusRole !== null ? (target.y ?? 0) : 0) * scale;
+    const initial = d3.zoomIdentity
+      .translate(Math.min(24, width * 0.06) - tx * 0.15, height / 2 - ty)
+      .scale(scale);
+    svg.call(zoom.transform, initial);
 
-  const renderSkills = (side: 'left' | 'right') => {
-    const open = roles.filter((r) => r.side === side && expanded.includes(r.key));
-    if (open.length === 0) return <div className="flex-1 min-w-0" />;
-    return (
-      <div className={`flex-1 min-w-0 flex flex-col justify-around gap-4 py-2 ${side === 'left' ? 'items-end' : 'items-start'}`}>
-        {open.map((role) => (
-          <div key={role.key} className={`flex flex-col gap-1 ${side === 'left' ? 'items-end' : 'items-start'}`}>
-            {role.skills.map((sk) => {
-              const live = !focus || focus.skills.has(sk.name);
-              return (
-                <div
-                  key={sk.name}
-                  ref={setRef(`skill-${role.key}-${sk.name}`)}
-                  onMouseEnter={() => setHover({ kind: 'skill', skill: sk.name })}
-                  onMouseLeave={() => setHover(null)}
-                  className={`group/sk flex items-center gap-2 rounded border-l-2 bg-background/70 backdrop-blur-sm pl-2 pr-2 py-[3px] cursor-default transition-all duration-200 ${
-                    live ? 'opacity-100' : 'opacity-20'
-                  }`}
-                  style={{ borderLeftColor: role.color }}
-                  title={
-                    sk.others.length
-                      ? `${sk.name} · ${sk.level}% · also used in ${sk.others.length} other role${sk.others.length > 1 ? 's' : ''}`
-                      : `${sk.name} · ${sk.level}% · only this role`
-                  }
-                >
-                  <span className="font-mono text-[10px] md:text-[11px] text-foreground/90 whitespace-nowrap">
-                    {sk.name}
-                  </span>
-                  <span className="h-[3px] w-8 rounded bg-foreground/10 overflow-hidden shrink-0">
-                    <span className="block h-full rounded" style={{ width: `${sk.level}%`, background: role.color }} />
-                  </span>
-                  {sk.others.length > 0 && (
-                    <span className="font-mono text-[9px] leading-none px-1 py-[2px] rounded-full bg-foreground/10 text-muted-foreground shrink-0">
-                      {sk.others.length + 1}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    );
-  };
+    return () => { svg.on('.zoom', null); };
+  }, [dimensions, expanded, focusRole, onExperienceClick, toggleRole]);
 
-  const renderRoles = (side: 'left' | 'right') => (
-    <div className={`flex flex-col justify-around gap-5 py-2 shrink-0 ${side === 'left' ? 'items-end' : 'items-start'}`}>
-      {roles.filter((r) => r.side === side).map((role) => {
-        const open = expanded.includes(role.key);
-        const live = !focus || focus.roles.has(role.key);
-        return (
-          <div
-            key={role.key}
-            ref={setRef(`role-${role.key}`)}
-            onMouseEnter={() => setHover({ kind: 'role', role: role.key })}
-            onMouseLeave={() => setHover(null)}
-            className={`w-[188px] md:w-[204px] rounded-lg overflow-hidden bg-background/85 backdrop-blur-sm ring-1 transition-all duration-200 ${
-              live ? 'opacity-100' : 'opacity-25'
-            }`}
-            style={{
-              boxShadow: open ? `0 2px 14px -4px ${role.color}77` : undefined,
-              ['--rc' as string]: role.color,
-            }}
-          >
-            <div className="h-[3px] w-full" style={{ background: role.color }} />
-            <button onClick={() => toggle(role.key)} aria-expanded={open} className="w-full text-left px-3 pt-2 pb-1.5">
-              <div className="flex items-start gap-1.5">
-                <ChevronRight
-                  className={`w-3.5 h-3.5 mt-[3px] shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
-                  style={{ color: role.color }}
-                />
-                <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground leading-tight">{role.title}</p>
-                  {role.company && (
-                    <p className="font-mono text-[10px] text-muted-foreground truncate">{role.company}</p>
-                  )}
-                </div>
-              </div>
-              <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground/70">
-                {role.period}
-              </p>
-              <p className="font-mono text-[9px] text-muted-foreground/70">
-                {role.total} skills · {role.shared} shared
-              </p>
-            </button>
-            <button
-              onClick={() => onExperienceClick(role.exp)}
-              className="w-full px-3 pb-2 text-left font-mono text-[9px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Role details
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
+  const allOpen = expanded.length === experiences.length;
 
   return (
-    <div className="w-full rounded-xl border border-border bg-card/30 overflow-auto relative h-[460px] sm:h-[560px] md:h-[680px]">
-      <div ref={wrapRef} className="relative min-w-[900px] p-6 md:p-10">
-        <svg className="absolute left-0 top-0 pointer-events-none" width={svgSize.w} height={svgSize.h} aria-hidden="true">
-          {connectors.map((c) => {
-            const live = connectorLive(c);
-            return (
-              <path
-                key={c.id}
-                d={c.d}
-                fill="none"
-                stroke={c.color}
-                strokeWidth={focus && live ? 1.8 : c.dashed ? 1 : 1.4}
-                strokeDasharray={c.dashed ? '5,4' : undefined}
-                strokeOpacity={live ? (focus ? 0.85 : c.dashed ? 0.16 : 0.4) : 0.04}
-                className="transition-[stroke-opacity,stroke-width] duration-200"
-              />
-            );
-          })}
-        </svg>
+    <div ref={containerRef} className="w-full h-[460px] sm:h-[560px] md:h-[680px] rounded-xl border border-border bg-card/30 overflow-hidden relative">
+      <svg ref={svgRef} className="w-full h-full touch-none block" />
 
-        <div className="relative flex items-stretch gap-3 md:gap-5">
-          {renderSkills('left')}
-          {renderRoles('left')}
-
-          <div className="flex flex-col justify-center shrink-0">
-            <div
-              ref={setRef('root')}
-              className="rounded-xl ring-1 ring-foreground/20 bg-background/90 backdrop-blur-sm px-4 py-3 text-center"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Ontology</p>
-              <p className="text-sm font-bold text-foreground">Skills</p>
-              <p className="font-mono text-[9px] text-muted-foreground/70">119 mapped · 79 shared</p>
-            </div>
-          </div>
-
-          {renderRoles('right')}
-          {renderSkills('right')}
-        </div>
+      <div className="absolute top-3 right-3 flex gap-2">
+        <button
+          onClick={() => {
+            setFocusRole(null);
+            setExpanded(allOpen ? [] : experiences.map((_, i) => i));
+          }}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-mono bg-background/90 backdrop-blur-sm border border-border/60 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+        >
+          {allOpen ? 'Collapse all' : 'Expand all'}
+        </button>
       </div>
 
       <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1 bg-background/85 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[10px] text-muted-foreground border border-border/50 pointer-events-none">
-        <span>Click roles to open them. Open two to see what they share.</span>
+        <span>Click a role to open it · double-click for details · scroll to zoom · drag to pan</span>
         <span className="inline-flex items-center gap-1.5">
-          <svg width="22" height="6" aria-hidden="true"><line x1="0" y1="3" x2="22" y2="3" stroke="currentColor" strokeWidth="1.4" /></svg>
-          owns
+          <svg width="20" height="6" aria-hidden="true"><line x1="0" y1="3" x2="20" y2="3" stroke="currentColor" strokeWidth="1.6" /></svg>
+          uses
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <svg width="22" height="6" aria-hidden="true"><line x1="0" y1="3" x2="22" y2="3" stroke="currentColor" strokeWidth="1.4" strokeDasharray="5,4" /></svg>
+          <svg width="20" height="6" aria-hidden="true"><line x1="0" y1="3" x2="20" y2="3" stroke="currentColor" strokeWidth="1.6" strokeDasharray="6,5" /></svg>
           also used in
         </span>
       </div>

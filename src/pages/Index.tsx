@@ -1,6 +1,5 @@
 import Navigation from '@/components/layout/Navigation';
 import Hero from '@/components/sections/Hero';
-import NowBlock from '@/components/sections/NowBlock';
 import About from '@/components/sections/About';
 import Experience from '@/components/sections/Experience';
 import Skills from '@/components/sections/Skills';
@@ -21,7 +20,6 @@ const Index = () => {
       <Navigation />
       <main>
         <Hero />
-        <NowBlock />
         <About />
         <Experience />
         <Skills />

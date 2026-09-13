@@ -1,18 +1,5 @@
 // Website-only content. None of this belongs on the submittable PDF.
 
-/** Dated "what I am working on now" block. Update the date whenever the items change. */
-export const nowBlock = {
-  updated: "September 2026",
-  intro:
-    "What I am actually working on right now. I update this every few weeks.",
-  items: [
-    "Getting the SOC 2 readiness work ready for an external audit. Mostly control mapping and closing gaps, and working out whether Drata is worth it.",
-    "Arguing with myself about the CI/CD gates. The hard part is not which scanners run, it is deciding what is allowed to block a merge and what should only block a deploy.",
-    "Still poking at PICOTTY after the Hackaday and CNX Software writeups. Right now it is over-the-air update safety, because bricking a node remotely would be a bad joke on a serial console project.",
-    "Reading toward AWS Security Specialty and AZ-500. Neither is booked, so neither goes on the resume.",
-  ],
-};
-
 /** Talks and external representation. Previously buried as one line in Honors. */
 export const talks = [
   {
