@@ -4,12 +4,12 @@
 export const nowBlock = {
   updated: "September 2026",
   intro:
-    "Current focus, updated every few weeks so repeat visitors can see what has moved.",
+    "What I am actually working on right now. I update this every few weeks.",
   items: [
-    "Preparing the SOC 2 readiness program for external audit: control mapping, gap remediation, and evaluating Drata for compliance automation.",
-    "Tightening the CI/CD security gates on the managed platform, deciding what blocks a merge versus what blocks a deploy.",
-    "Extending PICOTTY after the Hackaday and CNX Software coverage, mostly around over-the-air update safety and canary rollout.",
-    "Reading toward AWS Security Specialty and AZ-500. Neither is booked yet, so neither is on the resume.",
+    "Getting the SOC 2 readiness work ready for an external audit. Mostly control mapping and closing gaps, and working out whether Drata is worth it.",
+    "Arguing with myself about the CI/CD gates. The hard part is not which scanners run, it is deciding what is allowed to block a merge and what should only block a deploy.",
+    "Still poking at PICOTTY after the Hackaday and CNX Software writeups. Right now it is over-the-air update safety, because bricking a node remotely would be a bad joke on a serial console project.",
+    "Reading toward AWS Security Specialty and AZ-500. Neither is booked, so neither goes on the resume.",
   ],
 };
 
@@ -56,35 +56,35 @@ export const talks = [
 /** The personal lab, as a writeup rather than a three-line skills entry. */
 export const homelab = {
   summary:
-    "A self-hosted estate that runs on the same patterns as production: per-service isolation, no public ingress, and monitoring I actually read. It is where most of the infrastructure decisions get tested before a client sees them.",
+    "Everything here runs the way I would run it for a client: each service isolated, nothing exposed to the public internet, and monitoring I actually look at. It is also where I break things first. Most of the infrastructure calls I have made at work were tested here on my own hardware, where the only person I can annoy is me.",
   stack: [
     {
       name: "Proxmox VE",
-      detail: "Type-1 hypervisor across custom hardware, with per-service LXC and VM isolation so one compromised service does not reach the others.",
+      detail: "Runs on hardware I put together myself. Every service gets its own LXC or VM, so if one gets popped it cannot walk into the others.",
     },
     {
       name: "Kubernetes",
-      detail: "Container orchestration for the workloads that need it, kept deliberately small.",
+      detail: "Only for the handful of workloads that genuinely need it. I have watched enough people run a three-node cluster for a blog.",
     },
     {
       name: "Prometheus + Grafana",
-      detail: "Metrics and dashboards for the whole estate, including host, container, and service health.",
+      detail: "Dashboards for host, container and service health. The useful part is the alerts, not the pretty graphs.",
     },
     {
       name: "Komodo",
-      detail: "Container deployment and management across hosts. Also the subject of Komo.do-Hub, the mobile interface I built for it.",
+      detail: "Handles container deployment across hosts. I liked it enough to build Komo.do-Hub, a mobile interface for it.",
     },
     {
       name: "Tailscale",
-      detail: "Mesh VPN between my own devices and the lab. Nothing is published to the public internet, so there is no inbound attack surface to defend.",
+      detail: "Mesh VPN between my devices and the lab. Nothing is published publicly, so there is no front door to defend in the first place.",
     },
     {
       name: "Twingate",
-      detail: "Per-resource zero-trust access for anything I need to share or reach without putting a device on the mesh. Same pattern I run for client production access, which is where I tested it before it went anywhere near a client.",
+      detail: "Per-resource access for anything I need to reach without putting a device on the mesh. This is the one I tested here for months before it went anywhere near client production.",
     },
     {
       name: "PICOTTY",
-      detail: "My own networked serial console for the headless machines, so a node that drops off the network can still be recovered over serial.",
+      detail: "My own serial console for the headless boxes. I built it because a node dropped off the network and I got tired of walking over with a keyboard.",
     },
   ],
   writeups: [

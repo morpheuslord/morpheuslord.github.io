@@ -64,12 +64,16 @@ export const personalInfo = {
   blog: "https://hackernoon.com/u/morpheuslord",
   /** The five-second answer. Rendered above the fold. */
   headline:
-    "I own the security architecture and the CI/CD security gates for a managed security platform that runs on isolated per-client AWS deployments. I also write the production backends I secure.",
-  bio: `I am a Lead Security Engineer with 3 years across cloud security, DevSecOps, and secure architecture. At Cygne Noir Cyber I own the security architecture and the CI/CD security gates for a multi-tenant managed security platform: one EC2 instance per client in a separate AWS account, data locality as a hard rule so no scan input leaves the client deployment, Twingate zero-trust access, and a scanner fleet of Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape feeding a DefectDojo findings pipeline with bidirectional JIRA integration and EPSS, CISA KEV and SSVC prioritization. I also own the SOC 2 readiness program and cloud posture across AWS and Azure.
+    "I run cloud security and DevSecOps for a managed security platform. Every client gets their own AWS account, and nothing they scan ever leaves it. I also write the backends I secure, which is rarer than it should be.",
+  bio: `I am a Lead Security Engineer, three years in, working in cloud security, DevSecOps and secure architecture.
 
-What makes that different from most cloud security work is that I write the code I secure. I shipped a production application backend as sole developer (FastAPI, Supabase, Redis, AWS) designed to scale horizontally toward millions of users, along with its application security architecture. I also ran a two-person application and API penetration testing function, setting the methodology and signing off the client-facing reports, which is where my triage judgment comes from. Offensive security is background that explains the judgment, not what I am hired to do now.
+Day to day that means I own how our managed security platform is built and what stops bad code reaching production. Each client runs on a single EC2 instance inside their own AWS account. Their code and cloud metadata never leave that boundary, which was a deliberate call: it is the difference between promising tenants are separated and being able to show it. Access goes through Twingate rather than a VPN, so nobody holds standing SSH into a client box.
 
-Alongside this I work part-time as a Full Stack Engineer at Golden Fork Ventures, building compliance and operations software and running it myself on self-hosted Proxmox VE with per-service LXC and VM isolation. I have seven published papers in cybersecurity and machine learning, security blogs past 100,000 cumulative reads on HackerNoon, and CEH v12 and CND certifications.`,
+The scanners are the easy part. Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape all run, and between them they produce far more findings than any client can realistically fix. So everything lands in DefectDojo, gets normalised, syncs both ways with JIRA, and gets ranked by EPSS, CISA KEV and SSVC instead of raw CVSS. A theoretical critical nobody is exploiting should not outrank something already being used in the wild. I own the SOC 2 readiness work too.
+
+The part that makes me useful is that I write the code I secure. I built and shipped a production app backend on my own, FastAPI on Supabase and Redis, built to scale, along with the security architecture around it. I also spent two years running a small application and API pentest function, setting the methodology and signing the client reports. That is where my sense of which findings actually matter comes from. It is background now, not the job.
+
+On the side I am a part-time Full Stack Engineer at Golden Fork Ventures, building their compliance and operations software and running it myself on Proxmox. Seven published papers, security writing past 100,000 reads on HackerNoon, CEH v12 and CND.`,
 };
 
 export const stats = [
@@ -119,7 +123,7 @@ export const experiences: Array<{
           title: "Applied research: agentic AI security",
           desc: "Run applied research on securing agentic pipelines and on LLM-assisted triage and enrichment, including the agent and prompt threat surface, and feed the results back into the platform.",
           mainExp: "research",
-          mainExpCategories: ["research", "security"],
+          mainExpCategories: ["research", "security", "development"],
           importance: 5,
         },
         {
@@ -134,7 +138,7 @@ export const experiences: Array<{
           desc: "Prototype and benchmark scanners, detection rules and triage automation before they reach client deployments, including the false-positive work that decides what is worth shipping.",
           mainExp: "research",
           mainExpCategories: ["research", "security", "delivery"],
-          importance: 4,
+          importance: 5,
         },
         // --- Program ownership ---
         {
@@ -156,7 +160,7 @@ export const experiences: Array<{
           desc: "Own CI/CD and production DevSecOps end to end: which gates run (Semgrep, Gitleaks, Trivy, Checkov, Syft), at which pipeline stage they run, and what blocks a merge or a deploy.",
           mainExp: "security",
           mainExpCategories: ["security", "development", "delivery", "strategy"],
-          importance: 4,
+          importance: 5,
         },
         // --- Leadership ---
         {

@@ -75,7 +75,7 @@ const Services = () => {
     const node = sectionRef.current;
     if (!node) return;
 
-    // If the section is already in view on mount, the observer may not fire —
+    // If the section is already in view on mount, the observer may not fire, so
     // run immediately so the card never gets stuck at opacity-0.
     const rect = node.getBoundingClientRect();
     const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;

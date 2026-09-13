@@ -15,35 +15,47 @@ const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
 
 // Employment-based Skill Ontology, laid out as a mindmap.
 //
-// Root sits in the centre, roles fan out left and right, and SVG bezier
-// connectors are drawn from measured DOM positions (the approach from
-// dev.to/frankwisniewski/create-a-mindmap: flex columns for layout, SVG only
-// for the curves, redrawn by a ResizeObserver).
+// Layout follows dev.to/frankwisniewski/create-a-mindmap: flex columns place
+// the nodes, SVG only draws bezier curves between measured DOM rects, and a
+// ResizeObserver redraws them.
 //
-// Branches expand on click rather than rendering everything: there are 119
-// distinct skills across 5 roles and one branch alone owns 57, which no
-// space-around column can show at a readable size.
+// The point of this graph is the overlap, not the tree. A skill is drawn once,
+// under the role that uses it most heavily, but 79 of the 119 skills are used
+// by more than one role, and each of those draws a dashed cross-link back to
+// every other role that uses it. Hovering anything isolates its relationships.
+//
+// Branches expand on click, and more than one can be open at a time, because
+// two open branches is what makes the shared skills between them visible.
 
 const bezier = (x1: number, y1: number, x2: number, y2: number) =>
   `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`;
 
-type Connector = { id: string; d: string; color: string; branch: number };
+type Connector = {
+  id: string;
+  d: string;
+  color: string;
+  dashed: boolean;
+  roles: number[];
+  skill?: string;
+};
 
 const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (exp: typeof experiences[0]) => void }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const [hoverBranch, setHoverBranch] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<number[]>([]);
+  const [hover, setHover] = useState<{ kind: 'role' | 'skill'; role?: number; skill?: string } | null>(null);
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
 
-  // Each skill belongs to the role that uses it most heavily, so a skill
-  // appears exactly once in the tree.
-  const roles = useMemo(() => {
+  // Every role that uses a skill, plus the one that owns it (highest level).
+  const { roles, usedBy } = useMemo(() => {
+    const used = new Map<string, number[]>();
     const bestLevel = new Map<string, number>();
     const owner = new Map<string, number>();
     experiences.forEach((exp, i) => {
       Object.entries(exp.skills).forEach(([name, level]) => {
+        if (!used.has(name)) used.set(name, []);
+        used.get(name)!.push(i);
         if (!bestLevel.has(name) || level > bestLevel.get(name)!) {
           bestLevel.set(name, level);
           owner.set(name, i);
@@ -51,8 +63,7 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
       });
     });
 
-    // Newest role first, alternating sides so the fan stays balanced.
-    return experiences
+    const built = experiences
       .map((exp, i) => ({ exp, i }))
       .reverse()
       .map(({ exp, i }, pos) => {
@@ -69,10 +80,18 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
           exp,
           side: (pos % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
           total: Object.keys(exp.skills).length,
-          skills: owned.map((n) => ({ name: n, level: Math.round(exp.skills[n] * 100) })),
+          shared: Object.keys(exp.skills).filter((n) => (used.get(n) ?? []).length > 1).length,
+          skills: owned.map((n) => ({
+            name: n,
+            level: Math.round(exp.skills[n] * 100),
+            others: (used.get(n) ?? []).filter((r) => r !== i),
+          })),
         };
       });
+    return { roles: built, usedBy: used };
   }, []);
+
+  const roleByKey = useMemo(() => new Map(roles.map((r) => [r.key, r])), [roles]);
 
   const measure = useCallback(() => {
     const wrap = wrapRef.current;
@@ -91,28 +110,51 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
 
     const root = box('root');
     if (!root) return;
-
     const next: Connector[] = [];
+
     roles.forEach((role) => {
       const rb = box(`role-${role.key}`);
       if (!rb) return;
       const left = role.side === 'left';
+
       next.push({
         id: `root-${role.key}`,
         d: bezier(left ? root.left : root.right, root.cy, left ? rb.right : rb.left, rb.cy),
         color: role.color,
-        branch: role.key,
+        dashed: false,
+        roles: [role.key],
       });
 
-      if (expanded !== role.key) return;
+      if (!expanded.includes(role.key)) return;
+
       role.skills.forEach((sk) => {
         const sb = box(`skill-${role.key}-${sk.name}`);
         if (!sb) return;
+
         next.push({
-          id: `sk-${role.key}-${sk.name}`,
+          id: `own-${role.key}-${sk.name}`,
           d: bezier(left ? rb.left : rb.right, rb.cy, left ? sb.right : sb.left, sb.cy),
           color: role.color,
-          branch: role.key,
+          dashed: false,
+          roles: [role.key],
+          skill: sk.name,
+        });
+
+        // The ontology part: link this skill back to every other role using it.
+        sk.others.forEach((otherKey) => {
+          const ob = box(`role-${otherKey}`);
+          const other = roleByKey.get(otherKey);
+          if (!ob || !other) return;
+          const skillAnchorX = left ? sb.right : sb.left;
+          const roleAnchorX = other.side === 'left' ? ob.left : ob.right;
+          next.push({
+            id: `x-${role.key}-${sk.name}-${otherKey}`,
+            d: bezier(skillAnchorX, sb.cy, roleAnchorX, ob.cy),
+            color: other.color,
+            dashed: true,
+            roles: [role.key, otherKey],
+            skill: sk.name,
+          });
         });
       });
     });
@@ -123,7 +165,7 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
         ? prev
         : { w: wrap.scrollWidth, h: wrap.scrollHeight }
     );
-  }, [roles, expanded]);
+  }, [roles, expanded, roleByKey]);
 
   useLayoutEffect(() => { measure(); }, [measure]);
 
@@ -139,41 +181,72 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
     };
   }, [measure]);
 
+  // What the current hover makes relevant.
+  const focus = useMemo(() => {
+    if (!hover) return null;
+    if (hover.kind === 'skill' && hover.skill) {
+      return {
+        roles: new Set(usedBy.get(hover.skill) ?? []),
+        skills: new Set([hover.skill]),
+      };
+    }
+    if (hover.kind === 'role' && hover.role !== undefined) {
+      const r = roleByKey.get(hover.role);
+      const skills = new Set(Object.keys(r?.exp.skills ?? {}));
+      return { roles: new Set([hover.role]), skills };
+    }
+    return null;
+  }, [hover, usedBy, roleByKey]);
+
+  const connectorLive = (c: Connector) => {
+    if (!focus) return true;
+    if (c.skill) return focus.skills.has(c.skill) && c.roles.some((r) => focus.roles.has(r));
+    return c.roles.some((r) => focus.roles.has(r));
+  };
+
   const setRef = (id: string) => (el: HTMLElement | null) => { nodeRefs.current[id] = el; };
+  const toggle = (key: number) =>
+    setExpanded((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 
   const renderSkills = (side: 'left' | 'right') => {
-    const role = roles.find((r) => r.key === expanded && r.side === side);
-    if (!role) return <div className="flex-1 min-w-0" />;
+    const open = roles.filter((r) => r.side === side && expanded.includes(r.key));
+    if (open.length === 0) return <div className="flex-1 min-w-0" />;
     return (
-      <div
-        className={`flex-1 min-w-0 flex flex-col justify-around gap-1.5 py-2 ${
-          side === 'left' ? 'items-end' : 'items-start'
-        }`}
-      >
-        {role.skills.map((sk) => (
-          <div
-            key={sk.name}
-            ref={setRef(`skill-${role.key}-${sk.name}`)}
-            onMouseEnter={() => setHoverBranch(role.key)}
-            onMouseLeave={() => setHoverBranch(null)}
-            className="max-w-full rounded-md border bg-background/70 backdrop-blur-sm px-2 py-1 transition-transform duration-200 hover:scale-[1.04]"
-            style={{ borderColor: `${role.color}66` }}
-            title={`${sk.name} · ${sk.level}%`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] md:text-[11px] text-foreground/90 truncate">
-                {sk.name}
-              </span>
-              <span className="font-mono text-[9px] text-muted-foreground tabular-nums shrink-0">
-                {sk.level}
-              </span>
-            </div>
-            <div className="mt-1 h-[2px] w-full rounded bg-foreground/10 overflow-hidden">
-              <div
-                className="h-full rounded"
-                style={{ width: `${sk.level}%`, background: role.color }}
-              />
-            </div>
+      <div className={`flex-1 min-w-0 flex flex-col justify-around gap-4 py-2 ${side === 'left' ? 'items-end' : 'items-start'}`}>
+        {open.map((role) => (
+          <div key={role.key} className={`flex flex-col gap-1 ${side === 'left' ? 'items-end' : 'items-start'}`}>
+            {role.skills.map((sk) => {
+              const live = !focus || focus.skills.has(sk.name);
+              return (
+                <div
+                  key={sk.name}
+                  ref={setRef(`skill-${role.key}-${sk.name}`)}
+                  onMouseEnter={() => setHover({ kind: 'skill', skill: sk.name })}
+                  onMouseLeave={() => setHover(null)}
+                  className={`group/sk flex items-center gap-2 rounded border-l-2 bg-background/70 backdrop-blur-sm pl-2 pr-2 py-[3px] cursor-default transition-all duration-200 ${
+                    live ? 'opacity-100' : 'opacity-20'
+                  }`}
+                  style={{ borderLeftColor: role.color }}
+                  title={
+                    sk.others.length
+                      ? `${sk.name} · ${sk.level}% · also used in ${sk.others.length} other role${sk.others.length > 1 ? 's' : ''}`
+                      : `${sk.name} · ${sk.level}% · only this role`
+                  }
+                >
+                  <span className="font-mono text-[10px] md:text-[11px] text-foreground/90 whitespace-nowrap">
+                    {sk.name}
+                  </span>
+                  <span className="h-[3px] w-8 rounded bg-foreground/10 overflow-hidden shrink-0">
+                    <span className="block h-full rounded" style={{ width: `${sk.level}%`, background: role.color }} />
+                  </span>
+                  {sk.others.length > 0 && (
+                    <span className="font-mono text-[9px] leading-none px-1 py-[2px] rounded-full bg-foreground/10 text-muted-foreground shrink-0">
+                      {sk.others.length + 1}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
@@ -181,109 +254,90 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
   };
 
   const renderRoles = (side: 'left' | 'right') => (
-    <div
-      className={`flex flex-col justify-around gap-4 py-2 ${
-        side === 'left' ? 'items-end' : 'items-start'
-      }`}
-    >
-      {roles
-        .filter((r) => r.side === side)
-        .map((role) => {
-          const open = expanded === role.key;
-          return (
-            <div
-              key={role.key}
-              ref={setRef(`role-${role.key}`)}
-              onMouseEnter={() => setHoverBranch(role.key)}
-              onMouseLeave={() => setHoverBranch(null)}
-              className="rounded-lg border-2 bg-background/80 backdrop-blur-sm w-[190px] md:w-[210px] transition-all duration-200"
-              style={{
-                borderColor: role.color,
-                boxShadow: open ? `0 0 0 3px ${role.color}22` : undefined,
-              }}
-            >
-              <button
-                onClick={() => setExpanded(open ? null : role.key)}
-                aria-expanded={open}
-                className="w-full text-left px-3 py-2"
-              >
-                <div className="flex items-start gap-2">
-                  <ChevronRight
-                    className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${
-                      open ? 'rotate-90' : ''
-                    }`}
-                    style={{ color: role.color }}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground leading-snug">
-                      {role.title}
-                    </p>
-                    {role.company && (
-                      <p className="font-mono text-[10px] text-muted-foreground truncate">
-                        {role.company}
-                      </p>
-                    )}
-                    <p className="font-mono text-[10px] text-muted-foreground/70">
-                      {role.period} · {role.total} skills
-                    </p>
-                  </div>
+    <div className={`flex flex-col justify-around gap-5 py-2 shrink-0 ${side === 'left' ? 'items-end' : 'items-start'}`}>
+      {roles.filter((r) => r.side === side).map((role) => {
+        const open = expanded.includes(role.key);
+        const live = !focus || focus.roles.has(role.key);
+        return (
+          <div
+            key={role.key}
+            ref={setRef(`role-${role.key}`)}
+            onMouseEnter={() => setHover({ kind: 'role', role: role.key })}
+            onMouseLeave={() => setHover(null)}
+            className={`w-[188px] md:w-[204px] rounded-lg overflow-hidden bg-background/85 backdrop-blur-sm ring-1 transition-all duration-200 ${
+              live ? 'opacity-100' : 'opacity-25'
+            }`}
+            style={{
+              boxShadow: open ? `0 2px 14px -4px ${role.color}77` : undefined,
+              ['--rc' as string]: role.color,
+            }}
+          >
+            <div className="h-[3px] w-full" style={{ background: role.color }} />
+            <button onClick={() => toggle(role.key)} aria-expanded={open} className="w-full text-left px-3 pt-2 pb-1.5">
+              <div className="flex items-start gap-1.5">
+                <ChevronRight
+                  className={`w-3.5 h-3.5 mt-[3px] shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
+                  style={{ color: role.color }}
+                />
+                <div className="min-w-0">
+                  <p className="text-[12px] font-semibold text-foreground leading-tight">{role.title}</p>
+                  {role.company && (
+                    <p className="font-mono text-[10px] text-muted-foreground truncate">{role.company}</p>
+                  )}
                 </div>
-              </button>
-              <button
-                onClick={() => onExperienceClick(role.exp)}
-                className="w-full px-3 pb-2 text-left font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                View role details →
-              </button>
-            </div>
-          );
-        })}
+              </div>
+              <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                {role.period}
+              </p>
+              <p className="font-mono text-[9px] text-muted-foreground/70">
+                {role.total} skills · {role.shared} shared
+              </p>
+            </button>
+            <button
+              onClick={() => onExperienceClick(role.exp)}
+              className="w-full px-3 pb-2 text-left font-mono text-[9px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Role details
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 
   return (
-    <div className="w-full rounded-xl border border-border bg-card/30 overflow-auto relative h-[440px] sm:h-[540px] md:h-[640px]">
-      <div ref={wrapRef} className="relative min-w-[880px] p-6 md:p-10">
-        {/* Connectors sit behind the nodes, sized to the full scrollable area. */}
-        <svg
-          className="absolute left-0 top-0 pointer-events-none"
-          width={svgSize.w}
-          height={svgSize.h}
-          aria-hidden="true"
-        >
+    <div className="w-full rounded-xl border border-border bg-card/30 overflow-auto relative h-[460px] sm:h-[560px] md:h-[680px]">
+      <div ref={wrapRef} className="relative min-w-[900px] p-6 md:p-10">
+        <svg className="absolute left-0 top-0 pointer-events-none" width={svgSize.w} height={svgSize.h} aria-hidden="true">
           {connectors.map((c) => {
-            const dim = hoverBranch !== null && hoverBranch !== c.branch;
+            const live = connectorLive(c);
             return (
               <path
                 key={c.id}
                 d={c.d}
                 fill="none"
                 stroke={c.color}
-                strokeWidth={hoverBranch === c.branch ? 2 : 1.4}
-                strokeOpacity={dim ? 0.12 : hoverBranch === c.branch ? 0.85 : 0.4}
+                strokeWidth={focus && live ? 1.8 : c.dashed ? 1 : 1.4}
+                strokeDasharray={c.dashed ? '5,4' : undefined}
+                strokeOpacity={live ? (focus ? 0.85 : c.dashed ? 0.16 : 0.4) : 0.04}
                 className="transition-[stroke-opacity,stroke-width] duration-200"
               />
             );
           })}
         </svg>
 
-        <div className="relative flex items-stretch gap-3 md:gap-6">
+        <div className="relative flex items-stretch gap-3 md:gap-5">
           {renderSkills('left')}
           {renderRoles('left')}
 
-          {/* Root */}
           <div className="flex flex-col justify-center shrink-0">
             <div
               ref={setRef('root')}
-              className="rounded-xl border-2 border-foreground/30 bg-background/90 backdrop-blur-sm px-4 py-3 text-center"
+              className="rounded-xl ring-1 ring-foreground/20 bg-background/90 backdrop-blur-sm px-4 py-3 text-center"
             >
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Ontology
-              </p>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Ontology</p>
               <p className="text-sm font-bold text-foreground">Skills</p>
-              <p className="font-mono text-[10px] text-muted-foreground/70">
-                {roles.reduce((n, r) => n + r.skills.length, 0)} mapped
-              </p>
+              <p className="font-mono text-[9px] text-muted-foreground/70">119 mapped · 79 shared</p>
             </div>
           </div>
 
@@ -292,8 +346,16 @@ const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (ex
         </div>
       </div>
 
-      <div className="absolute bottom-3 left-3 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground border border-border/50 pointer-events-none">
-        Click a role to expand its skills
+      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1 bg-background/85 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[10px] text-muted-foreground border border-border/50 pointer-events-none">
+        <span>Click roles to open them. Open two to see what they share.</span>
+        <span className="inline-flex items-center gap-1.5">
+          <svg width="22" height="6" aria-hidden="true"><line x1="0" y1="3" x2="22" y2="3" stroke="currentColor" strokeWidth="1.4" /></svg>
+          owns
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <svg width="22" height="6" aria-hidden="true"><line x1="0" y1="3" x2="22" y2="3" stroke="currentColor" strokeWidth="1.4" strokeDasharray="5,4" /></svg>
+          also used in
+        </span>
       </div>
     </div>
   );
@@ -552,7 +614,7 @@ const Skills = () => {
           <h2 className="section-heading skills-header opacity-0">Skill Ontology</h2>
           <p className="text-muted-foreground skills-header opacity-0 max-w-2xl mx-auto">
             {activeTab === 'ontology'
-              ? 'Employment-based knowledge graph — click employment nodes to explore skills gained'
+              ? 'Every skill I use, mapped to the job where I picked it up. Click a role to open it.'
               : 'Click a category to view detailed skills and proficiency levels'
             }
           </p>

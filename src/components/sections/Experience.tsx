@@ -261,6 +261,16 @@ const Experience = () => {
     const labelRadius = radius + (isNarrow ? 22 : 30);
     const axisLabelFontSize = isNarrow ? '9px' : '11px';
 
+    type LineSel = d3.Selection<SVGLineElement, unknown, null, undefined>;
+    type TextSel = d3.Selection<SVGTextElement, unknown, null, undefined>;
+    type PathSel = d3.Selection<SVGPathElement, unknown, null, undefined>;
+    type CircleSel = d3.Selection<SVGCircleElement, unknown, null, undefined>;
+    type RectSel = d3.Selection<SVGRectElement, unknown, null, undefined>;
+
+    const spokes: LineSel[] = [];
+    const axisLabels: TextSel[] = [];
+    let axisHandler: (i: number | null, event: MouseEvent | null) => void = () => { };
+
     for (let level = 1; level <= levels; level++) {
       const levelRadius = (radius / levels) * level;
       const levelValue = level; // 1, 2, 3, 4, 5
@@ -270,15 +280,16 @@ const Experience = () => {
         .attr('cy', 0)
         .attr('r', levelRadius)
         .attr('fill', 'none')
-        .attr('stroke', 'rgba(255,255,255,0.08)')
-        .attr('stroke-dasharray', '2,2');
+        .attr('stroke', level === levels ? 'rgba(255,255,255,0.34)' : 'rgba(255,255,255,0.16)')
+        .attr('stroke-width', level === levels ? 1.4 : 1)
+        .attr('stroke-dasharray', level === levels ? null : '2,3');
 
       if (!isNarrow) {
         g.append('text')
           .attr('x', 5)
           .attr('y', -levelRadius - 2)
-          .attr('fill', 'rgba(255,255,255,0.35)')
-          .attr('font-size', '9px')
+          .attr('fill', 'rgba(255,255,255,0.62)')
+          .attr('font-size', '10px')
           .attr('font-family', 'monospace')
           .text(levelValue);
       }
@@ -289,26 +300,37 @@ const Experience = () => {
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
 
-      g.append('line')
+      const spoke = g.append('line')
         .attr('x1', 0)
         .attr('y1', 0)
         .attr('x2', x)
         .attr('y2', y)
-        .attr('stroke', 'rgba(255,255,255,0.12)')
+        .attr('stroke', 'rgba(255,255,255,0.24)')
         .attr('stroke-width', 1);
+      spokes.push(spoke);
 
       const labelX = Math.cos(angle) * labelRadius;
       const labelY = Math.sin(angle) * labelRadius;
 
-      g.append('text')
+      const axisLabel = g.append('text')
         .attr('x', labelX)
         .attr('y', labelY)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
-        .attr('fill', 'rgba(255,255,255,0.75)')
+        .attr('fill', 'rgba(255,255,255,0.95)')
         .attr('font-size', axisLabelFontSize)
-        .attr('font-weight', '500')
+        .attr('font-weight', '600')
+        .attr('cursor', 'pointer')
+        .attr('pointer-events', 'all')
         .text(categoryLabels[cat]);
+      axisLabels.push(axisLabel);
+
+      axisLabel
+        .on('mouseover', (event: MouseEvent) => axisHandler(i, event))
+        .on('mousemove', (event: MouseEvent) => {
+          tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
+        })
+        .on('mouseout', () => axisHandler(null, null));
     });
 
     const tooltip = d3.select('body').append('div')
@@ -357,96 +379,125 @@ const Experience = () => {
     const getColorForRole = (role: RoleMetrics) =>
       roleColors[experiences.length - 1 - role.index];
 
+    // Visuals per role, so hover can dim every other role and sync the legend.
+    const roleVisuals = new Map<number, {
+      path: PathSel;
+      dots: CircleSel[];
+      swatch: RectSel | null;
+      label: TextSel | null;
+      isActive: boolean;
+    }>();
+    let focusHandler: (idx: number | null) => void = () => { };
+
+    const showRoleTooltip = (event: MouseEvent, role: RoleMetrics, color: string) => {
+      const coords = categories.map(c => {
+        const avg = role.avgImportance[c];
+        const avgStr = avg > 0 ? avg.toFixed(1) : '0';
+        return `${categoryLabelsLong[c]}: ${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5`;
+      }).join(' · ');
+      tooltip.html(`
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+          <div style="font-weight: 600; font-size: 13px; color: ${color};">${role.title}</div>
+          <div style="color: #888; font-size: 11px; margin-top: 2px;">${role.company} | ${role.period}</div>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">Score = min(5, round(avg importance)). Scale 0–5:</div>
+          ${categories.map(c => {
+            const avg = role.avgImportance[c];
+            const avgStr = avg > 0 ? avg.toFixed(1) : '0';
+            return `
+            <div style="display: flex; justify-content: space-between; margin: 2px 0; gap: 12px;">
+              <span style="color: #888;">${categoryLabelsLong[c]}:</span>
+              <span style="font-weight: bold; color: white;">${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5</span>
+            </div>
+          `;
+          }).join('')}
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; font-size: 10px;">
+          <div style="color: ${color}; font-family: monospace; word-break: break-all;">${coords}</div>
+        </div>
+      `)
+        .style('visibility', 'visible')
+        .style('left', (event.pageX + 15) + 'px')
+        .style('top', (event.pageY - 15) + 'px');
+    };
+
     dataToRender.forEach((role) => {
       const values = categories.map(c => role.scores[c]);
       const color = getColorForRole(role);
-      const opacity = showCombined ? (role.isActive ? 1 : 0.4) : 0.8;
+      const baseStrokeOpacity = showCombined ? (role.isActive ? 1 : 0.4) : 0.9;
+      const baseFillOpacity = role.isActive || !showCombined ? 0.2 : 0.05;
+      const baseStrokeWidth = role.isActive || !showCombined ? 2.5 : 1.5;
 
-      g.append('path')
+      const path = g.append('path')
         .attr('fill', color)
-        .attr('fill-opacity', role.isActive || !showCombined ? 0.2 : opacity * 0.12)
+        .attr('fill-opacity', baseFillOpacity)
         .attr('stroke', color)
-        .attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5)
-        .attr('stroke-opacity', opacity)
+        .attr('stroke-width', baseStrokeWidth)
+        .attr('stroke-opacity', baseStrokeOpacity)
         .attr('stroke-linejoin', 'round')
         .attr('d', radarPath(values))
         .attr('cursor', 'pointer')
+        // Low fill opacity still needs to catch the pointer across the whole shape.
+        .attr('pointer-events', 'all')
         .on('click', () => {
-          if (showCombined) {
-            setActiveRole(experiences.length - 1 - role.index);
-          }
+          if (showCombined) setActiveRole(experiences.length - 1 - role.index);
         })
-        .on('mouseover', function(event) {
-          d3.select(this).attr('stroke-width', 3);
-          const coords = categories.map(c => {
-            const avg = role.avgImportance[c];
-            const avgStr = avg > 0 ? avg.toFixed(1) : '0';
-            return `${categoryLabelsLong[c]}: ${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5`;
-          }).join(' · ');
-          tooltip.html(`
-            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
-              <div style="font-weight: 600; font-size: 13px; color: ${color};">${role.title}</div>
-              <div style="color: #888; font-size: 11px; margin-top: 2px;">${role.company} | ${role.period}</div>
-            </div>
-            <div style="margin-bottom: 8px;">
-              <div style="font-size: 11px; color: #aaa; margin-bottom: 4px;">Score = min(5, round(avg importance)). Scale 0–5:</div>
-              ${categories.map(c => {
-                const avg = role.avgImportance[c];
-                const avgStr = avg > 0 ? avg.toFixed(1) : '0';
-                return `
-                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
-                  <span style="color: #888;">${categoryLabelsLong[c]}:</span>
-                  <span style="font-weight: bold; color: white;">${role.counts[c]} resp., avg ${avgStr} → ${role.scores[c]}/5</span>
-                </div>
-              `;
-              }).join('')}
-            </div>
-            <div style="background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; font-size: 10px;">
-              <div style="color: #06b6d4; font-family: monospace; word-break: break-all;">${coords}</div>
-            </div>
-          `)
-            .style('visibility', 'visible')
-            .style('left', (event.pageX + 15) + 'px')
-            .style('top', (event.pageY - 15) + 'px');
+        .on('mouseover', (event: MouseEvent) => {
+          focusHandler(role.index);
+          showRoleTooltip(event, role, color);
         })
-        .on('mousemove', function(event) {
-          tooltip
-            .style('left', (event.pageX + 15) + 'px')
-            .style('top', (event.pageY - 15) + 'px');
+        .on('mousemove', (event: MouseEvent) => {
+          tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
         })
-        .on('mouseout', function() {
-          d3.select(this).attr('stroke-width', role.isActive || !showCombined ? 2.5 : 1.5);
+        .on('mouseout', () => {
+          focusHandler(null);
           tooltip.style('visibility', 'hidden');
         });
 
+      const dots: CircleSel[] = [];
       categories.forEach((cat, catIndex) => {
         const angle = angleSlice * catIndex - Math.PI / 2;
         const value = role.scores[cat];
         const pointRadius = (value / SCALE_MAX) * radius;
-        const x = Math.cos(angle) * pointRadius;
-        const y = Math.sin(angle) * pointRadius;
 
-        g.append('circle')
-          .attr('cx', x)
-          .attr('cy', y)
+        const dot = g.append('circle')
+          .attr('cx', Math.cos(angle) * pointRadius)
+          .attr('cy', Math.sin(angle) * pointRadius)
           .attr('r', role.isActive || !showCombined ? 5 : 3)
           .attr('fill', color)
           .attr('stroke', 'white')
           .attr('stroke-width', role.isActive || !showCombined ? 2 : 0)
+          .attr('opacity', baseStrokeOpacity)
           .attr('cursor', 'pointer')
+          .attr('pointer-events', 'all')
           .on('click', () => {
-            if (showCombined) {
-              setActiveRole(experiences.length - 1 - role.index);
-            }
+            if (showCombined) setActiveRole(experiences.length - 1 - role.index);
+          })
+          // Vertices sit above their own polygon, so without these they would
+          // punch dead holes in the hover area.
+          .on('mouseover', (event: MouseEvent) => {
+            focusHandler(role.index);
+            showRoleTooltip(event, role, color);
+          })
+          .on('mousemove', (event: MouseEvent) => {
+            tooltip.style('left', (event.pageX + 15) + 'px').style('top', (event.pageY - 15) + 'px');
+          })
+          .on('mouseout', () => {
+            focusHandler(null);
+            tooltip.style('visibility', 'hidden');
           });
+
+        dots.push(dot);
       });
+
+      roleVisuals.set(role.index, { path, dots, swatch: null, label: null, isActive: role.isActive });
     });
 
     if (showCombined) {
       const legendX = isNarrow ? width / 2 - 70 : width - 160;
       const legendY = isNarrow ? height - 52 : 16;
-      const legendG = svg.append('g')
-        .attr('transform', `translate(${legendX}, ${legendY})`);
+      const legendG = svg.append('g').attr('transform', `translate(${legendX}, ${legendY})`);
 
       const itemWidth = isNarrow ? 70 : 140;
       const cols = isNarrow ? 2 : 1;
@@ -457,23 +508,109 @@ const Experience = () => {
         const xPos = colIndex * itemWidth;
         const yPos = row * 18;
 
-        legendG.append('rect')
-          .attr('x', xPos)
-          .attr('y', yPos)
-          .attr('width', 10)
-          .attr('height', 10)
-          .attr('fill', color)
-          .attr('rx', 2)
-          .attr('opacity', role.isActive ? 1 : 0.5);
+        const swatch = legendG.append('rect')
+          .attr('x', xPos).attr('y', yPos)
+          .attr('width', 10).attr('height', 10)
+          .attr('fill', color).attr('rx', 2)
+          .attr('opacity', role.isActive ? 1 : 0.5)
+          .attr('cursor', 'pointer')
+          .on('click', () => setActiveRole(experiences.length - 1 - i));
 
-        legendG.append('text')
-          .attr('x', xPos + 14)
-          .attr('y', yPos + 8)
+        const label = legendG.append('text')
+          .attr('x', xPos + 14).attr('y', yPos + 8)
           .attr('fill', role.isActive ? 'white' : 'rgba(255,255,255,0.5)')
           .attr('font-size', isNarrow ? '9px' : '10px')
-          .text(role.company.substring(0, isNarrow ? 10 : 14));
+          .attr('cursor', 'pointer')
+          .text(role.company.substring(0, isNarrow ? 10 : 14))
+          .on('click', () => setActiveRole(experiences.length - 1 - i));
+
+        const v = roleVisuals.get(i);
+        if (v) { v.swatch = swatch; v.label = label; }
+
+        [swatch, label].forEach((sel) => {
+          sel
+            .on('mouseover', () => focusHandler(i))
+            .on('mouseout', () => focusHandler(null));
+        });
       });
     }
+
+    // Hovering an axis label compares every role on that one axis.
+    axisHandler = (i: number | null, event: MouseEvent | null) => {
+      spokes.forEach((sp, idx) => {
+        sp.attr('stroke', i === idx ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.24)')
+          .attr('stroke-width', i === idx ? 2 : 1);
+      });
+      axisLabels.forEach((lb, idx) => {
+        lb.attr('fill', i === null
+          ? 'rgba(255,255,255,0.95)'
+          : idx === i ? '#ffffff' : 'rgba(255,255,255,0.3)');
+      });
+
+      if (i === null || !event) {
+        tooltip.style('visibility', 'hidden');
+        return;
+      }
+
+      const cat = categories[i];
+      const rows = allData
+        .map((role, idx) => ({ role, color: roleColors[experiences.length - 1 - idx] }))
+        .sort((a, b) => b.role.scores[cat] - a.role.scores[cat])
+        .map(({ role, color }) => `
+          <div style="display:flex; justify-content:space-between; gap:14px; margin:3px 0;">
+            <span style="color:${color};">${role.company.substring(0, 18)}</span>
+            <span style="font-weight:bold; color:white;">${role.scores[cat]}/5</span>
+          </div>`)
+        .join('');
+
+      tooltip.html(`
+        <div style="font-weight:600; font-size:13px; margin-bottom:8px;">${categoryLabelsLong[cat]}</div>
+        <div style="font-size:11px; color:#aaa; margin-bottom:6px;">Every role on this axis</div>
+        ${rows}
+      `)
+        .style('visibility', 'visible')
+        .style('left', (event.pageX + 15) + 'px')
+        .style('top', (event.pageY - 15) + 'px');
+    };
+
+    // Single place that decides how every role looks, so hover, dim and reset
+    // can never drift apart.
+    focusHandler = (idx: number | null) => {
+      roleVisuals.forEach((v, index) => {
+        const focused = idx === null ? null : index === idx;
+        const activeDefault = v.isActive || !showCombined;
+
+        const strokeOpacity = focused === null
+          ? (showCombined ? (v.isActive ? 1 : 0.4) : 0.9)
+          : focused ? 1 : 0.08;
+        const fillOpacity = focused === null
+          ? (activeDefault ? 0.2 : 0.05)
+          : focused ? 0.32 : 0.015;
+        const strokeWidth = focused === null
+          ? (activeDefault ? 2.5 : 1.5)
+          : focused ? 3.5 : 1;
+
+        v.path
+          .attr('stroke-opacity', strokeOpacity)
+          .attr('fill-opacity', fillOpacity)
+          .attr('stroke-width', strokeWidth);
+        if (focused) v.path.raise();
+
+        v.dots.forEach((d) => {
+          d.attr('opacity', strokeOpacity)
+            .attr('r', focused ? 6 : activeDefault ? 5 : 3);
+          if (focused) d.raise();
+        });
+
+        if (v.swatch) v.swatch.attr('opacity', focused === null ? (v.isActive ? 1 : 0.5) : focused ? 1 : 0.2);
+        if (v.label) {
+          v.label.attr('fill',
+            focused === null
+              ? (v.isActive ? 'white' : 'rgba(255,255,255,0.5)')
+              : focused ? 'white' : 'rgba(255,255,255,0.25)');
+        }
+      });
+    };
 
     return () => {
       d3.selectAll('.exp-tooltip').remove();
@@ -593,7 +730,7 @@ const Experience = () => {
           )}
 
           <div className="flex flex-col lg:flex-row gap-4 w-full overflow-hidden min-h-[280px] sm:min-h-[320px]">
-            {/* Left: calculation derivation for selected role — how scores were derived */}
+            {/* Left: how the scores for the selected role were derived */}
             <div className="lg:min-w-[200px] lg:max-w-[260px] flex-shrink-0 p-3 rounded-lg bg-background/50 border border-border/30 text-xs">
               <p className="font-medium text-foreground mb-1.5">How the score was derived</p>
               <p className="text-muted-foreground mb-2 leading-tight">

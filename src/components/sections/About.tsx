@@ -100,26 +100,33 @@ const About = () => {
           <div className="about-content opacity-0">
             <div className="space-y-6">
               <p className="text-muted-foreground leading-relaxed">
-                I am a <span className="text-foreground font-medium">Lead Security Engineer</span> with 3 years across
-                cloud security, DevSecOps, and secure architecture. At <span className="text-foreground font-medium">Cygne Noir Cyber</span> I
-                own the security architecture and the CI/CD security gates for a managed security platform that runs
-                on isolated per-client AWS deployments: one EC2 instance per client in a separate AWS account,
-                data locality as a hard rule so no scan input leaves the client deployment, and Twingate zero-trust access.
+                I am a <span className="text-foreground font-medium">Lead Security Engineer</span>, three years in,
+                working in cloud security and DevSecOps at <span className="text-foreground font-medium">Cygne Noir Cyber</span>.
+                I own how our managed security platform is built and what stops bad code reaching production.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                I run a scanner fleet of <span className="text-foreground">Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape</span> into
-                a <span className="text-foreground">DefectDojo</span> findings pipeline with bidirectional JIRA integration, SARIF normalization,
-                and <span className="text-foreground">EPSS, CISA KEV and SSVC</span> prioritization. I also own the SOC 2 readiness
-                program and cloud posture across AWS and Azure.
+                Every client runs on their own EC2 instance inside their own AWS account, and their code never
+                leaves it. That was a deliberate call. It is the difference between telling a client their data is
+                separated from everyone else's and being able to show them why it cannot be otherwise. Access goes
+                through <span className="text-foreground">Twingate</span> instead of a VPN, so nobody is sitting on
+                standing SSH into a client box.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                What separates this from most cloud security work is that I write the code I secure. I shipped a
-                production application backend as sole developer (FastAPI, Supabase, Redis, AWS) along with its
-                application security architecture. I previously led a two-person application and API penetration
-                testing function, which is where the triage judgment comes from. That offensive work is background,
-                not what I am hired to do now.
+                Running the scanners is the easy part. <span className="text-foreground">Trivy, Prowler, Checkov,
+                ScoutSuite, Semgrep, Gitleaks and Kubescape</span> between them find more than anyone can fix, so
+                everything lands in <span className="text-foreground">DefectDojo</span>, syncs both ways with JIRA,
+                and gets ranked by <span className="text-foreground">EPSS, CISA KEV and SSVC</span> rather than raw
+                CVSS. A critical nobody is exploiting should not jump the queue ahead of something already being
+                used in the wild.
+              </p>
+
+              <p className="text-muted-foreground leading-relaxed">
+                What makes me useful is that I write the code I secure. I shipped a production backend on my own,
+                FastAPI on Supabase and Redis, plus the security architecture around it. I also spent two years
+                running a small application and API pentest function and signing off the client reports, which is
+                where my sense of which findings actually matter came from. That part is background now, not the job.
               </p>
 
               {/* CTA */}
