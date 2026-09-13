@@ -1,11 +1,15 @@
 import Navigation from '@/components/layout/Navigation';
 import Hero from '@/components/sections/Hero';
+import NowBlock from '@/components/sections/NowBlock';
 import About from '@/components/sections/About';
 import Experience from '@/components/sections/Experience';
 import Skills from '@/components/sections/Skills';
 import LearningAchievements from '@/components/sections/LearningAchievements';
 import Projects from '@/components/sections/Projects';
+import DecisionLog from '@/components/sections/DecisionLog';
+import Homelab from '@/components/sections/Homelab';
 import Research from '@/components/sections/Research';
+import Talks from '@/components/sections/Talks';
 import Blogs from '@/components/sections/Blogs';
 import Services from '@/components/sections/Services';
 import Testimonials from '@/components/sections/Testimonials';
@@ -18,12 +22,16 @@ const Index = () => {
       <Navigation />
       <main>
         <Hero />
+        <NowBlock />
         <About />
         <Experience />
         <Skills />
         <LearningAchievements />
         <Projects />
+        <DecisionLog />
+        <Homelab />
         <Research />
+        <Talks />
         <Blogs />
         <Services />
         <Testimonials />

@@ -25,6 +25,22 @@ const BASE_URL = "https://hackernoon.com/";
 
 export const articles: Article[] = [
   {
+    id: 28,
+    title: "PicoTTY: A KVM Without the V (or the M) for My Homelab",
+    description:
+      "Building PICOTTY, a networked serial console for a fleet of headless Proxmox machines: Pi Pico nodes with W5100S Ethernet and USB HID keystroke injection, coordinated by a Pi Zero 2 W hub and one browser dashboard. Covered by Hackaday and CNX Software.",
+    date: "August 10, 2026",
+    // TODO: replace with the exact accumulated reading time from the HackerNoon
+    // dashboard. Derived here from 400 reads at roughly 14 min per read.
+    readTime: "3.89 d",
+    reads: 400,
+    url: `${BASE_URL}picotty-a-kvm-without-the-v-or-the-m-for-my-homelab`,
+    tags: ["Raspberry Pi", "Homelab", "Hardware", "CircuitPython", "KVM"],
+    category: "Tools & Automation",
+    categories: ["Tools & Automation", "Cloud Security"],
+    featured: true,
+  },
+  {
     id: 1,
     title: "Inside My $1,000 Homelab: How I Rebuilt Big Tech Services in a Tiny Rack",
     description: "Building enterprise-grade services in a compact homelab setup.",

@@ -72,9 +72,24 @@ const Research = () => {
                   <h3 className="font-medium text-foreground mb-1 group-hover:text-foreground/90 transition-colors">
                     {paper.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 font-mono text-xs text-muted-foreground">
+                    <span className="px-2 py-0.5 rounded border border-border/60">
+                      {paper.venue}
+                    </span>
+                    {/* Years are shown where confirmed; a missing year is stated, not guessed. */}
+                    <span>{paper.year ?? 'Year to be confirmed'}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
                     {paper.description}
                   </p>
+                  {paper.relatedProject && (
+                    <p className="mt-2 font-mono text-xs text-muted-foreground">
+                      Based on{' '}
+                      <span className="text-foreground underline underline-offset-2">
+                        {paper.relatedProject.name}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Arrow */}

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { personalInfo, stats } from '@/data/portfolioData';
-import { Shield, Code, Brain, Terminal } from 'lucide-react';
+import { Shield, Cloud, Brain, Terminal } from 'lucide-react';
 
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -52,10 +52,10 @@ const About = () => {
   }, []);
 
   const cards = [
-    { icon: Shield, label: 'Certifications', value: 'CEH V12, CND V2' },
-    { icon: Code, label: 'Projects', value: '9+ Completed' },
-    { icon: Brain, label: 'Research', value: '7+ Papers' },
-    { icon: Terminal, label: 'Experience', value: '3+ Years' },
+    { icon: Cloud, label: 'Cloud Security', value: 'AWS & Azure' },
+    { icon: Terminal, label: 'DevSecOps', value: 'CI/CD Gates' },
+    { icon: Shield, label: 'Certifications', value: 'CEH v12, CND' },
+    { icon: Brain, label: 'Research', value: '7 Papers' },
   ];
 
   return (
@@ -100,21 +100,26 @@ const About = () => {
           <div className="about-content opacity-0">
             <div className="space-y-6">
               <p className="text-muted-foreground leading-relaxed">
-                I am a <span className="text-foreground font-medium">Security Engineer</span> with a strong foundation in offensive security,
-                holding a BCA in Cybersecurity from Jain University along with <span className="text-foreground">CEH v12</span> and <span className="text-foreground">CND</span> certifications.
+                I am a <span className="text-foreground font-medium">Lead Security Engineer</span> with 3 years across
+                cloud security, DevSecOps, and secure architecture. At <span className="text-foreground font-medium">Cygne Noir Cyber</span> I
+                own the security architecture and the CI/CD security gates for a managed security platform that runs
+                on isolated per-client AWS deployments: one EC2 instance per client in a separate AWS account,
+                data locality as a hard rule so no scan input leaves the client deployment, and Twingate zero-trust access.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                At <span className="text-foreground font-medium">Cygne Noir Cyber</span>, I work across product development and applied research,
-                contributing to the design and implementation of Python-based security tools and API-driven systems.
-                My responsibilities span from building automation frameworks to supporting client-facing engagements
-                involving secure backend development and threat detection capabilities.
+                I run a scanner fleet of <span className="text-foreground">Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape</span> into
+                a <span className="text-foreground">DefectDojo</span> findings pipeline with bidirectional JIRA integration, SARIF normalization,
+                and <span className="text-foreground">EPSS, CISA KEV and SSVC</span> prioritization. I also own the SOC 2 readiness
+                program and cloud posture across AWS and Azure.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                Beyond my core role, I actively develop custom scripts, publish technical content, and contribute
-                to community learning platforms. I rank among the <span className="text-foreground font-medium">top 1% on TryHackMe</span> and
-                continue to refine my skills in penetration testing, bug hunting, and secure application architecture.
+                What separates this from most cloud security work is that I write the code I secure. I shipped a
+                production application backend as sole developer (FastAPI, Supabase, Redis, AWS) along with its
+                application security architecture. I previously led a two-person application and API penetration
+                testing function, which is where the triage judgment comes from. That offensive work is background,
+                not what I am hired to do now.
               </p>
 
               {/* CTA */}

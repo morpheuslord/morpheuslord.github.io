@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { achievements, certifications } from '@/data/portfolioData';
-import { Award, Trophy, Star, BookOpen, Github, Medal } from 'lucide-react';
+import { Trophy, Star, Github, Medal, Newspaper, ExternalLink } from 'lucide-react';
 
 const LearningAchievements = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -52,9 +52,9 @@ const LearningAchievements = () => {
         </div>
 
         {/* Achievements Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {achievements.map((achievement, index) => {
-            const icons = [Trophy, Star, Github];
+            const icons = [Newspaper, Trophy, Github, Star];
             const Icon = icons[index % icons.length];
             
             return (
@@ -82,24 +82,31 @@ const LearningAchievements = () => {
 
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {certifications.map((cert) => (
-            <div 
+            <a
               key={cert.id}
+              href={cert.verifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="achievement-card opacity-0 card-cyber rounded-xl p-6 group hover:border-foreground/20 transition-all duration-300"
+              aria-label={`Verify ${cert.title} with ${cert.issuer}`}
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-lg bg-foreground/5 flex items-center justify-center flex-shrink-0 group-hover:bg-foreground/10 transition-colors">
                   <Medal className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-foreground mb-1">{cert.title}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{cert.issuer}</p>
                   <p className="font-mono text-xs text-muted-foreground">
                     ID: {cert.certId}
                   </p>
+                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                    {cert.validity}
+                  </p>
                 </div>
-                <span className="font-mono text-xs text-muted-foreground">{cert.year}</span>
+                <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>

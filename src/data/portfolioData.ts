@@ -53,23 +53,30 @@ export function getHighlightCategories(h: ExperienceHighlight): MainExpCategory[
 
 export const personalInfo = {
   name: "Chiranjeevi Naidu",
-  title: "Security Engineer",
-  subtitle: "Backend Lead · Agentic AI Developer",
+  title: "Lead Security Engineer",
+  subtitle: "Cloud Security · DevSecOps · Secure Architecture",
+  // Public, indexed page: email and a contact form only. The phone number stays
+  // on the submittable PDF and off the website.
   email: "chiranjeevi.naidu@proton.me",
   linkedin: "https://www.linkedin.com/in/chiranjeevi-g-naidu/",
   github: "https://github.com/morpheuslord",
-  bio: `I am a Security Engineer and Backend Developer with 3+ years of experience across cybersecurity, production backend development, agentic AI systems, and technical leadership. At Cygne Noir Cyber I serve as Security Engineer & Backend Lead — sole developer of a production-grade backend system designed to scale to millions of users, with full ownership of cloud infrastructure across AWS and Azure, security architecture, and client delivery. Alongside this, I work part-time as a Full Stack Engineer at Golden Fork Ventures, building compliance and operations systems and deploying them on self-hosted Proxmox infrastructure running on custom hardware.
+  orcid: "https://orcid.org/0000-0002-0677-0474",
+  blog: "https://hackernoon.com/u/morpheuslord",
+  /** The five-second answer. Rendered above the fold. */
+  headline:
+    "I own the security architecture and the CI/CD security gates for a managed security platform that runs on isolated per-client AWS deployments. I also write the production backends I secure.",
+  bio: `I am a Lead Security Engineer with 3 years across cloud security, DevSecOps, and secure architecture. At Cygne Noir Cyber I own the security architecture and the CI/CD security gates for a multi-tenant managed security platform: one EC2 instance per client in a separate AWS account, data locality as a hard rule so no scan input leaves the client deployment, Twingate zero-trust access, and a scanner fleet of Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks and Kubescape feeding a DefectDojo findings pipeline with bidirectional JIRA integration and EPSS, CISA KEV and SSVC prioritization. I also own the SOC 2 readiness program and cloud posture across AWS and Azure.
 
-My technical depth spans offensive security (CEH v12, CND), full-stack API development, E2EE systems, DevSecOps, self-hosted infrastructure, and AI-driven automation. I build custom security tooling, design agentic workflows, and lead cross-functional teams — combining the ability to find vulnerabilities and the ability to build systems that resist them.
+What makes that different from most cloud security work is that I write the code I secure. I shipped a production application backend as sole developer (FastAPI, Supabase, Redis, AWS) designed to scale horizontally toward millions of users, along with its application security architecture. I also ran a two-person application and API penetration testing function, setting the methodology and signing off the client-facing reports, which is where my triage judgment comes from. Offensive security is background that explains the judgment, not what I am hired to do now.
 
-I publish actively on HackerNoon (27 articles, 199,521+ reads), hold 7 research publications, and rank in the top 1% on TryHackMe.`,
+Alongside this I work part-time as a Full Stack Engineer at Golden Fork Ventures, building compliance and operations software and running it myself on self-hosted Proxmox VE with per-service LXC and VM isolation. I have seven published papers in cybersecurity and machine learning, security blogs past 100,000 cumulative reads on HackerNoon, and CEH v12 and CND certifications.`,
 };
 
 export const stats = [
-  { label: "Certifications", value: "CEH V12, CND V2" },
-  { label: "Projects", value: "9+" },
-  { label: "Research Papers", value: "7+" },
-  { label: "Experience", value: "3+ Years" },
+  { label: "Experience", value: "3 Years" },
+  { label: "GitHub Stars", value: "1,665" },
+  { label: "Research Papers", value: "7" },
+  { label: "Certifications", value: "CEH v12, CND" },
 ];
 
 export const experiences: Array<{
@@ -78,198 +85,215 @@ export const experiences: Array<{
   company: string;
   period: string;
   duration: string;
+  /** Seniority/engagement label shown as a chip. Explicit, not derived from array order. */
+  level: string;
   current: boolean;
   highlights: ExperienceHighlight[];
 }> = [
     {
       id: 1,
-      title: "Security Engineer & Backend Lead",
+      title: "Lead Security Engineer",
       company: "Cygne Noir Cyber",
-      period: "Oct 2024 - Present",
-      duration: "1.9+ Years",
+      period: "2026 - Present",
+      duration: "Current role",
+      level: "Lead",
       current: true,
       highlights: [
         {
-          title: "Sole Production Backend Developer",
-          desc: "Sole backend developer for a production application — independently designed, architected, and deployed the entire backend system as a single contributor, built to scale from thousands to millions of concurrent users.",
-          mainExp: "development",
-          mainExpCategories: ["development", "delivery", "strategy"],
+          title: "Security sign-off authority",
+          desc: "Hold sign-off on security architecture, tooling selection, and risk acceptance as lead security researcher and advisor for the managed security platform.",
+          mainExp: "advisory",
+          mainExpCategories: ["advisory", "strategy", "security"],
           importance: 5,
         },
         {
-          title: "Python & API Development",
-          desc: "Developed secure backend systems and tooling using Python and REST APIs.",
-          mainExp: "development",
-          mainExpCategories: ["development", "security"],
+          title: "SOC 2 readiness program ownership",
+          desc: "Own the SOC 2 readiness program across all deployed environments: control mapping, gap remediation, and evaluation of Drata for compliance automation.",
+          mainExp: "security",
+          mainExpCategories: ["security", "advisory", "delivery"],
           importance: 5,
         },
         {
-          title: "90% Cloud Cost Reduction",
-          desc: "Conducted infrastructure cost simulations and optimization analysis — identified critical S3 and network cost inefficiencies and implemented targeted optimizations achieving a 90% reduction in projected cloud infrastructure costs at million-user scale.",
+          title: "Cloud security ownership (AWS and Azure)",
+          desc: "Own cloud security across AWS and Azure client deployments, covering the per-client account isolation model, IAM boundaries, Cloudflare security and DNS, and ongoing posture management.",
+          mainExp: "security",
+          mainExpCategories: ["security", "strategy", "delivery"],
+          importance: 5,
+        },
+        {
+          title: "CI/CD and production DevSecOps ownership",
+          desc: "Own CI/CD and production DevSecOps end to end: which gates run (Semgrep, Gitleaks, Trivy, Checkov, Syft), at which pipeline stage they run, and what blocks a merge or a deploy.",
+          mainExp: "security",
+          mainExpCategories: ["security", "development", "delivery", "strategy"],
+          importance: 5,
+        },
+        {
+          title: "Hiring and team input",
+          desc: "Hire engineers, manage freelancers, and advise the founder on team performance, promotions, and role changes.",
+          mainExp: "leadership",
+          mainExpCategories: ["leadership", "advisory"],
+          importance: 4,
+        },
+        {
+          title: "Security training: 7 trainees",
+          desc: "Trained 7 security trainees on the platform's scanner output, DefectDojo triage workflow, and L2 SOC escalation path.",
+          mainExp: "advisory",
+          mainExpCategories: ["advisory", "leadership", "collaboration"],
+          importance: 4,
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: "Security Engineer & Backend Lead",
+      company: "Cygne Noir Cyber",
+      period: "Oct 2024 - Sep 2026",
+      duration: "2 years",
+      level: "Senior",
+      current: false,
+      highlights: [
+        // --- Platform security and DevSecOps ---
+        {
+          title: "Platform security architecture",
+          desc: "Designed the security architecture for the managed platform: one EC2 instance per client in a separate AWS account, data locality as a hard rule so no scan input leaves the client deployment, Twingate zero-trust access, and an RBAC management API. The isolation model removes cross-tenant data exposure as a class of risk.",
+          mainExp: "security",
+          mainExpCategories: ["security", "strategy", "development"],
+          importance: 5,
+        },
+        {
+          title: "Scanner fleet operations",
+          desc: "Ran the scanner fleet across client deployments: Trivy, Prowler, Checkov, ScoutSuite, Semgrep, Gitleaks, and Kubescape.",
+          mainExp: "security",
+          mainExpCategories: ["security", "delivery"],
+          importance: 5,
+        },
+        {
+          title: "Findings pipeline on DefectDojo",
+          desc: "Built the findings pipeline on DefectDojo as the hub, with bidirectional JIRA integration, SARIF normalization, and LLM-assisted triage enrichment, including tracing CVE misattribution on shared-CDN infrastructure to cut false positives.",
+          mainExp: "security",
+          mainExpCategories: ["security", "development", "delivery"],
+          importance: 5,
+        },
+        {
+          title: "Risk prioritization: EPSS, KEV, SSVC",
+          desc: "Prioritized remediation with EPSS, CISA KEV, and SSVC, which moved known-exploited findings ahead of high-CVSS findings with no evidence of exploitation.",
+          mainExp: "security",
+          mainExpCategories: ["security", "strategy"],
+          importance: 5,
+        },
+        {
+          title: "Detection and response",
+          desc: "Deployed Wazuh across client environments, integrated EDR and SIEM sources, and ran human-in-the-loop L2 SOC coverage with customer-facing incident support.",
+          mainExp: "security",
+          mainExpCategories: ["security", "delivery", "collaboration"],
+          importance: 5,
+        },
+        {
+          title: "Zero-trust production hardening",
+          desc: "Hardened production to zero trust: moved management and administrative interfaces off the public internet behind Twingate and removed standing direct SSH access to client instances.",
+          mainExp: "security",
+          mainExpCategories: ["security", "development"],
+          importance: 5,
+        },
+        {
+          title: "90% projected cloud cost reduction",
+          desc: "Owned AWS and Azure infrastructure and spend: ran a cost simulation at million-user scale, found S3 and network inefficiencies, and implemented optimizations projected to cut cloud costs by 90%.",
           mainExp: "strategy",
           mainExpCategories: ["strategy", "delivery", "development"],
           importance: 5,
         },
         {
-          title: "Autonomous Threat Detection",
-          desc: "Designed and implemented a comprehensive security architecture including an autonomous threat detection, monitoring, and automated ban system for real-time application protection.",
+          title: "Regulated EU client delivery",
+          desc: "Designed security architecture for clients under EU regulatory regimes (DORA, NIS2, GDPR).",
           mainExp: "security",
-          mainExpCategories: ["security", "development", "strategy"],
+          mainExpCategories: ["security", "advisory", "strategy"],
+          importance: 5,
+        },
+        // --- Engineering and delivery leadership ---
+        {
+          title: "Led a 2-person pentest function",
+          desc: "Led a two-person application and API penetration testing function: set direction and methodology, ran white-box and black-box engagements, performed manual and automated code review, and wrote and signed off the client-facing reports.",
+          mainExp: "security",
+          mainExpCategories: ["security", "leadership", "delivery"],
           importance: 5,
         },
         {
-          title: "Agentic AI Systems",
-          desc: "Designed autonomous agents for internal security automation and threat response.",
+          title: "Sole backend developer, production app",
+          desc: "Built and shipped the backend for a production dating application as sole backend developer and technical lead (FastAPI, Supabase, Redis, AWS), designed to scale horizontally toward millions of users, in a 5-person product team of 3 frontend engineers, 1 backend engineer, and 1 QA engineer, delegating tasks, reviewing code, and setting development pace across the 3 frontend engineers.",
           mainExp: "development",
-          mainExpCategories: ["development", "security"],
+          mainExpCategories: ["development", "leadership", "delivery"],
           importance: 5,
         },
         {
-          title: "MCP-Based Architecture",
-          desc: "Worked on modular control pipelines for process-level control.",
-          mainExp: "strategy",
-          mainExpCategories: ["strategy", "development"],
+          title: "Application security architecture",
+          desc: "Designed the application security architecture for that product: autonomous threat detection, monitoring, and an automated ban system for real-time abuse response, plus the architecture plans and implementation roadmaps for later phases.",
+          mainExp: "security",
+          mainExpCategories: ["security", "strategy", "development"],
+          importance: 5,
+        },
+        {
+          title: "Agentic AI and research",
+          desc: "Built agentic workflows and modular control pipelines for security automation and threat analysis, and contributed research on E2EE systems and secure agentic AI.",
+          mainExp: "research",
+          mainExpCategories: ["research", "security", "development"],
           importance: 4,
         },
         {
-          title: "Client-Facing Research",
-          desc: "Collaborated with clients to deliver research-driven automation.",
-          mainExp: "collaboration",
-          mainExpCategories: ["collaboration", "research"],
-          importance: 5,
-        },
-        {
-          title: "Security Automation",
-          desc: "Built automated scripts for vulnerability validation and pipeline integration.",
-          mainExp: "security",
-          mainExpCategories: ["security", "development"],
-          importance: 4,
-        },
-        {
-          title: "Training & Mentorship",
-          desc: "Providing training and guidance to cybersecurity trainees.",
-          mainExp: "advisory",
-          mainExpCategories: ["advisory", "leadership"],
-          importance: 5,
-        },
-        {
-          title: "Application Pentesting",
-          desc: "Lead a Team in performing application pentesting.",
-          mainExp: "security",
-          mainExpCategories: ["security", "leadership"],
-          importance: 5,
-        },
-        {
-          title: "Client Admin Command Center",
-          desc: "Built a fully-featured client admin command center for operational management, user oversight, and platform control.",
-          mainExp: "development",
-          mainExpCategories: ["development", "delivery"],
-          importance: 5,
-        },
-        {
-          title: "Recruiting",
-          desc: "Recruiting and managing a team of cybersecurity professionals and interns.",
-          mainExp: "leadership",
-          mainExpCategories: ["leadership", "advisory"],
-          importance: 5,
-        },
-        {
-          title: "Team Lead in MVP Projects",
-          desc: "Led teams across approximately 10 MVP-level projects, coordinating development and ensuring successful delivery.",
+          title: "Delivery and process",
+          desc: "Ran delivery end to end: sprint management, product-lifecycle planning, the client admin command center, and product and application security testing across 6+ research initiatives, of which 4 reached MVP and 1 is live in production.",
           mainExp: "delivery",
-          mainExpCategories: ["delivery", "leadership"],
+          mainExpCategories: ["delivery", "leadership", "research"],
           importance: 5,
         },
         {
-          title: "Architectural Design Leadership",
-          desc: "Led architectural design and system architecture for all MVP projects, establishing technical standards and best practices.",
-          mainExp: "strategy",
-          mainExpCategories: ["strategy", "leadership"],
+          title: "Direct client management",
+          desc: "Managed clients directly through requirement-gathering sessions, change requests, and delivery communication.",
+          mainExp: "collaboration",
+          mainExpCategories: ["collaboration", "delivery"],
           importance: 5,
         },
         {
-          title: "E2EE Systems Research",
-          desc: "Contributed to cross-domain research in E2EE systems and secure agentic AI, expanding technical scope into privacy-focused secure communication architecture.",
-          mainExp: "research",
-          mainExpCategories: ["research", "security"],
+          title: "External representation",
+          desc: "Spoke at university sessions and ran internal training for interns and employees.",
+          mainExp: "advisory",
+          mainExpCategories: ["advisory", "collaboration"],
           importance: 4,
-        },
-        {
-          title: "Compliance & Regulatory",
-          desc: "Performed compliance checks and ensured regulatory and security compliance across all deployed environments, proactively identifying and remediating gaps across tooling and processes.",
-          mainExp: "security",
-          mainExpCategories: ["security", "advisory"],
-          importance: 4,
-        },
-        {
-          title: "Cross-Domain Research",
-          desc: "Worked across 6+ product research initiatives, converting 4 into MVP-level projects and 1 into a fully live production deployment.",
-          mainExp: "research",
-          mainExpCategories: ["research", "strategy"],
-          importance: 5,
-        },
-        {
-          title: "Architecture Documentation",
-          desc: "Authored detailed backend architecture plans for upcoming development phases, ensuring technical continuity, scalability, and clear implementation road-maps for future team execution.",
-          mainExp: "strategy",
-          mainExpCategories: ["strategy", "advisory", "development"],
-          importance: 4,
-        },
-        {
-          title: "Cloud Infrastructure Ownership",
-          desc: "Owned end-to-end cloud infrastructure — deployment, maintenance, cost optimization, and Cloudflare security configuration across AWS and Azure environments.",
-          mainExp: "development",
-          mainExpCategories: ["development", "strategy", "delivery"],
-          importance: 5,
-        },
-        {
-          title: "Sprint & Product Management",
-          desc: "Implemented sprint management and product life-cycle planning, driving a faster and more structured development workflow across the team.",
-          mainExp: "leadership",
-          mainExpCategories: ["leadership", "delivery"],
-          importance: 5,
         },
       ],
     },
     {
-      id: 5,
-      title: "Full Stack Engineer",
+      id: 3,
+      title: "Full Stack Engineer (Part-time)",
       company: "Golden Fork Ventures",
       period: "Feb 2026 - Present",
-      duration: "6+ months · Part-time · Remote",
+      duration: "7+ months · Part-time · Remote",
+      level: "Part-time",
       current: true,
       highlights: [
         {
-          title: "Compliance Systems Development",
-          desc: "Developing and maintaining software systems necessary for regulatory and operational compliance across Golden Fork Ventures.",
-          mainExp: "development",
-          mainExpCategories: ["development", "security"],
-          importance: 5,
-        },
-        {
-          title: "Day-to-Day Operations Software",
-          desc: "Building and maintaining full-stack systems that power day-to-day business operations, from internal tooling to operational workflows.",
+          title: "Compliance and operations software",
+          desc: "Built and shipped the compliance and operations software the business runs on, working remotely alongside the primary role.",
           mainExp: "development",
           mainExpCategories: ["development", "delivery"],
           importance: 5,
         },
         {
-          title: "Custom Hardware Deployment",
-          desc: "Deploying production systems on custom hardware — provisioning, configuring, and maintaining on-premise deployments tailored to operational needs.",
+          title: "On-prem provisioning and networking",
+          desc: "Provisioned and deployed those systems on on-premise hardware, including networking and edge deployment.",
           mainExp: "delivery",
           mainExpCategories: ["delivery", "development"],
           importance: 5,
         },
         {
-          title: "Self-Hosted Proxmox Infrastructure",
-          desc: "Running self-hosted server infrastructure on Proxmox VE — hypervisor management, LXC/VM isolation per service, and secure remote access for deployed systems.",
+          title: "Self-hosted Proxmox VE infrastructure",
+          desc: "Ran the self-hosted infrastructure on Proxmox VE with per-service LXC and VM isolation and secure remote access.",
           mainExp: "development",
-          mainExpCategories: ["development", "strategy"],
-          importance: 4,
+          mainExpCategories: ["development", "security", "strategy"],
+          importance: 5,
         },
         {
-          title: "System Maintenance & Reliability",
-          desc: "Maintaining deployed systems end-to-end, ensuring uptime, applying updates, and keeping compliance-critical services reliable.",
+          title: "Monitoring and maintenance",
+          desc: "Kept compliance-critical services available through monitoring, patching, and maintenance.",
           mainExp: "delivery",
           mainExpCategories: ["delivery", "advisory"],
           importance: 4,
@@ -277,217 +301,203 @@ export const experiences: Array<{
       ],
     },
     {
-      id: 2,
-      title: "Freelance Developer & Researcher",
-      company: "Independent",
-      period: "Mar 2024 - Oct 2024",
-      duration: "7 months",
-      current: false,
-      highlights: [
-        {
-          title: "Restaurant POS System",
-          desc: "Sole developer on a full-stack Point-of-Sale system (FastAPI + MongoDB + Redis) — order management, inventory, billing, and reporting. Deployed on self-hosted Proxmox hypervisor with LXC containers and Tailscale mesh VPN for zero-cloud-cost edge infrastructure.",
-          mainExp: "development",
-          mainExpCategories: ["development", "security"],
-          importance: 5,
-        },
-        {
-          title: "Designer Marketplace Platform",
-          desc: "Built end-to-end marketplace (React/Next.js + FastAPI + MongoDB + Redis) connecting designers with clients. Dual-sided user model, service listings, booking/transaction workflows. Deployed via Vercel + self-managed VPS, optimized to ₹2–3k/month operational cost.",
-          mainExp: "development",
-          mainExpCategories: ["development", "collaboration"],
-          importance: 5,
-        },
-        {
-          title: "Infrastructure Architecture",
-          desc: "Designed infrastructure under real constraints — converted low-power hardware into Proxmox hypervisor with per-service LXC isolation, and architected cost-optimized cloud deployments with Vercel + VPS stacks.",
-          mainExp: "development",
-          mainExpCategories: ["development", "security"],
-          importance: 4,
-        },
-        {
-          title: "Security Research & Tooling",
-          desc: "Designed PoC implementations for security research, built Python and Bash automation scripts for testing, monitoring, and data processing pipelines.",
-          mainExp: "research",
-          mainExpCategories: ["security", "research"],
-          importance: 4,
-        },
-        {
-          title: "Technical Writing & Documentation",
-          desc: "Delivered full system documentation covering architecture, container topology, and operational runbooks. Provided technical writing and review support for research papers.",
-          mainExp: "research",
-          mainExpCategories: ["research", "advisory"],
-          importance: 3,
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Offensive Security Engineer Intern",
-      company: "Averlon/Avercyber",
-      period: "Jul 2023 - Mar 2024",
-      duration: "8 months",
-      current: false,
-      highlights: [
-        {
-          title: "Azure and AWS Security",
-          desc: "Managed cloud infrastructure security and compliance assessments.",
-          mainExp: "security",
-          mainExpCategories: ["security", "advisory"],
-          importance: 4,
-        },
-        {
-          title: "Linux Optimization",
-          desc: "Optimized system initialization and security hardening.",
-          mainExp: "development",
-          mainExpCategories: ["research", "security"],
-          importance: 4,
-        },
-        {
-          title: "SBOM Tools",
-          desc: "Evaluated Software Bill of Materials tools for integration.",
-          mainExp: "development",
-          mainExpCategories: ["research", "delivery", "strategy", "security"],
-          importance: 3,
-        },
-        {
-          title: "Terraform Projects",
-          desc: "Deployed security-focused infrastructure using IaC.",
-          mainExp: "advisory",
-          mainExpCategories: ["advisory", "delivery"],
-          importance: 4,
-        },
-        {
-          title: "Vulnerability Research",
-          desc: "Conducted in-depth security research and exploit development.",
-          mainExp: "research",
-          mainExpCategories: ["strategy", "security"],
-          importance: 4,
-        },
-        {
-          title: "G.O.A.T Project Development",
-          desc: "Led development of the G.O.A.T security project initiative.",
-          mainExp: "development",
-          mainExpCategories: ["collaboration", "security"],
-          importance: 4,
-        },
-        {
-          title: "AWS and Azure Development",
-          desc: "Developed cloud-native solutions and infrastructure on AWS and Azure platforms.",
-          mainExp: "development",
-          mainExpCategories: ["collaboration", "security"],
-          importance: 4,
-        },
-        {
-          title: "Containerized App Development",
-          desc: "Built and deployed containerized applications using Docker and orchestration tools.",
-          mainExp: "delivery",
-          mainExpCategories: ["delivery", "development"],
-          importance: 4,
-        },
-      ],
-    },
-    {
       id: 4,
-      title: "Cybersecurity Engineer Intern",
-      company: "Averlon/Avercyber",
-      period: "May 2023 - Jul 2023",
-      duration: "3 months",
+      title: "Freelance Full Stack Developer & Researcher",
+      company: "Independent · 4 client companies",
+      period: "Mar 2024 - Oct 2024",
+      duration: "4 client engagements",
+      level: "Freelance",
       current: false,
       highlights: [
         {
-          title: "Red Team Tools",
-          desc: "Developed automated tools for threat detection and assessment.",
+          title: "AI and backend engineer (longest engagement)",
+          desc: "Worked as the AI and backend engineer for one client across the longest of the four engagements, building and shipping Python and FastAPI services with LLM-backed processing.",
           mainExp: "development",
-          mainExpCategories: ["development", "security"],
-          importance: 4,
+          mainExpCategories: ["development", "research"],
+          importance: 5,
         },
         {
-          title: "Vulnerability Assessments",
-          desc: "Performed comprehensive security assessments and pen testing.",
-          mainExp: "security",
-          mainExpCategories: ["security", "research"],
-          importance: 4,
-        },
-        {
-          title: "AWS Security",
-          desc: "Conducted AWS Rules assessments for cloud security.",
-          mainExp: "security",
-          mainExpCategories: ["security", "advisory"],
-          importance: 4,
-        },
-        {
-          title: "LLM Integration",
-          desc: "Research on AI implementation for cybersecurity applications.",
+          title: "Insurance filing automation research",
+          desc: "Researched and prototyped insurance filing automation for a second client.",
           mainExp: "research",
           mainExpCategories: ["research", "development"],
           importance: 4,
         },
         {
-          title: "Network Assessment and Testing",
-          desc: "Performed network security assessments and penetration testing.",
+          title: "Online security enumeration",
+          desc: "Ran online security enumeration work for a third client, the single security engagement of the four.",
           mainExp: "security",
-          mainExpCategories: ["security", "delivery"],
+          mainExpCategories: ["security", "research"],
           importance: 4,
         },
         {
-          title: "Cloud Web Testing",
-          desc: "Conducted security testing for cloud-hosted web applications.",
+          title: "Restaurant point-of-sale system",
+          desc: "Built a restaurant point-of-sale system for a fourth client and deployed the full backend on local hardware, including the networking adjustments and edge deployment.",
+          mainExp: "development",
+          mainExpCategories: ["development", "delivery"],
+          importance: 5,
+        },
+        {
+          title: "Design studio site",
+          desc: "Built a design studio site for a designer selling third-party products on Amazon, kept at very low hosting cost.",
+          mainExp: "development",
+          mainExpCategories: ["development", "collaboration"],
+          importance: 4,
+        },
+      ],
+    },
+    {
+      id: 5,
+      title: "Security Engineer Intern (Cybersecurity, then Offensive Security)",
+      company: "Avercyber Technologies",
+      period: "May 2023 - Mar 2024",
+      duration: "11 months · Internship",
+      level: "Internship",
+      current: false,
+      highlights: [
+        {
+          title: "AWS and Azure cloud security assessments",
+          desc: "Ran cloud security assessments across AWS and Azure environments, focused on misconfiguration and exposure risk.",
           mainExp: "security",
-          mainExpCategories: ["security", "development"],
+          mainExpCategories: ["security", "advisory"],
+          importance: 4,
+        },
+        {
+          title: "Terraform assessment environments",
+          desc: "Built and deployed security-focused Terraform environments for assessment and research workloads.",
+          mainExp: "development",
+          mainExpCategories: ["development", "delivery", "security"],
+          importance: 4,
+        },
+        {
+          title: "SBOM and supply-chain research",
+          desc: "Researched SBOM and supply-chain security tooling, Linux initialization behavior, and AWS security rules.",
+          mainExp: "research",
+          mainExpCategories: ["research", "security", "strategy"],
+          importance: 4,
+        },
+        {
+          title: "Python security tooling",
+          desc: "Wrote Python security automation and red-team tooling, and supported vulnerability assessment, reporting, and remediation validation.",
+          mainExp: "development",
+          mainExpCategories: ["development", "security"],
           importance: 4,
         },
       ],
     },
   ];
 
+/** Ordered for a cloud security and DevSecOps reader: cloud first, offensive
+ *  work last and explicitly labelled as background. */
 export const skillCategories = [
   {
+    id: "cloud-security",
+    name: "Cloud Security",
+    skills: [
+      { name: "AWS", level: 85 },
+      { name: "Multi-Account Isolation", level: 85 },
+      { name: "IAM Boundaries", level: 80 },
+      { name: "Cloudflare", level: 75 },
+      { name: "Threat Modeling", level: 80 },
+      { name: "Azure", level: 55 },
+    ],
+  },
+  {
+    id: "devsecops",
+    name: "DevSecOps & CI/CD Security",
+    skills: [
+      { name: "Pipeline Security Gates", level: 85 },
+      { name: "Semgrep", level: 85 },
+      { name: "Gitleaks", level: 85 },
+      { name: "Trivy", level: 85 },
+      { name: "Checkov", level: 80 },
+      { name: "Syft / SBOM", level: 80 },
+    ],
+  },
+  {
+    id: "iac-containers",
+    name: "Infrastructure as Code & Containers",
+    skills: [
+      { name: "Terraform", level: 80 },
+      { name: "Docker", level: 85 },
+      { name: "Docker Compose", level: 85 },
+      { name: "Kubernetes", level: 70 },
+      { name: "Kubescape", level: 75 },
+    ],
+  },
+  {
+    id: "detection",
+    name: "Detection & Response Tooling",
+    skills: [
+      { name: "Wazuh", level: 80 },
+      { name: "SIEM / EDR Integration", level: 80 },
+      { name: "DefectDojo", level: 85 },
+      { name: "JIRA Findings Workflow", level: 80 },
+    ],
+  },
+  {
+    id: "vuln-management",
+    name: "Vulnerability Management",
+    skills: [
+      { name: "EPSS", level: 85 },
+      { name: "CISA KEV", level: 85 },
+      { name: "SSVC Prioritization", level: 80 },
+      { name: "SARIF Normalization", level: 80 },
+      { name: "Triage Automation", level: 85 },
+    ],
+  },
+  {
+    id: "ai-security",
+    name: "AI Security & Agentic Systems",
+    skills: [
+      { name: "Securing Agentic Pipelines", level: 85 },
+      { name: "LLM-Assisted Triage", level: 85 },
+      { name: "Agent & Prompt Threat Surface", level: 80 },
+      { name: "OpenAI / Llama / Ollama", level: 85 },
+    ],
+  },
+  {
     id: "programming",
-    name: "Programming & Development",
+    name: "Programming & Automation",
     skills: [
       { name: "Python", level: 95 },
-      { name: "Shell/Bash", level: 85 },
-      { name: "JavaScript", level: 70 },
-      { name: "Flask/FastAPI", level: 80 },
-      { name: "Git/GitHub", level: 90 },
-      { name: "API Development", level: 70 },
+      { name: "Bash", level: 85 },
+      { name: "FastAPI", level: 85 },
+      { name: "REST API Design", level: 85 },
+      { name: "E2EE Backend Development", level: 75 },
     ],
   },
   {
-    id: "security",
-    name: "Cybersecurity & Pen Testing",
+    id: "compliance",
+    name: "Compliance & Risk",
     skills: [
-      { name: "Burp Suite", level: 90 },
-      { name: "Nmap", level: 90 },
-      { name: "Wireshark", level: 85 },
-      { name: "Metasploit", level: 75 },
-      { name: "OWASP", level: 80 },
-      { name: "Network Security", level: 85 },
+      { name: "SOC 2 Readiness", level: 80 },
+      { name: "Control Mapping", level: 80 },
+      { name: "Audit Readiness", level: 75 },
+      { name: "Regulated-Client Delivery", level: 75 },
     ],
   },
   {
-    id: "cloud",
-    name: "Cloud & Infrastructure",
+    id: "offensive",
+    name: "Offensive Security (background)",
     skills: [
-      { name: "AWS", level: 80 },
-      { name: "Docker", level: 85 },
-      { name: "Terraform", level: 80 },
-      { name: "Linux Admin", level: 90 },
-      { name: "CI/CD", level: 60 },
-      { name: "Azure", level: 50 },
+      { name: "Web & API Pentesting", level: 85 },
+      { name: "White-Box Methodology", level: 80 },
+      { name: "Black-Box Methodology", level: 80 },
+      { name: "Attack Surface Analysis", level: 80 },
+      { name: "Network VAPT", level: 80 },
     ],
   },
   {
-    id: "ai",
-    name: "AI & Machine Learning",
+    id: "self-hosted",
+    name: "Self-Hosted Infrastructure",
     skills: [
-      { name: "LLMs", level: 90 },
-      { name: "RAG & Agentic AI", level: 90 },
-      { name: "LangChain", level: 80 },
-      { name: "Prompt Engineering", level: 90 },
-      { name: "MCP", level: 85 },
-      { name: "Vector DBs", level: 70 },
+      { name: "Proxmox VE", level: 85 },
+      { name: "LXC / VM Isolation", level: 85 },
+      { name: "Komodo", level: 80 },
+      { name: "Prometheus", level: 75 },
+      { name: "Grafana", level: 75 },
+      { name: "Tailscale", level: 80 },
     ],
   },
 ];
@@ -498,181 +508,278 @@ export const certifications = [
     title: "Certified Ethical Hacker V12",
     issuer: "EC-Council",
     certId: "ECC7349261508",
-    year: "2024",
+    year: "2023",
+    validity: "Valid 6/2023 - 6/2027",
+    verifyUrl: "https://aspen.eccouncil.org/Verify",
   },
   {
     id: 2,
     title: "Certified Network Defender",
     issuer: "EC-Council",
     certId: "ECC9327805461",
-    year: "2024",
+    year: "2023",
+    validity: "Valid 6/2023 - 6/2027",
+    verifyUrl: "https://aspen.eccouncil.org/Verify",
   },
 ];
 
 export const achievements = [
   {
+    title: "Third-Party Press",
+    badge: "Hackaday + CNX",
+    desc: "PICOTTY covered by two independent technical outlets",
+  },
+  {
+    title: "Research Scholar",
+    badge: "7 Papers",
+    desc: "Springer, JETIR and FMDB, 2022 to 2026",
+  },
+  {
+    title: "Open Source",
+    badge: "1,665 Stars",
+    desc: "Security and infrastructure tooling on GitHub",
+  },
+  {
     title: "TryHackMe Elite",
     badge: "Top 1%",
     desc: "Top-tier cybersecurity challenges",
   },
-  {
-    title: "Research Scholar",
-    badge: "7+ Papers",
-    desc: "Published cybersecurity research",
-  },
-  {
-    title: "Open Source Contributor",
-    badge: "9+ Projects",
-    desc: "Security tools development",
-  },
 ];
 
-export const projects = [
+/** Project clusters. The labels do the positioning work: offensive work is
+ *  explicitly marked as background and ordered last. Star counts are shown only
+ *  at roughly 50 and above; below that the number is omitted rather than shown weak. */
+export const projectClusters = [
   {
-    id: 11,
-    title: "PICOTTY",
-    description:
-      "Networked serial console system for managing fleets of headless machines - real-time console output, USB HID keystroke injection, and macro/runbook automation from a single web dashboard.",
-    github: "https://github.com/morpheuslord/PICOTTY",
-    tags: [
-      "CircuitPython",
-      "Python",
-      "Embedded",
-      "Raspberry Pi Pico",
-      "Hardware",
-      "Infrastructure",
-    ],
+    id: "ai-security",
+    name: "AI security and LLM research",
+    description: "Applying language models to vulnerability analysis and triage.",
   },
+  {
+    id: "security-tooling",
+    name: "Security tooling and analysis",
+    description: "Scanners, analysis frameworks, and API-driven security tooling.",
+  },
+  {
+    id: "systems",
+    name: "Systems and infrastructure",
+    description: "Hardware, fleet management, and container operations.",
+  },
+  {
+    id: "offensive",
+    name: "Offensive security internals (background)",
+    description: "Earlier work on attack tooling and platform internals. Background, not a current capability claim.",
+  },
+] as const;
+
+export type ProjectCluster = (typeof projectClusters)[number]["id"];
+
+export const projects: Array<{
+  id: number;
+  title: string;
+  description: string;
+  github: string;
+  tags: string[];
+  cluster: ProjectCluster;
+  stars?: number;
+  press?: { outlet: string; url: string }[];
+}> = [
+  // --- AI security and LLM research (ordered by stars) ---
   {
     id: 1,
     title: "GPT-Vuln-Analyzer",
     description:
-      "AI integration into security operations - PoC demonstrating LLM-powered vulnerability analysis.",
+      "LLM-assisted vulnerability analysis across multiple model backends, with DNS reconnaissance, subdomain enumeration, and structured vulnerability reasoning.",
     github: "https://github.com/morpheuslord/GPT_Vuln-analyzer",
-    tags: ["Python", "AI", "Security"],
+    tags: ["Python", "LLMs", "Security Analysis"],
+    cluster: "ai-security",
+    stars: 599,
   },
   {
     id: 2,
-    title: "Startup-SBOM",
+    title: "HackBot",
     description:
-      "SBOM based on complete reverse engineering of the Linux boot process.",
-    github: "https://github.com/morpheuslord/Startup-SBOM",
-    tags: ["Python", "Linux", "SBOM"],
+      "Agentic LLM assistant for security analysis and scan interpretation, built to support code inspection and scan-result triage.",
+    github: "https://github.com/morpheuslord/HackBot",
+    tags: ["Python", "LLMs", "Assistant Systems"],
+    cluster: "ai-security",
+    stars: 363,
   },
   {
     id: 3,
-    title: "QuadraInspect",
+    title: "CVE-LLM-Dataset",
     description:
-      "Automated approach for APK analysis with comprehensive security checks.",
-    github: "https://github.com/morpheuslord/QuadraInspect",
-    tags: ["Python", "Mobile Security", "Analysis"],
+      "Dataset design for training and evaluating LLMs on vulnerability intelligence, exploring dataset problems specific to CVE data.",
+    github: "https://github.com/morpheuslord/CVE-llm_dataset",
+    tags: ["Dataset", "LLM Research", "CVE Analysis"],
+    cluster: "ai-security",
+    stars: 69,
   },
+
+  // --- Security tooling and analysis (ordered by stars) ---
   {
     id: 4,
-    title: "Brute Framework",
+    title: "QuadraInspect",
     description:
-      "All-in-one hackers framework for Windows-based security testing.",
-    github:
-      "https://github.com/morpheuslord/Brute-Hacking-Framework-SourceCode",
-    tags: ["Python", "Framework", "Windows"],
+      "Automated Android APK security analysis framework, combining several techniques to inspect permissions, components, and application behavior.",
+    github: "https://github.com/morpheuslord/QuadraInspect",
+    tags: ["Python", "Mobile Security", "Reverse Engineering"],
+    cluster: "security-tooling",
+    stars: 349,
   },
   {
     id: 5,
     title: "Nmap-API",
-    description: "REST API for network analysis built as a graduation project.",
+    description:
+      "REST API wrapper around Nmap for programmatic network scanning, and the basis for the published paper on API-driven network scanning.",
     github: "https://github.com/morpheuslord/Nmap-API",
-    tags: ["Python", "API", "Nmap"],
+    tags: ["Python", "API Development", "Network Security"],
+    cluster: "security-tooling",
+    stars: 83,
   },
   {
     id: 6,
-    title: "HackBot",
-    description: "LLM Assistant PoC for analysis and information gathering.",
-    github: "https://github.com/morpheuslord/HackBot",
-    tags: ["Python", "AI", "Assistant"],
+    title: "Startup-SBOM",
+    description:
+      "Linux boot and package analysis for startup and persistence vectors, using chroot-based inspection of RPM and DPKG metadata.",
+    github: "https://github.com/morpheuslord/Startup-SBOM",
+    tags: ["Python", "Linux", "SBOM"],
+    cluster: "security-tooling",
   },
+
+  // --- Systems and infrastructure ---
   {
     id: 7,
-    title: "CVE-LLM-Dataset",
+    title: "PICOTTY",
     description:
-      "Test dataset demonstrating LLM training dataset structure for CVEs.",
-    github: "https://github.com/morpheuslord/CVE-llm_dataset",
-    tags: ["Dataset", "LLM", "CVE"],
+      "Networked serial console system for headless fleet management: CircuitPython on Raspberry Pi Pico nodes with W5100S Ethernet and USB HID keystroke injection, with over-the-air firmware updates, rollback protection, and canary rollout.",
+    github: "https://github.com/morpheuslord/PICOTTY",
+    tags: ["CircuitPython", "Python", "Embedded", "Raspberry Pi Pico"],
+    cluster: "systems",
+    stars: 103,
+    press: [
+      {
+        outlet: "Hackaday",
+        url: "https://hackaday.com/2026/08/02/a-kvm-without-the-v-or-the-m/",
+      },
+      {
+        outlet: "CNX Software",
+        url: "https://www.cnx-software.com/2026/08/06/picotty-project-enables-multi-target-serial-remote-management-through-raspberry-pi-pico-boards-and-pi-zero-2-w-sbc/",
+      },
+    ],
   },
   {
     id: 8,
-    title: "C2C-Server",
+    title: "Komo.do-Hub",
     description:
-      "Command & Control server demonstrating real-life attack scenarios.",
-    github: "https://github.com/morpheuslord/C2C-Server",
-    tags: ["Python", "C2", "Red Team"],
+      "Mobile interface for the Komodo container management platform, built across frontend and backend for operational visibility into containerized environments.",
+    github: "https://github.com/morpheuslord/komo.do-hub",
+    tags: ["Java", "Node.js", "React Native", "React"],
+    cluster: "systems",
   },
+
+  // --- Offensive security internals (background) ---
   {
     id: 9,
     title: "WinFiHack",
-    description: "WiFi bruteforcing using native Windows network libraries.",
+    description:
+      "Windows wireless stack internals and native networking library automation, focused on platform behavior and automation constraints.",
     github: "https://github.com/morpheuslord/WinFiHack",
-    tags: ["Python", "WiFi", "Windows"],
+    tags: ["Python", "WiFi", "Windows Internals"],
+    cluster: "offensive",
+    stars: 82,
   },
   {
     id: 10,
-    title: "Komo.do-Hub",
+    title: "C2C-Server",
     description:
-      "A Mobile application interface for the Komodo Container Management Platform",
-    github: "https://github.com/morpheuslord/komo.do-hub",
-    tags: [
-      "Android",
-      "Komodo",
-      "Container Management",
-      "Java",
-      "Node.js",
-      "React Native",
-      "React",
-    ],
+      "Command-and-control server demonstrating real attack communication patterns, used for controlled red-team experimentation.",
+    github: "https://github.com/morpheuslord/C2C-Server",
+    tags: ["Python", "C2", "Red Team"],
+    cluster: "offensive",
   },
 ];
 
-export const researchPapers = [
+export const researchPapers: Array<{
+  id: number;
+  title: string;
+  description: string;
+  venue: string;
+  /** null where the publication year is not yet confirmed. Never guessed. */
+  year: number | null;
+  link: string;
+  relatedProject?: { name: string; url: string };
+}> = [
   {
     id: 1,
-    title: "API-based Network Scanning",
-    description: "Implementation of the Nmap-API project findings.",
-    link: "https://drive.proton.me/urls/6P6MS0T83G#3OLWdBs3lWM1",
+    title:
+      "Hybrid Quantum-Classical Neural Network Incorporating Attention Mechanisms for Anomaly Detection",
+    description:
+      "A hybrid quantum-classical architecture with attention mechanisms for anomaly detection. My contribution was the computer science and systems side: architecture, implementation, and evaluation of the detection pipeline.",
+    venue: "Springer CCIS",
+    year: 2026,
+    link: "https://link.springer.com/chapter/10.1007/978-3-032-20447-9_13",
   },
   {
     id: 2,
-    title: "AI Based Enumeration and Exploit Suggester",
-    description: "Proposal paper on AI with cybersecurity research.",
-    link: "https://www.jetir.org/view.php?paper=JETIRFM06037",
-  },
-  {
-    id: 3,
-    title: "AI in Action: Exploiting the Nexus of Cybersecurity",
-    description: "AI in cybersecurity using CI/CD pipelines.",
-    link: "https://drive.proton.me/urls/R83Q1HJS9W#8Z8HRKh44jS0",
-  },
-  {
-    id: 4,
-    title: "Using Autoencoder for Malware Detection",
-    description: "Study into autoencoders and their use in cybersecurity.",
-    link: "https://www.fmdbpub.com/uploads/articles/174600650419444.%20FTSIN-292-2024.pdf",
-  },
-  {
-    id: 5,
-    title: "Docker Based Decentralized Vulnerability Assessment",
-    description: "Port scanning powered by Artificial Intelligence.",
-    link: "https://www.fmdbpub.com/uploads/articles/174595000296104.%20FTSIN-290-2024.pdf",
-  },
-  {
-    id: 6,
-    title: "ML-Driven Secure Communication for 6G Networks",
-    description: "Machine learning for next-generation network security.",
+    title: "ML-Driven Secure Communication for Next-Generation 6G Networks",
+    description:
+      "A machine learning approach to secure communication in 6G networks, covering how ML can improve security and reliability in high-speed network infrastructure. Published in 6G Cyber Security Resilience: Trends and Challenges.",
+    venue: "Springer",
+    year: 2025,
     link: "https://link.springer.com/chapter/10.1007/978-3-031-85008-0_6",
   },
   {
+    id: 3,
+    title:
+      "Using Autoencoder-Driven Machine Learning for Advanced Cybersecurity Malware Detection",
+    description:
+      "Autoencoder-based models for malware detection on the Ember dataset, and how unsupervised feature learning finds anomalous behavior in executables. FMDB Transactions on Sustainable Intelligent Networks, Vol.1 No.4.",
+    venue: "FMDB",
+    year: 2024,
+    link: "https://www.fmdbpub.com/uploads/articles/174600650419444.%20FTSIN-292-2024.pdf",
+  },
+  {
+    id: 4,
+    title: "Docker Based Decentralized Vulnerability Assessment",
+    description:
+      "A decentralized vulnerability assessment framework built on Docker containers: distributed scanning, scaling, and AI-assisted port scanning and analysis. FMDB Transactions on Sustainable Intelligent Networks, Vol.1 No.4.",
+    venue: "FMDB",
+    year: 2024,
+    link: "https://www.fmdbpub.com/uploads/articles/174595000296104.%20FTSIN-290-2024.pdf",
+  },
+  {
+    id: 5,
+    title: "AI Based Enumeration and Exploit Suggester",
+    description:
+      "Using AI models in cybersecurity workflows to automate reconnaissance, vulnerability enumeration, and exploit suggestion, and to prioritize likely attack vectors. JETIR Vol.9 Issue 6.",
+    venue: "JETIR",
+    year: 2022,
+    link: "https://www.jetir.org/view.php?paper=JETIRFM06037",
+  },
+  {
+    id: 6,
+    title: "API-Based Network Scanning",
+    description:
+      "An API-driven approach to network vulnerability scanning, based on the Nmap-API project. Covers stability, usability, and scaling through structured resource management and virtualized client interactions.",
+    venue: "Cybersecurity & ML",
+    // TODO: confirm the publication year for this paper.
+    year: null,
+    link: "https://drive.proton.me/urls/6P6MS0T83G#3OLWdBs3lWM1",
+    relatedProject: {
+      name: "Nmap-API",
+      url: "https://github.com/morpheuslord/Nmap-API",
+    },
+  },
+  {
     id: 7,
-    title: "Hybrid Quantum-Classical Neural Network Incorporating Attention Mechanisms for Anomaly Detection",
-    description: "Hybrid quantum-classical architecture applied to anomaly detection.",
-    link: "https://link.springer.com/chapter/10.1007/978-3-032-20447-9_13",
+    title: "AI in Action: Exploiting the Nexus of Cybersecurity",
+    description:
+      "AI in modern security environments, with a focus on integrating AI-driven analysis into CI/CD pipelines for security automation, threat detection, and response.",
+    venue: "Cybersecurity & ML",
+    // TODO: confirm the publication year for this paper.
+    year: null,
+    link: "https://drive.proton.me/urls/R83Q1HJS9W#8Z8HRKh44jS0",
   },
 ];
 
@@ -715,10 +822,12 @@ export const testimonials = [
 ];
 
 export const navLinks = [
+  { name: "Now", href: "#now" },
   { name: "About", href: "#about" },
   { name: "Experience", href: "#experience" },
   { name: "Skills", href: "#skills" },
   { name: "Projects", href: "#projects" },
+  { name: "Decisions", href: "#decisions" },
   { name: "Research", href: "#research" },
   { name: "Services", href: "#services" },
   { name: "Articles", href: "/articles" },

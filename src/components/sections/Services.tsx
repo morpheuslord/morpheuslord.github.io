@@ -1,39 +1,52 @@
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { ExternalLink, Shield, Bot, Code, FileSearch, Server, Zap, CheckCircle } from 'lucide-react';
+import { ExternalLink, Shield, Bot, Cloud, GitBranch, CheckSquare, FileSearch, Server, Zap, CheckCircle } from 'lucide-react';
 
 const services = [
   {
+    icon: Cloud,
+    title: "Cloud Security Architecture",
+    description: "Multi-account isolation, IAM boundary design, zero-trust access, and ongoing posture management across AWS and Azure.",
+    features: ["Account Isolation", "IAM Boundaries", "Zero-Trust Access", "Posture Management"],
+  },
+  {
+    icon: GitBranch,
+    title: "DevSecOps & CI/CD Security",
+    description: "Security gates wired into the pipeline: which checks run, at which stage, and what blocks a merge or a deploy.",
+    features: ["Semgrep · Gitleaks", "Trivy · Checkov", "SBOM · Supply Chain", "Pipeline Gates"],
+  },
+  {
     icon: Shield,
-    title: "Security Assessments",
-    description: "Comprehensive penetration testing, vulnerability assessments, and security audits for web applications and infrastructure.",
-    features: ["Web App Testing", "API Security", "Cloud Audits", "Compliance Reviews"],
+    title: "Vulnerability Management",
+    description: "Scanner fleet operations feeding a single findings pipeline, with exploitation-aware prioritization so the right things get fixed first.",
+    features: ["DefectDojo · JIRA", "SARIF Normalization", "EPSS · KEV · SSVC", "Triage Automation"],
   },
   {
-    icon: Bot,
-    title: "AI/LLM Integration",
-    description: "Custom AI agent development, LLM integration for security operations, and intelligent automation solutions.",
-    features: ["Custom AI Agents", "RAG Systems", "LangChain/MCP", "Security Automation"],
-  },
-  {
-    icon: Code,
-    title: "Security Tool Development",
-    description: "Custom Python-based security tools, automation scripts, and API development for your specific needs.",
-    features: ["Python Tools", "REST APIs", "Automation", "Custom Scripts"],
+    icon: CheckSquare,
+    title: "Compliance Readiness",
+    description: "SOC 2 readiness work: control mapping, gap remediation, evidence collection, and delivery for clients under EU regulatory regimes.",
+    features: ["SOC 2 Readiness", "Control Mapping", "Audit Evidence", "DORA · NIS2 · GDPR"],
   },
   {
     icon: Server,
-    title: "Backend & API Development",
-    description: "End-to-end Python backend systems, secure REST API design, cloud deployment across AWS and Azure, and scalable architecture for early-stage products and MVPs.",
-    features: ["Python · FastAPI/Flask", "AWS · Azure", "MongoDB · E2EE", "Scalable Architecture"],
+    title: "Secure Backend & API Development",
+    description: "End-to-end Python backend systems, secure REST API design, cloud deployment, and scalable architecture for early-stage products.",
+    features: ["Python · FastAPI", "AWS · Azure", "E2EE Systems", "Scalable Architecture"],
+  },
+  {
+    icon: Bot,
+    title: "AI Security & Agentic Systems",
+    description: "Securing agentic pipelines, LLM-assisted triage and enrichment, and the agent and prompt threat surface.",
+    features: ["Agentic Pipelines", "LLM-Assisted Triage", "Prompt Threat Surface", "Security Automation"],
   },
   {
     icon: FileSearch,
-    title: "Technical Research",
+    title: "Security Research & Writing",
     description: "Security research, vulnerability analysis, technical documentation, and proof-of-concept development.",
-    features: ["PoC Development", "Research Papers", "Technical Docs", "Exploit Analysis"],
+    features: ["PoC Development", "Research Papers", "Technical Docs", "Tooling Analysis"],
   },
 ];
+
 
 const Services = () => {
   const sectionRef = useRef<HTMLDivElement>(null);

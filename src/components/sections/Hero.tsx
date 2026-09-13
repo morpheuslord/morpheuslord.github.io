@@ -8,7 +8,7 @@ import resumePdf from '@/data/Resume.pdf';
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timeline = anime.timeline({
@@ -129,14 +129,20 @@ const Hero = () => {
             </h1>
 
             {/* Subtitle */}
-            <p 
+            <div 
               ref={subtitleRef}
-              className="font-mono text-sm md:text-base text-muted-foreground max-w-md mx-auto lg:mx-0 mb-10 opacity-0"
+              className="max-w-lg mx-auto lg:mx-0 mb-10 opacity-0"
             >
-              <span className="text-foreground font-medium">{personalInfo.title}</span>
-              <span className="mx-3 text-foreground">|</span>
-              <span>{personalInfo.subtitle}</span>
-            </p>
+              <p className="font-mono text-sm md:text-base text-muted-foreground mb-4">
+                <span className="text-foreground font-medium">{personalInfo.title}</span>
+                <span className="mx-3 text-foreground">|</span>
+                <span>{personalInfo.subtitle}</span>
+              </p>
+              {/* The five-second answer, above the fold. */}
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {personalInfo.headline}
+              </p>
+            </div>
 
             {/* Stats */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-10 mb-10">

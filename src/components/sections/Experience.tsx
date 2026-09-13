@@ -507,10 +507,9 @@ const Experience = () => {
     advisory: MessageCircle,
   };
 
-  const getRoleLevel = (index: number) => {
-    const levels = ['Senior', 'Mid-Level', 'Junior', 'Entry'];
-    return levels[Math.min(index, levels.length - 1)];
-  };
+  // Read the label off the role itself. Deriving it from array position broke
+  // as soon as the roles were reordered.
+  const getRoleLevel = (index: number) => experiences[index]?.level ?? '';
 
   return (
     <section id="experience" ref={sectionRef} className="section bg-card/30">
