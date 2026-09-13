@@ -1,7 +1,6 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import anime from 'animejs';
-import * as d3 from 'd3';
-import { Code, Shield, Cloud, Brain, BookOpen, Workflow, X } from 'lucide-react';
+import { Code, Shield, Cloud, Brain, BookOpen, Workflow, X, ChevronRight } from 'lucide-react';
 import { skillCategories, experiences, SkillCategory } from '@/data/skillsData';
 
 // Helper function to convert hex to RGB
@@ -14,390 +13,287 @@ const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   } : null;
 };
 
-// Employment-based Skill Ontology Graph
+// Employment-based Skill Ontology, laid out as a mindmap.
+//
+// Root sits in the centre, roles fan out left and right, and SVG bezier
+// connectors are drawn from measured DOM positions (the approach from
+// dev.to/frankwisniewski/create-a-mindmap: flex columns for layout, SVG only
+// for the curves, redrawn by a ResizeObserver).
+//
+// Branches expand on click rather than rendering everything: there are 119
+// distinct skills across 5 roles and one branch alone owns 57, which no
+// space-around column can show at a readable size.
+
+const bezier = (x1: number, y1: number, x2: number, y2: number) =>
+  `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`;
+
+type Connector = { id: string; d: string; color: string; branch: number };
+
 const EmploymentSkillOntology = ({ onExperienceClick }: { onExperienceClick: (exp: typeof experiences[0]) => void }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 700 });
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const nodeRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [hoverBranch, setHoverBranch] = useState<number | null>(null);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
 
-  // Responsive dimension handling
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({
-          width: Math.max(width, 300),
-          height: Math.max(height, 400)
-        });
-      }
-    };
+  // Each skill belongs to the role that uses it most heavily, so a skill
+  // appears exactly once in the tree.
+  const roles = useMemo(() => {
+    const bestLevel = new Map<string, number>();
+    const owner = new Map<string, number>();
+    experiences.forEach((exp, i) => {
+      Object.entries(exp.skills).forEach(([name, level]) => {
+        if (!bestLevel.has(name) || level > bestLevel.get(name)!) {
+          bestLevel.set(name, level);
+          owner.set(name, i);
+        }
+      });
+    });
 
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
+    // Newest role first, alternating sides so the fan stays balanced.
+    return experiences
+      .map((exp, i) => ({ exp, i }))
+      .reverse()
+      .map(({ exp, i }, pos) => {
+        const [title, company] = exp.title.split(' – ');
+        const owned = Object.keys(exp.skills)
+          .filter((n) => owner.get(n) === i)
+          .sort((a, b) => exp.skills[b] - exp.skills[a]);
+        return {
+          key: i,
+          title,
+          company: company ?? '',
+          period: exp.period,
+          color: exp.color,
+          exp,
+          side: (pos % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
+          total: Object.keys(exp.skills).length,
+          skills: owned.map((n) => ({ name: n, level: Math.round(exp.skills[n] * 100) })),
+        };
+      });
   }, []);
 
+  const measure = useCallback(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const wb = wrap.getBoundingClientRect();
+    const box = (id: string) => {
+      const el = nodeRefs.current[id];
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return {
+        left: r.left - wb.left,
+        right: r.right - wb.left,
+        cy: r.top - wb.top + r.height / 2,
+      };
+    };
+
+    const root = box('root');
+    if (!root) return;
+
+    const next: Connector[] = [];
+    roles.forEach((role) => {
+      const rb = box(`role-${role.key}`);
+      if (!rb) return;
+      const left = role.side === 'left';
+      next.push({
+        id: `root-${role.key}`,
+        d: bezier(left ? root.left : root.right, root.cy, left ? rb.right : rb.left, rb.cy),
+        color: role.color,
+        branch: role.key,
+      });
+
+      if (expanded !== role.key) return;
+      role.skills.forEach((sk) => {
+        const sb = box(`skill-${role.key}-${sk.name}`);
+        if (!sb) return;
+        next.push({
+          id: `sk-${role.key}-${sk.name}`,
+          d: bezier(left ? rb.left : rb.right, rb.cy, left ? sb.right : sb.left, sb.cy),
+          color: role.color,
+          branch: role.key,
+        });
+      });
+    });
+
+    setConnectors(next);
+    setSvgSize((prev) =>
+      prev.w === wrap.scrollWidth && prev.h === wrap.scrollHeight
+        ? prev
+        : { w: wrap.scrollWidth, h: wrap.scrollHeight }
+    );
+  }, [roles, expanded]);
+
+  useLayoutEffect(() => { measure(); }, [measure]);
+
   useEffect(() => {
-    if (!svgRef.current) return;
-
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
-
-    const { width } = dimensions;
-    const isMobile = width < 640;
-    const isTablet = width >= 640 && width < 1024;
-    const margin = {
-      top: isMobile ? 10 : 20,
-      right: isMobile ? 10 : 20,
-      bottom: isMobile ? 10 : 20,
-      left: isMobile ? 60 : 180
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(wrap);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
     };
+  }, [measure]);
 
-    // Map each skill to its employments and find the primary (highest level) one
-    const skillToEmployments = new Map<string, Array<{ expIndex: number; level: number; color: string }>>();
-    experiences.forEach((exp, expIndex) => {
-      Object.keys(exp.skills).forEach(skillName => {
-        if (!skillToEmployments.has(skillName)) {
-          skillToEmployments.set(skillName, []);
-        }
-        skillToEmployments.get(skillName)!.push({
-          expIndex,
-          level: Math.round(exp.skills[skillName] * 100),
-          color: exp.color
-        });
-      });
-    });
+  const setRef = (id: string) => (el: HTMLElement | null) => { nodeRefs.current[id] = el; };
 
-    // Determine primary employment for each skill (highest level)
-    const skillPrimary = new Map<string, number>();
-    skillToEmployments.forEach((emps, skillName) => {
-      const best = emps.reduce((a, b) => b.level > a.level ? b : a, emps[0]);
-      skillPrimary.set(skillName, best.expIndex);
-    });
+  const renderSkills = (side: 'left' | 'right') => {
+    const role = roles.find((r) => r.key === expanded && r.side === side);
+    if (!role) return <div className="flex-1 min-w-0" />;
+    return (
+      <div
+        className={`flex-1 min-w-0 flex flex-col justify-around gap-1.5 py-2 ${
+          side === 'left' ? 'items-end' : 'items-start'
+        }`}
+      >
+        {role.skills.map((sk) => (
+          <div
+            key={sk.name}
+            ref={setRef(`skill-${role.key}-${sk.name}`)}
+            onMouseEnter={() => setHoverBranch(role.key)}
+            onMouseLeave={() => setHoverBranch(null)}
+            className="max-w-full rounded-md border bg-background/70 backdrop-blur-sm px-2 py-1 transition-transform duration-200 hover:scale-[1.04]"
+            style={{ borderColor: `${role.color}66` }}
+            title={`${sk.name} · ${sk.level}%`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] md:text-[11px] text-foreground/90 truncate">
+                {sk.name}
+              </span>
+              <span className="font-mono text-[9px] text-muted-foreground tabular-nums shrink-0">
+                {sk.level}
+              </span>
+            </div>
+            <div className="mt-1 h-[2px] w-full rounded bg-foreground/10 overflow-hidden">
+              <div
+                className="h-full rounded"
+                style={{ width: `${sk.level}%`, background: role.color }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
-    // Build tree: each skill appears ONCE under its primary employment
-    const treeData: any = {
-      name: 'Skills',
-      children: experiences.map((exp, i) => {
-        const titleParts = exp.title.split(' – ');
-        const jobTitle = titleParts[0].split(' ').slice(0, 2).join(' ');
-        const companyName = titleParts[1] || '';
-        const shortName = companyName ? `${jobTitle} @ ${companyName}` : jobTitle;
-
-        // Only include skills whose primary employment is this one
-        const mySkills = Object.keys(exp.skills).filter(
-          skillName => skillPrimary.get(skillName) === i
-        );
-
-        return {
-          name: shortName,
-          fullName: exp.title,
-          type: 'employment',
-          color: exp.color,
-          expData: exp,
-          expIndex: i,
-          children: mySkills.length > 0 ? mySkills.map(skillName => {
-            const emps = skillToEmployments.get(skillName)!;
-            const isShared = emps.length > 1;
-            return {
-              name: skillName,
-              type: 'skill',
-              color: exp.color,
-              level: Math.round(exp.skills[skillName] * 100),
-              isShared,
-              // Other employments that also use this skill (for connection lines)
-              otherEmployments: isShared
-                ? emps.filter(e => e.expIndex !== i).map(e => e.expIndex)
-                : [],
-              allColors: emps.map(e => e.color),
-            };
-          }) : undefined
-        };
-      })
-    };
-
-    // Compute tree layout
-    const root = d3.hierarchy(treeData);
-    const dx = isMobile ? 12 : 15;
-    const dy = (width - margin.left - margin.right) / (root.height + 1);
-
-    const tree = d3.tree().nodeSize([dx, dy]);
-    root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
-    tree(root);
-
-    let x0 = Infinity;
-    let x1 = -x0;
-    root.each(d => {
-      if (d.x > x1) x1 = d.x;
-      if (d.x < x0) x0 = d.x;
-    });
-
-    const treeHeight = x1 - x0 + dx * 2;
-
-    svg.attr('width', width)
-      .attr('height', treeHeight)
-      .attr('viewBox', [-dy / 3, x0 - dx, width, treeHeight])
-      .style('max-width', '100%')
-      .style('height', 'auto')
-      .style('font', isMobile ? '7px' : isTablet ? '8px' : '9px JetBrains Mono, monospace');
-
-    const g = svg.append('g');
-
-    // Zoom/pan
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.2, 4])
-      .filter((event) => {
-        if (event.type === 'wheel') return !event.ctrlKey;
-        return true;
-      })
-      .on('zoom', (event) => {
-        g.attr('transform', event.transform.toString());
-      });
-    svg.call(zoom as any);
-
-    const initialScale = isMobile ? 0.5 : 1;
-    const initialTransform = d3.zoomIdentity
-      .translate(width / 2 - (width / 2) * initialScale, treeHeight / 2 - (treeHeight / 2) * initialScale)
-      .scale(initialScale);
-    svg.call(zoom.transform as any, initialTransform);
-
-    svg.on('touchstart', (event) => event.preventDefault());
-
-    // Index employment nodes and skill nodes for cross-links
-    const employmentNodes = new Map<number, any>();
-    const sharedSkillNodes: any[] = [];
-
-    root.each((d: any) => {
-      if (d.data.type === 'employment' && d.data.expIndex !== undefined) {
-        employmentNodes.set(d.data.expIndex, d);
-      }
-      if (d.data.type === 'skill' && d.data.isShared) {
-        sharedSkillNodes.push(d);
-      }
-    });
-
-    // Draw tree links (parent-child)
-    const treeLinks = root.links();
-    const link = g.append('g')
-      .attr('fill', 'none')
-      .attr('stroke-opacity', 0.3)
-      .attr('stroke-width', isMobile ? 1 : 1.2)
-      .selectAll('path')
-      .data(treeLinks)
-      .join('path')
-      .attr('stroke', (d: any) => {
-        if (!d.source.parent) return '#888';
-        return d.source.data.color || '#555';
-      })
-      .attr('stroke-width', (d: any) => {
-        if (!d.source.parent) return isMobile ? 1.5 : 2;
-        return isMobile ? 1.2 : 1.5;
-      })
-      .attr('d', d3.linkHorizontal()
-        .x((d: any) => d.y)
-        .y((d: any) => d.x));
-
-    // Build cross-links: dashed lines from shared skills to their OTHER employment nodes
-    const crossLinkData: Array<{ skillNode: any; empNode: any; color: string }> = [];
-    sharedSkillNodes.forEach((skillNode: any) => {
-      if (skillNode.data.otherEmployments) {
-        skillNode.data.otherEmployments.forEach((expIndex: number) => {
-          const empNode = employmentNodes.get(expIndex);
-          if (empNode) {
-            crossLinkData.push({
-              skillNode,
-              empNode,
-              color: empNode.data.color
-            });
-          }
-        });
-      }
-    });
-
-    // Draw cross-links as smooth dashed curves (same style as tree links)
-    const crossLinkSelection = g.append('g')
-      .attr('fill', 'none')
-      .attr('stroke-opacity', 0.3)
-      .attr('stroke-width', isMobile ? 0.8 : 1.2)
-      .attr('stroke-dasharray', '6,4')
-      .selectAll('path')
-      .data(crossLinkData)
-      .join('path')
-      .attr('stroke', (d: any) => d.color)
-      .attr('d', (d: any) => {
-        // Use the same smooth horizontal link generator as tree links
-        const linkGen = d3.linkHorizontal()
-          .x((p: any) => p.y)
-          .y((p: any) => p.x);
-        return linkGen({ source: d.skillNode, target: d.empNode } as any);
-      });
-
-    // Draw nodes
-    const node = g.append('g')
-      .attr('stroke-linejoin', 'round')
-      .attr('stroke-width', 3)
-      .selectAll('g')
-      .data(root.descendants())
-      .join('g')
-      .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
-
-    // Node circles
-    node.append('circle')
-      .attr('fill', (d: any) => {
-        if (!d.parent) return '#666';
-        if (d.data.type === 'employment') return d.data.color || '#555';
-        if (d.data.type === 'skill') return d.data.color || '#999';
-        return d.children ? '#555' : '#999';
-      })
-      .attr('r', (d: any) => {
-        const baseSize = isMobile ? 0.6 : isTablet ? 0.75 : 0.85;
-        if (!d.parent) return 5 * baseSize;
-        if (d.data.type === 'employment') return 4 * baseSize;
-        if (d.data.type === 'skill' && d.data.isShared) return 3 * baseSize;
-        if (d.data.type === 'skill') return 2.5 * baseSize;
-        return (d.children ? 3 : 2) * baseSize;
-      })
-      .attr('stroke', (d: any) => {
-        if (!d.parent) return '#888';
-        return d.data.color || '#555';
-      })
-      .attr('stroke-width', (d: any) => {
-        if (!d.parent) return 2.5;
-        if (d.data.type === 'employment') return 2;
-        return 1.5;
-      });
-
-    // Text labels
-    node.append('text')
-      .attr('dy', '0.31em')
-      .attr('x', (d: any) => {
-        if (!d.parent) return -10;
-        if (d.data.type === 'employment') return -10;
-        if (d.data.type === 'skill') return 8;
-        return d.children ? -8 : 8;
-      })
-      .attr('text-anchor', (d: any) => {
-        if (!d.parent) return 'end';
-        if (d.data.type === 'employment') return 'end';
-        if (d.data.type === 'skill') return 'start';
-        return d.children ? 'end' : 'start';
-      })
-      .text((d: any) => d.data.name)
-      .attr('fill', (d: any) => {
-        if (!d.parent) return '#aaa';
-        if (d.data.type === 'employment') {
-          const rgb = hexToRgb(d.data.color);
-          return rgb ? `rgb(${Math.min(255, rgb.r + 40)}, ${Math.min(255, rgb.g + 40)}, ${Math.min(255, rgb.b + 40)})` : d.data.color;
-        }
-        return d.data.color || '#333';
-      })
-      .attr('font-weight', (d: any) => {
-        if (!d.parent) return '700';
-        if (d.data.type === 'employment') return '700';
-        if (d.data.type === 'skill') return '500';
-        return d.children ? '600' : '400';
-      });
-
-    // Store original text colors
-    const originalTextColors = new Map();
-    node.select('text').each(function (d: any) {
-      originalTextColors.set(d, d3.select(this).attr('fill'));
-    });
-
-    // Hover interactions
-    node.append('rect')
-      .attr('fill', 'none')
-      .attr('width', 200)
-      .attr('height', 20)
-      .attr('x', (d: any) => d.data.type === 'employment' ? -200 : -10)
-      .attr('y', -10)
-      .attr('pointer-events', 'all')
-      .style('cursor', (d: any) => d.data.type === 'employment' ? 'pointer' : 'default')
-      .on('pointerenter', (event, d: any) => {
-        // Dim everything
-        node.select('text').attr('fill', 'hsl(0, 0%, 50%)');
-        link.attr('stroke-opacity', 0.1);
-        crossLinkSelection.attr('stroke-opacity', 0.05);
-
-        // Highlight hovered node
-        node.filter((n: any) => n === d)
-          .select('text')
-          .attr('fill', (n: any) => originalTextColors.get(n) || n.data.color || '#333')
-          .attr('font-weight', 'bold');
-
-        // Highlight related nodes
-        node.filter((n: any) => {
-          if (d.parent && n.parent === d.parent && n !== d) return true;
-          if (d.children && n.parent === d) return true;
-          if (n.children && d.parent === n) return true;
-          // For shared skills: highlight the other employment nodes they connect to
-          if (d.data.type === 'skill' && d.data.isShared && n.data.type === 'employment') {
-            return d.data.otherEmployments?.includes(n.data.expIndex);
-          }
-          // For employment: highlight shared skills that connect TO this employment
-          if (d.data.type === 'employment' && n.data.type === 'skill' && n.data.isShared) {
-            return n.data.otherEmployments?.includes(d.data.expIndex);
-          }
-          return false;
-        })
-          .select('text')
-          .attr('fill', (n: any) => originalTextColors.get(n) || n.data.color || '#333')
-          .attr('opacity', 0.9);
-
-        // Highlight tree links
-        link.filter((l: any) =>
-          (l.source === d && l.target.parent === d) ||
-          (l.target === d && l.source === d.parent)
-        )
-          .raise()
-          .attr('stroke-opacity', 0.8)
-          .attr('stroke-width', 2.5);
-
-        // Highlight cross-links
-        if (d.data.type === 'skill' && d.data.isShared) {
-          crossLinkSelection.filter((l: any) => l.skillNode === d)
-            .raise()
-            .attr('stroke-opacity', 0.6)
-            .attr('stroke-width', 2);
-        } else if (d.data.type === 'employment') {
-          crossLinkSelection.filter((l: any) => l.empNode === d)
-            .raise()
-            .attr('stroke-opacity', 0.5)
-            .attr('stroke-width', 1.5);
-        }
-      })
-      .on('pointerout', () => {
-        node.select('text').each(function (n: any) {
-          d3.select(this)
-            .attr('fill', originalTextColors.get(n) || n.data.color || '#333')
-            .attr('opacity', 1)
-            .attr('font-weight', (n: any) => {
-              if (n.data.type === 'employment') return '700';
-              if (n.data.type === 'skill') return '500';
-              return n.children ? '600' : '400';
-            });
-        });
-        link.order().attr('stroke-opacity', 0.3).attr('stroke-width', 1.5);
-        crossLinkSelection.order().attr('stroke-opacity', 0.2).attr('stroke-width', isMobile ? 0.8 : 1);
-      })
-      .on('click', (event, d: any) => {
-        if (d.data.type === 'employment' && d.data.expData) {
-          onExperienceClick(d.data.expData);
-        }
-      });
-
-    return () => { };
-  }, [dimensions, onExperienceClick]);
+  const renderRoles = (side: 'left' | 'right') => (
+    <div
+      className={`flex flex-col justify-around gap-4 py-2 ${
+        side === 'left' ? 'items-end' : 'items-start'
+      }`}
+    >
+      {roles
+        .filter((r) => r.side === side)
+        .map((role) => {
+          const open = expanded === role.key;
+          return (
+            <div
+              key={role.key}
+              ref={setRef(`role-${role.key}`)}
+              onMouseEnter={() => setHoverBranch(role.key)}
+              onMouseLeave={() => setHoverBranch(null)}
+              className="rounded-lg border-2 bg-background/80 backdrop-blur-sm w-[190px] md:w-[210px] transition-all duration-200"
+              style={{
+                borderColor: role.color,
+                boxShadow: open ? `0 0 0 3px ${role.color}22` : undefined,
+              }}
+            >
+              <button
+                onClick={() => setExpanded(open ? null : role.key)}
+                aria-expanded={open}
+                className="w-full text-left px-3 py-2"
+              >
+                <div className="flex items-start gap-2">
+                  <ChevronRight
+                    className={`w-3.5 h-3.5 mt-0.5 shrink-0 transition-transform duration-200 ${
+                      open ? 'rotate-90' : ''
+                    }`}
+                    style={{ color: role.color }}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground leading-snug">
+                      {role.title}
+                    </p>
+                    {role.company && (
+                      <p className="font-mono text-[10px] text-muted-foreground truncate">
+                        {role.company}
+                      </p>
+                    )}
+                    <p className="font-mono text-[10px] text-muted-foreground/70">
+                      {role.period} · {role.total} skills
+                    </p>
+                  </div>
+                </div>
+              </button>
+              <button
+                onClick={() => onExperienceClick(role.exp)}
+                className="w-full px-3 pb-2 text-left font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View role details →
+              </button>
+            </div>
+          );
+        })}
+    </div>
+  );
 
   return (
-    <div ref={containerRef} className="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-xl border border-border bg-card/30 overflow-hidden relative">
-      <svg ref={svgRef} className="w-full h-full touch-none" />
-      <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground border border-border/50 pointer-events-none">
-        <div className="flex items-center gap-2">
-          <span>🔍 Scroll to zoom</span>
-          <span>•</span>
-          <span>👆 Drag to pan</span>
+    <div className="w-full rounded-xl border border-border bg-card/30 overflow-auto relative h-[440px] sm:h-[540px] md:h-[640px]">
+      <div ref={wrapRef} className="relative min-w-[880px] p-6 md:p-10">
+        {/* Connectors sit behind the nodes, sized to the full scrollable area. */}
+        <svg
+          className="absolute left-0 top-0 pointer-events-none"
+          width={svgSize.w}
+          height={svgSize.h}
+          aria-hidden="true"
+        >
+          {connectors.map((c) => {
+            const dim = hoverBranch !== null && hoverBranch !== c.branch;
+            return (
+              <path
+                key={c.id}
+                d={c.d}
+                fill="none"
+                stroke={c.color}
+                strokeWidth={hoverBranch === c.branch ? 2 : 1.4}
+                strokeOpacity={dim ? 0.12 : hoverBranch === c.branch ? 0.85 : 0.4}
+                className="transition-[stroke-opacity,stroke-width] duration-200"
+              />
+            );
+          })}
+        </svg>
+
+        <div className="relative flex items-stretch gap-3 md:gap-6">
+          {renderSkills('left')}
+          {renderRoles('left')}
+
+          {/* Root */}
+          <div className="flex flex-col justify-center shrink-0">
+            <div
+              ref={setRef('root')}
+              className="rounded-xl border-2 border-foreground/30 bg-background/90 backdrop-blur-sm px-4 py-3 text-center"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Ontology
+              </p>
+              <p className="text-sm font-bold text-foreground">Skills</p>
+              <p className="font-mono text-[10px] text-muted-foreground/70">
+                {roles.reduce((n, r) => n + r.skills.length, 0)} mapped
+              </p>
+            </div>
+          </div>
+
+          {renderRoles('right')}
+          {renderSkills('right')}
         </div>
+      </div>
+
+      <div className="absolute bottom-3 left-3 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground border border-border/50 pointer-events-none">
+        Click a role to expand its skills
       </div>
     </div>
   );
