@@ -7,29 +7,85 @@ const LearningAchievements = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            anime({
-              targets: '.learning-header',
-              opacity: [0, 1],
-              translateY: [30, 0],
-              duration: 800,
-              easing: 'easeOutExpo',
-            });
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
 
-            anime({
+          const badges =
+            sectionRef.current?.querySelectorAll<HTMLElement>('.achievement-badge') ?? [];
+
+          if (reduceMotion) {
+            anime.set('.learning-header, .achievement-card, .achievement-icon', {
+              opacity: 1,
+              translateY: 0,
+              scale: 1,
+              rotate: 0,
+            });
+            badges.forEach((b) => {
+              b.textContent = b.dataset.display ?? b.textContent;
+            });
+            return;
+          }
+
+          anime({
+            targets: '.learning-header',
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 800,
+            delay: anime.stagger(80),
+            easing: 'easeOutExpo',
+          });
+
+          anime
+            .timeline({ easing: 'easeOutExpo' })
+            .add({
               targets: '.achievement-card',
               opacity: [0, 1],
-              translateY: [40, 0],
-              delay: anime.stagger(100, { start: 300 }),
-              duration: 800,
-              easing: 'easeOutExpo',
-            });
+              translateY: [46, 0],
+              scale: [0.92, 1],
+              duration: 820,
+              delay: anime.stagger(110, { start: 200 }),
+            })
+            .add(
+              {
+                targets: '.achievement-icon',
+                scale: [0, 1],
+                rotate: [-35, 0],
+                duration: 700,
+                delay: anime.stagger(110),
+                easing: 'easeOutBack',
+              },
+              '-=760'
+            );
 
-            observer.unobserve(entry.target);
-          }
+          // Count the numeric part of each badge up; leave the rest of the
+          // label ("Stars", "Papers", "Top 1%") exactly as written.
+          badges.forEach((el, i) => {
+            const display = el.dataset.display ?? '';
+            const match = display.match(/^([\d,]+)(.*)$/);
+            if (!match) {
+              el.textContent = display;
+              return;
+            }
+            const target = Number(match[1].replace(/,/g, ''));
+            const suffix = match[2];
+            const counter = { v: 0 };
+            anime({
+              targets: counter,
+              v: target,
+              round: 1,
+              duration: 1400,
+              delay: 420 + i * 110,
+              easing: 'easeOutExpo',
+              update: () => {
+                el.textContent = counter.v.toLocaleString() + suffix;
+              },
+            });
+          });
         });
       },
       { threshold: 0.2 }
@@ -60,12 +116,15 @@ const LearningAchievements = () => {
             return (
               <div 
                 key={achievement.title}
-                className="achievement-card opacity-0 card-cyber rounded-xl p-6 text-center group hover:border-foreground/20 transition-all duration-300"
+                className="achievement-card opacity-0 card-cyber rounded-xl p-6 text-center group hover:border-foreground/20 hover:-translate-y-1.5 transition-[transform,border-color] duration-300 ease-out will-change-transform"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-foreground/5 flex items-center justify-center group-hover:bg-foreground/10 transition-colors">
+                <div className="achievement-icon w-16 h-16 mx-auto mb-4 rounded-xl bg-foreground/5 flex items-center justify-center group-hover:bg-foreground/10 group-hover:scale-110 transition-all duration-300">
                   <Icon className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
-                <div className="font-mono text-2xl font-bold text-foreground mb-2">
+                <div
+                  className="achievement-badge font-mono text-2xl font-bold text-foreground mb-2 tabular-nums"
+                  data-display={achievement.badge}
+                >
                   {achievement.badge}
                 </div>
                 <h3 className="font-medium text-foreground mb-2">{achievement.title}</h3>

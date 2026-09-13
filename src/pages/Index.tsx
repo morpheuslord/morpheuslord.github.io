@@ -6,7 +6,6 @@ import Experience from '@/components/sections/Experience';
 import Skills from '@/components/sections/Skills';
 import LearningAchievements from '@/components/sections/LearningAchievements';
 import Projects from '@/components/sections/Projects';
-import DecisionLog from '@/components/sections/DecisionLog';
 import Homelab from '@/components/sections/Homelab';
 import Research from '@/components/sections/Research';
 import Talks from '@/components/sections/Talks';
@@ -28,7 +27,6 @@ const Index = () => {
         <Skills />
         <LearningAchievements />
         <Projects />
-        <DecisionLog />
         <Homelab />
         <Research />
         <Talks />

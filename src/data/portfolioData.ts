@@ -99,13 +99,44 @@ export const experiences: Array<{
       level: "Lead",
       current: true,
       highlights: [
+        // --- Authority and advisory ---
         {
           title: "Security sign-off authority",
-          desc: "Hold sign-off on security architecture, tooling selection, and risk acceptance as lead security researcher and advisor for the managed security platform.",
+          desc: "Hold sign-off on security architecture, tooling selection, and risk acceptance for the managed security platform.",
           mainExp: "advisory",
           mainExpCategories: ["advisory", "strategy", "security"],
           importance: 5,
         },
+        // --- Research ---
+        {
+          title: "Lead security researcher",
+          desc: "Own the security research track for the platform: evaluate emerging tooling and detection approaches, track vulnerability and threat intelligence, and decide what makes it into the product.",
+          mainExp: "research",
+          mainExpCategories: ["research", "security", "strategy", "advisory"],
+          importance: 5,
+        },
+        {
+          title: "Applied research: agentic AI security",
+          desc: "Run applied research on securing agentic pipelines and on LLM-assisted triage and enrichment, including the agent and prompt threat surface, and feed the results back into the platform.",
+          mainExp: "research",
+          mainExpCategories: ["research", "security"],
+          importance: 5,
+        },
+        {
+          title: "Published research and technical writing",
+          desc: "Publish peer-reviewed research and long-form security writing: 7 papers across Springer, JETIR and FMDB, and security blogs past 100,000 cumulative reads.",
+          mainExp: "research",
+          mainExpCategories: ["research", "advisory", "collaboration"],
+          importance: 5,
+        },
+        {
+          title: "Tooling and detection evaluation",
+          desc: "Prototype and benchmark scanners, detection rules and triage automation before they reach client deployments, including the false-positive work that decides what is worth shipping.",
+          mainExp: "research",
+          mainExpCategories: ["research", "security", "delivery"],
+          importance: 4,
+        },
+        // --- Program ownership ---
         {
           title: "SOC 2 readiness program ownership",
           desc: "Own the SOC 2 readiness program across all deployed environments: control mapping, gap remediation, and evaluation of Drata for compliance automation.",
@@ -125,20 +156,35 @@ export const experiences: Array<{
           desc: "Own CI/CD and production DevSecOps end to end: which gates run (Semgrep, Gitleaks, Trivy, Checkov, Syft), at which pipeline stage they run, and what blocks a merge or a deploy.",
           mainExp: "security",
           mainExpCategories: ["security", "development", "delivery", "strategy"],
+          importance: 4,
+        },
+        // --- Leadership ---
+        {
+          title: "Lead the security engineering function",
+          desc: "Set technical direction and working standards for the security team, run code and design review on security-critical work, and own the escalation path when something is found in production.",
+          mainExp: "leadership",
+          mainExpCategories: ["leadership", "strategy", "advisory"],
           importance: 5,
         },
         {
           title: "Hiring and team input",
           desc: "Hire engineers, manage freelancers, and advise the founder on team performance, promotions, and role changes.",
           mainExp: "leadership",
-          mainExpCategories: ["leadership", "advisory"],
-          importance: 4,
+          mainExpCategories: ["leadership", "advisory", "strategy"],
+          importance: 5,
         },
         {
           title: "Security training: 7 trainees",
           desc: "Trained 7 security trainees on the platform's scanner output, DefectDojo triage workflow, and L2 SOC escalation path.",
-          mainExp: "advisory",
-          mainExpCategories: ["advisory", "leadership", "collaboration"],
+          mainExp: "leadership",
+          mainExpCategories: ["leadership", "advisory", "collaboration"],
+          importance: 4,
+        },
+        {
+          title: "Client and stakeholder advisory",
+          desc: "Present security posture, risk decisions and remediation plans directly to clients and to the founder, and translate findings into work the delivery team can act on.",
+          mainExp: "collaboration",
+          mainExpCategories: ["collaboration", "advisory", "delivery"],
           importance: 4,
         },
       ],
@@ -179,7 +225,7 @@ export const experiences: Array<{
           desc: "Prioritized remediation with EPSS, CISA KEV, and SSVC, which moved known-exploited findings ahead of high-CVSS findings with no evidence of exploitation.",
           mainExp: "security",
           mainExpCategories: ["security", "strategy"],
-          importance: 5,
+          importance: 4,
         },
         {
           title: "Detection and response",
@@ -207,7 +253,7 @@ export const experiences: Array<{
           desc: "Designed security architecture for clients under EU regulatory regimes (DORA, NIS2, GDPR).",
           mainExp: "security",
           mainExpCategories: ["security", "advisory", "strategy"],
-          importance: 5,
+          importance: 4,
         },
         // --- Engineering and delivery leadership ---
         {
@@ -215,7 +261,7 @@ export const experiences: Array<{
           desc: "Led a two-person application and API penetration testing function: set direction and methodology, ran white-box and black-box engagements, performed manual and automated code review, and wrote and signed off the client-facing reports.",
           mainExp: "security",
           mainExpCategories: ["security", "leadership", "delivery"],
-          importance: 5,
+          importance: 4,
         },
         {
           title: "Sole backend developer, production app",
@@ -229,7 +275,7 @@ export const experiences: Array<{
           desc: "Designed the application security architecture for that product: autonomous threat detection, monitoring, and an automated ban system for real-time abuse response, plus the architecture plans and implementation roadmaps for later phases.",
           mainExp: "security",
           mainExpCategories: ["security", "strategy", "development"],
-          importance: 5,
+          importance: 4,
         },
         {
           title: "Agentic AI and research",
@@ -243,14 +289,14 @@ export const experiences: Array<{
           desc: "Ran delivery end to end: sprint management, product-lifecycle planning, the client admin command center, and product and application security testing across 6+ research initiatives, of which 4 reached MVP and 1 is live in production.",
           mainExp: "delivery",
           mainExpCategories: ["delivery", "leadership", "research"],
-          importance: 5,
+          importance: 4,
         },
         {
           title: "Direct client management",
           desc: "Managed clients directly through requirement-gathering sessions, change requests, and delivery communication.",
           mainExp: "collaboration",
           mainExpCategories: ["collaboration", "delivery"],
-          importance: 5,
+          importance: 4,
         },
         {
           title: "External representation",
@@ -827,7 +873,7 @@ export const navLinks = [
   { name: "Experience", href: "#experience" },
   { name: "Skills", href: "#skills" },
   { name: "Projects", href: "#projects" },
-  { name: "Decisions", href: "#decisions" },
+  { name: "Lab", href: "#homelab" },
   { name: "Research", href: "#research" },
   { name: "Services", href: "#services" },
   { name: "Articles", href: "/articles" },

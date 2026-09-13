@@ -48,8 +48,8 @@ const Homelab = () => {
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-6">
-          <p className="section-title homelab-header opacity-0">Demonstrated Ownership</p>
-          <h2 className="section-heading homelab-header opacity-0">Homelab</h2>
+          <p className="section-title homelab-header opacity-0">Where I Test Things First</p>
+          <h2 className="section-heading homelab-header opacity-0">My personal lab</h2>
         </div>
         <p className="homelab-header opacity-0 text-sm text-muted-foreground text-center max-w-2xl mx-auto mb-12 leading-relaxed">
           {homelab.summary}

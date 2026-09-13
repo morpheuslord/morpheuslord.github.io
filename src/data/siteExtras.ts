@@ -1,9 +1,4 @@
-// Website-only content.
-//
-// None of this belongs on the submittable PDF. It exists because the weakest
-// part of the position is that the senior scope all comes from one small
-// company and cannot be verified from outside. A PDF cannot fix that; a public
-// page with dated updates, named decisions and linked artifacts can.
+// Website-only content. None of this belongs on the submittable PDF.
 
 /** Dated "what I am working on now" block. Update the date whenever the items change. */
 export const nowBlock = {
@@ -58,8 +53,7 @@ export const talks = [
   },
 ];
 
-/** The homelab as a writeup rather than a three-line skills entry. For an
- *  infrastructure security role this is demonstrated ownership, not a hobby. */
+/** The personal lab, as a writeup rather than a three-line skills entry. */
 export const homelab = {
   summary:
     "A self-hosted estate that runs on the same patterns as production: per-service isolation, no public ingress, and monitoring I actually read. It is where most of the infrastructure decisions get tested before a client sees them.",
@@ -82,7 +76,11 @@ export const homelab = {
     },
     {
       name: "Tailscale",
-      detail: "Mesh VPN for remote access. Nothing is published to the public internet, which is the same zero-trust posture used for client production access.",
+      detail: "Mesh VPN between my own devices and the lab. Nothing is published to the public internet, so there is no inbound attack surface to defend.",
+    },
+    {
+      name: "Twingate",
+      detail: "Per-resource zero-trust access for anything I need to share or reach without putting a device on the mesh. Same pattern I run for client production access, which is where I tested it before it went anywhere near a client.",
     },
     {
       name: "PICOTTY",
@@ -104,58 +102,3 @@ export const homelab = {
     },
   ],
 };
-
-/** Decision log: the architecture calls, what was rejected, and why.
- *  This is the closest thing to public proof of advisory authority. */
-export const decisionLog = [
-  {
-    id: 1,
-    decision: "Twingate for production access, not a VPN",
-    context:
-      "Client production instances needed operator access for L2 SOC work and incident response, across separate AWS accounts with no shared network.",
-    rejected: [
-      "A traditional VPN into each client VPC",
-      "Bastion hosts with standing SSH keys",
-    ],
-    reasoning:
-      "A VPN grants network-level reach once a user is on it, so a single compromised operator credential exposes a whole client subnet. Bastions keep standing SSH access alive, which is the exact access class worth removing. Twingate authorizes per resource rather than per network, so operator access is scoped to the specific service and revocation is immediate.",
-    tradeoff:
-      "A third-party dependency now sits in the access path, and access breaks if that provider is down. Accepted because the blast radius reduction is larger than the availability risk, and break-glass paths exist.",
-  },
-  {
-    id: 2,
-    decision: "Data locality as a hard architectural rule",
-    context:
-      "The platform scans client code, cloud accounts and containers. Scan input is some of the most sensitive material a client has.",
-    rejected: [
-      "A central multi-tenant scanning cluster",
-      "Shipping findings to a shared analysis backend",
-    ],
-    reasoning:
-      "A central cluster is cheaper and much easier to operate, but it means client source and cloud metadata leave the client boundary and sit next to other clients' data. Running one EC2 instance per client inside a separate AWS account means no scan input leaves the client deployment, which removes cross-tenant data exposure as a class of risk rather than mitigating it. It also makes the answer to the regulated-client question a fact about the architecture instead of a policy promise.",
-    tradeoff:
-      "Higher per-client cost and more deployments to operate and patch. Accepted, and it is the reason the cost simulation work mattered.",
-  },
-  {
-    id: 3,
-    decision: "HostExec replacing Komodo and Periphery",
-    context:
-      "Container deployment and host-level execution on client instances needed a control path that the platform owned.",
-    rejected: ["Komodo plus its Periphery agent as the production control path"],
-    reasoning:
-      "Komodo and Periphery are good tools and still run in my homelab, but on client instances they meant running a general-purpose management agent with broad host reach for a narrow set of operations. A purpose-built execution path exposes only the operations the platform actually needs, which is a smaller surface to reason about during an audit and a smaller one to defend.",
-    tradeoff:
-      "Maintaining something in-house instead of adopting a maintained upstream project. Accepted because the scope is deliberately narrow.",
-  },
-  {
-    id: 4,
-    decision: "EPSS, CISA KEV and SSVC over raw CVSS ranking",
-    context:
-      "The scanner fleet produces far more findings than any client can remediate, and CVSS alone sorted them badly.",
-    rejected: ["Ranking remediation work by CVSS severity"],
-    reasoning:
-      "CVSS scores severity if a vulnerability is exploited; it says nothing about whether anyone is exploiting it. Sorting by CVSS put theoretical criticals ahead of findings with active exploitation. Layering EPSS for exploitation probability, CISA KEV for confirmed exploitation, and SSVC for the decision itself moved known-exploited findings to the front of the queue.",
-    tradeoff:
-      "Harder to explain to a client than a single severity number, so each prioritized finding has to carry its reasoning.",
-  },
-];
