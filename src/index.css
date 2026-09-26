@@ -187,7 +187,7 @@
   
   .card-cyber::before {
     content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none;
     background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.03) 0%, transparent 100%);
   }
   

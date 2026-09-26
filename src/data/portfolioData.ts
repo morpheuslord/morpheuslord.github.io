@@ -664,6 +664,15 @@ export const projects: Array<{
 
   // --- Security tooling and analysis (ordered by stars) ---
   {
+    id: 11,
+    title: "CloudG",
+    description:
+      "Multi-cloud infrastructure mapping and audit CLI for AWS, Azure, and GCP: builds topology graphs with reachability and attack-path analysis, runs Prowler, Checkov, Trivy and ScoutSuite, and scores deduplicated findings against 28 compliance frameworks.",
+    github: "https://github.com/morpheuslord/cloudg",
+    tags: ["Python", "Cloud Security", "AWS", "Azure", "GCP"],
+    cluster: "security-tooling",
+  },
+  {
     id: 4,
     title: "QuadraInspect",
     description:
