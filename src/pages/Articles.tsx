@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import anime from 'animejs';
+import { useCardSpotlight } from '@/hooks/useCardSpotlight';
 import { articles, articleCategories, authorStats, getArticleCategories } from '@/data/articlesData';
 import { ArrowLeft, ExternalLink, Clock, Calendar, Search, Brain, Shield, Code, Cloud, BookOpen } from 'lucide-react';
 
 const Articles = () => {
+  useCardSpotlight();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);

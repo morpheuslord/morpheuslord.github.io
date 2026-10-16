@@ -91,7 +91,7 @@ const Cluster = ({
       {/* Cluster label */}
       <div className="mb-6">
         <div className="flex items-center gap-4">
-          <h3 className="cluster-label font-mono text-sm uppercase tracking-widest text-foreground whitespace-nowrap">
+          <h3 className="cluster-label font-mono text-xs sm:text-sm uppercase tracking-widest text-foreground sm:whitespace-nowrap">
             {name}
           </h3>
           <div className="cluster-rule h-px flex-1 bg-border origin-left" />

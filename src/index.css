@@ -118,6 +118,26 @@
     font-family: var(--font-mono);
   }
   
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    .btn-hero::before {
+      display: none;
+    }
+  }
+
   ::selection {
     background: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
@@ -185,13 +205,38 @@
     background-image: var(--gradient-card);
   }
   
+  /* Cursor spotlight: --mx/--my are set on hover by useCardSpotlight. Without
+     them (touch, first paint) the light sits at the top centre. */
   .card-cyber::before {
     content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none;
-    background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.03) 0%, transparent 100%);
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 0%),
+      hsla(0, 0%, 100%, 0.075),
+      transparent 60%
+    );
   }
-  
-  .card-cyber:hover::before {
+
+  /* Lit edge: the same light, masked down to the 1px border. */
+  .card-cyber::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 0%),
+      hsla(0, 0%, 100%, 0.6),
+      transparent 70%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .card-cyber:hover::before,
+  .card-cyber:hover::after,
+  .card-cyber:focus-within::after {
     @apply opacity-100;
   }
   
@@ -354,13 +399,39 @@
     @apply py-20 md:py-32 relative;
   }
   
+  /* Eyebrow label with short rules either side: ── LABEL ── */
   .section-title {
-    @apply text-sm font-medium tracking-widest uppercase text-muted-foreground mb-3;
+    @apply inline-flex items-center gap-3 text-xs md:text-sm font-medium tracking-[0.25em] uppercase text-muted-foreground mb-4;
     font-family: var(--font-mono);
   }
-  
+
+  .section-title::before,
+  .section-title::after {
+    content: '';
+    @apply h-px w-6 md:w-10;
+    background: linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.6));
+  }
+
+  .section-title::after {
+    background: linear-gradient(270deg, transparent, hsl(var(--muted-foreground) / 0.6));
+  }
+
+  /* Headings fade from full white to grey top to bottom, like light falling on them. */
   .section-heading {
-    @apply text-3xl md:text-4xl lg:text-5xl font-bold mb-8;
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold mb-8 tracking-tight;
+    text-wrap: balance;
+    background-image: linear-gradient(180deg, hsl(var(--foreground)) 30%, hsl(var(--foreground) / 0.55) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: 0.08em;
+  }
+
+  /* Hairline between stacked sections, brightest in the middle. */
+  .section + .section::before {
+    content: '';
+    @apply absolute top-0 left-1/2 -translate-x-1/2 h-px w-full max-w-5xl pointer-events-none;
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.12), transparent);
   }
   
   /* Timeline Styling */
@@ -380,9 +451,32 @@
   
   /* Button Variants for Hero */
   .btn-hero {
-    @apply inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-lg transition-all duration-300;
+    @apply relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-lg transition-all duration-300;
     @apply bg-foreground text-background hover:bg-foreground/90;
     box-shadow: 0 4px 20px hsla(0, 0%, 100%, 0.2);
+  }
+
+  /* A sheen that sweeps across once per hover. */
+  .btn-hero::before {
+    content: '';
+    @apply absolute inset-y-0 -left-1/2 w-1/3 pointer-events-none;
+    background: linear-gradient(100deg, transparent, hsla(0, 0%, 100%, 0.7), transparent);
+    transform: translateX(-120%) skewX(-20deg);
+  }
+
+  .btn-hero:hover::before {
+    transform: translateX(520%) skewX(-20deg);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-hero:active,
+  .btn-ghost:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn-hero:focus-visible,
+  .btn-ghost:focus-visible {
+    @apply outline-none ring-2 ring-foreground/70 ring-offset-2 ring-offset-background;
   }
   
   .btn-hero:hover {
@@ -393,6 +487,29 @@
   .btn-ghost {
     @apply inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-lg transition-all duration-300;
     @apply bg-transparent text-foreground border border-border hover:bg-foreground/5 hover:border-foreground/30;
+  }
+
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ---------- Hero backdrop ---------- */
+
+  .hero-glow {
+    @apply absolute pointer-events-none rounded-full;
+    background: radial-gradient(circle, hsla(0, 0%, 100%, 0.07), transparent 65%);
+  }
+
+  /* Surname set as an outline that fills in on hover. */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px hsl(var(--foreground) / 0.4);
+    transition: color 500ms ease, -webkit-text-stroke-color 500ms ease;
+  }
+
+  .group:hover .text-outline {
+    color: hsl(var(--foreground) / 0.5);
+    -webkit-text-stroke-color: transparent;
   }
   
   /* Nav Styles */

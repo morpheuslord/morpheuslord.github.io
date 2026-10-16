@@ -3,6 +3,7 @@ import anime from 'animejs';
 import { personalInfo, stats } from '@/data/portfolioData';
 import { ChevronDown, Download } from 'lucide-react';
 import ComputerModel from './ComputerModel';
+import TerrainLines from '@/components/ui/terrain-lines';
 import resumePdf from '@/data/Resume.pdf';
 
 const Hero = () => {
@@ -94,13 +95,18 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden"
     >
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/10" />
-      
-      {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-10" />
+
+      <div className="hero-glow w-[720px] h-[720px] -top-64 -left-48" aria-hidden="true" />
+
+      {/* Terrain accent along the bottom edge; rises a little under the cursor */}
+      <TerrainLines className="absolute inset-x-0 bottom-0 h-[220px] md:h-[300px]" amplitude={64} />
+
+      {/* Fade into the next section */}
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-background pointer-events-none" aria-hidden="true" />
 
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 w-full">
@@ -112,7 +118,10 @@ const Hero = () => {
 
             {/* Badge */}
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border/40 bg-card/20 backdrop-blur-md mb-8 opacity-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="relative flex w-2 h-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+                <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+              </span>
               <span className="font-mono text-xs text-muted-foreground">
                 Available for opportunities
               </span>
@@ -121,11 +130,11 @@ const Hero = () => {
             {/* Main Title */}
             <h1 
               ref={titleRef}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 opacity-0"
+              className="group text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.035em] leading-[0.95] mb-8 opacity-0"
             >
               <span className="glow-text">{personalInfo.name.split(' ')[0]}</span>
               <br />
-              <span className="text-muted-foreground/50">{personalInfo.name.split(' ')[1]}</span>
+              <span className="text-outline">{personalInfo.name.split(' ')[1]}</span>
             </h1>
 
             {/* Subtitle */}
@@ -145,10 +154,13 @@ const Hero = () => {
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-10 mb-10">
+            <div className="grid grid-cols-2 gap-x-6 sm:gap-x-10 gap-y-6 max-w-lg mx-auto lg:mx-0 mb-10">
               {stats.map((stat) => (
-                <div key={stat.label} className="hero-stat text-center lg:text-left opacity-0">
-                  <div className="font-mono text-2xl md:text-3xl font-bold text-foreground mb-1">
+                <div
+                  key={stat.label}
+                  className="hero-stat text-center lg:text-left opacity-0 lg:pl-4 lg:border-l lg:border-border/60"
+                >
+                  <div className="font-mono text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 tabular-nums sm:whitespace-nowrap">
                     {stat.value}
                   </div>
                   <div className="text-xs text-muted-foreground uppercase tracking-widest">
@@ -181,7 +193,7 @@ const Hero = () => {
           <div className="order-1 lg:order-2 flex justify-center">
             <div className="hero-illustration opacity-0 relative w-full max-w-lg lg:max-w-xl h-[400px] lg:h-[500px]">
               {/* Glow effect behind computer model */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-blue-500/10 blur-3xl rounded-full" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle,hsla(0,0%,100%,0.08),transparent_65%)] blur-2xl rounded-full" />
               
               <ComputerModel />
               

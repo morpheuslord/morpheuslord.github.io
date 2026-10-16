@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { navLinks } from '@/data/portfolioData';
 import anime from 'animejs';
@@ -7,28 +7,38 @@ const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
 
+      // Reading progress, written to the DOM directly to avoid a render per frame.
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+      }
+
       // Determine active section (only for anchor links)
       const sections = navLinks
         .filter(link => link.href.startsWith('#'))
         .map(link => link.href.replace('#', ''));
+      let current = '';
       for (const section of sections.reverse()) {
         const element = document.getElementById(section);
         if (element) {
           const rect = element.getBoundingClientRect();
           if (rect.top <= 150) {
-            setActiveSection(section);
+            current = section;
             break;
           }
         }
       }
+      setActiveSection(current);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -129,6 +139,16 @@ const Navigation = () => {
           </button>
         </div>
       </div>
+
+      {/* Scroll progress */}
+      <div
+        ref={progressRef}
+        aria-hidden="true"
+        className={`absolute bottom-0 left-0 h-px w-full origin-left bg-gradient-to-r from-foreground/10 via-foreground/70 to-foreground transition-opacity duration-500 ${
+          isScrolled ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ transform: 'scaleX(0)' }}
+      />
 
       {/* Mobile Menu */}
       <div

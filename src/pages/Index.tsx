@@ -13,8 +13,11 @@ import Services from '@/components/sections/Services';
 import Testimonials from '@/components/sections/Testimonials';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/layout/Footer';
+import { useCardSpotlight } from '@/hooks/useCardSpotlight';
 
 const Index = () => {
+  useCardSpotlight();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />

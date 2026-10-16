@@ -1,5 +1,6 @@
 import { personalInfo } from '@/data/portfolioData';
 import { Github, Linkedin, Mail, ChevronUp } from 'lucide-react';
+import TerrainLines from '@/components/ui/terrain-lines';
 
 const Footer = () => {
   const scrollToTop = () => {
@@ -7,8 +8,11 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-border py-12 mt-20">
-      <div className="max-w-6xl mx-auto px-6">
+    <footer className="relative overflow-hidden border-t border-border py-12 mt-20">
+      {/* Same terrain motif as the hero, quieter, to close the page */}
+      <TerrainLines className="absolute inset-x-0 bottom-0 h-full" lines={9} amplitude={30} />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo / Name */}
           <div className="text-center md:text-left">
