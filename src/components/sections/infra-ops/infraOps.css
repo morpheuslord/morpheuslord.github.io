@@ -1,0 +1,232 @@
+/* InfraOps game: hover states and packet keyframes from the design.
+   Two identical keyframe names let a new attack wave restart every packet. */
+
+@keyframes ioPkA {
+  0% { offset-distance: 0%; opacity: 0; }
+  8% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+@keyframes ioPkB {
+  0% { offset-distance: 0%; opacity: 0; }
+  8% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.io-game textarea::selection { background: rgba(236, 224, 204, .22); }
+.io-game input::placeholder { color: #5f5a55; }
+
+.io-game .io-tab:hover { color: #fff !important; }
+.io-game .io-file:hover { background: #1f1d1b !important; }
+.io-game .io-btn-outline:hover { border-color: #7d7873 !important; background: rgba(255, 255, 255, .03) !important; }
+.io-game .io-btn-small:hover { border-color: #8a8580 !important; }
+.io-game .io-btn-primary:hover { background: #fff !important; }
+.io-game .io-btn-ghost:hover { color: #e8e6e3 !important; }
+.io-game .io-btn-dark:hover { background: #2a2826 !important; }
+
+.io-game button:focus-visible {
+  outline: 1px solid #ece0cc;
+  outline-offset: 2px;
+}
+
+.io-banner { animation: ioBannerIn .45s cubic-bezier(.2, .8, .2, 1); }
+@keyframes ioBannerIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .io-game .io-packet { animation-duration: 0s !important; opacity: 0 !important; }
+  .io-banner { animation: none; }
+}
+
+/* ---- The monitor the game boots on ------------------------------------ */
+
+.retro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.retro-overlay[hidden] { display: none; }
+
+.retro-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 7, 6, .78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Bezel colours match the hero computer's casing (#EEDEC8 / #c6b5a4). */
+.retro-monitor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 0;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #eedec8 0%, #e2d1ba 60%, #d4c2aa 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .55),
+    inset 0 -3px 0 rgba(0, 0, 0, .12),
+    0 40px 120px rgba(0, 0, 0, .6),
+    0 0 0 1px rgba(0, 0, 0, .25);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.retro-glass {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 12px;
+  background: #0d0c0b;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 3px #b8a690,
+    inset 0 0 0 5px #282828,
+    inset 0 6px 22px rgba(0, 0, 0, .8);
+}
+
+.retro-viewport {
+  position: absolute;
+  inset: 5px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #161514;
+}
+
+.retro-viewport.is-scrollable { overflow: auto; }
+
+.retro-screen {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+
+.retro-game-host {
+  transform-origin: 0 0;
+}
+
+/* Faint scanlines + vignette, light enough not to fight the game's type. */
+.retro-scanlines {
+  position: absolute;
+  inset: 5px;
+  border-radius: 8px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .09) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 50%, transparent 62%, rgba(0, 0, 0, .38) 100%);
+  mix-blend-mode: multiply;
+  z-index: 3;
+}
+
+.retro-flash {
+  position: absolute;
+  inset: 5px;
+  border-radius: 8px;
+  pointer-events: none;
+  background: #f1efec;
+  opacity: 0;
+  z-index: 4;
+}
+
+.retro-boot {
+  position: absolute;
+  inset: 5px;
+  padding: clamp(18px, 3vw, 40px);
+  font: 400 clamp(11px, 1.1vw, 14px)/1.75 'JetBrains Mono', monospace;
+  color: #4ec456;
+  text-shadow: 0 0 6px rgba(78, 196, 86, .45);
+  background: radial-gradient(80% 70% at 50% 45%, #121a13 0%, #0a0c0a 100%);
+  white-space: pre-wrap;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.retro-boot .dim { color: #2f7a35; text-shadow: none; }
+.retro-boot .hi { color: #eedec8; text-shadow: 0 0 6px rgba(238, 222, 200, .35); }
+.retro-boot .caret {
+  display: inline-block;
+  width: .6em;
+  height: 1.1em;
+  vertical-align: -.2em;
+  background: #4ec456;
+  box-shadow: 0 0 6px #4ec456;
+  animation: retroCaret 1s step-end infinite;
+}
+@keyframes retroCaret {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.retro-boot .skip {
+  position: absolute;
+  right: clamp(18px, 3vw, 40px);
+  bottom: clamp(14px, 2vw, 28px);
+  color: #2f7a35;
+  text-shadow: none;
+}
+
+.retro-chin {
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 10px;
+}
+
+.retro-badge {
+  font: 700 12px 'JetBrains Mono', monospace;
+  letter-spacing: .32em;
+  color: #8a7a6a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+}
+
+.retro-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 400 11px 'JetBrains Mono', monospace;
+  color: #8a7a6a;
+}
+
+.retro-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b5d50;
+  transition: background .3s, box-shadow .3s;
+}
+.retro-led.on {
+  background: #4ec456;
+  box-shadow: 0 0 6px #4ec456, 0 0 12px rgba(78, 196, 86, .5);
+}
+
+.retro-power {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #c6b5a4 0%, #a99784 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), inset 0 -2px 0 rgba(0, 0, 0, .18), 0 1px 2px rgba(0, 0, 0, .2);
+  color: #4d413a;
+  font: 500 11px 'JetBrains Mono', monospace;
+  cursor: pointer;
+}
+.retro-power:hover { background: linear-gradient(180deg, #d4c2aa 0%, #b5a28e 100%); }
+.retro-power:active { transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .3); }
+.retro-power:focus-visible { outline: 2px solid #4d413a; outline-offset: 2px; }
+.retro-power svg { width: 12px; height: 12px; }
+
+@media (max-width: 640px) {
+  .retro-monitor { padding: 10px 10px 0; border-radius: 14px; }
+  .retro-chin { height: 40px; }
+  .retro-controls .esc-hint { display: none; }
+}

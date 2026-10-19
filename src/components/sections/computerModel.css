@@ -287,3 +287,6 @@
     z-index: 1000;
     opacity: 0.8;
 }
+/* Keyboard focus for the clickable computer (boots the Infra Ops game). */
+.computer-stage { outline: none; border-radius: 24px; }
+.computer-stage:focus-visible { box-shadow: 0 0 0 1px hsla(0, 0%, 100%, .45); }

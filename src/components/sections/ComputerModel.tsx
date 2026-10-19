@@ -1,10 +1,35 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type RefObject } from 'react';
 import './computerModel.css';
 
-const ComputerModel = () => {
+interface ComputerModelProps {
+  /** Called on a plain click (not a drag-to-rotate) or Enter/Space. */
+  onBoot?: () => void;
+  /** Attached to the monitor's screen so a popup can grow out of it. */
+  screenRef?: RefObject<HTMLDivElement>;
+}
+
+// Pointer travel (px) beyond which a press counts as a rotate-drag, not a click.
+const DRAG_THRESHOLD = 6;
+
+const ComputerModel = ({ onBoot, screenRef }: ComputerModelProps) => {
   const computerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const pressStart = useRef<{ x: number; y: number } | null>(null);
+
+  const handleClick = (e: ReactMouseEvent) => {
+    const start = pressStart.current;
+    pressStart.current = null;
+    if (!onBoot) return;
+    if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > DRAG_THRESHOLD) return;
+    onBoot();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!onBoot || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    onBoot();
+  };
 
   useEffect(() => {
     const computerElement = computerRef.current;
@@ -33,6 +58,7 @@ const ComputerModel = () => {
     };
 
     const handleMouseDown = (e: MouseEvent) => {
+      pressStart.current = { x: e.clientX, y: e.clientY };
       setIsDragging(true);
       handleMouseMove(e);
     };
@@ -58,7 +84,15 @@ const ComputerModel = () => {
   }, [isDragging]);
 
   return (
-    <div ref={containerRef} style={{
+    <div
+      ref={containerRef}
+      className={onBoot ? 'computer-stage' : undefined}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role={onBoot ? 'button' : undefined}
+      tabIndex={onBoot ? 0 : undefined}
+      aria-label={onBoot ? 'Boot the computer and play Infra Ops, a cloud security game' : undefined}
+      style={{
       position: 'relative',
       width: '100%',
       height: '100%',
@@ -75,7 +109,7 @@ const ComputerModel = () => {
           <div className="top square"></div>
           <div className="left square">
             {/* Enhanced Screen Content */}
-            <div style={{
+            <div ref={screenRef} style={{
               position: 'absolute',
               top: '12%',
               left: '8%',

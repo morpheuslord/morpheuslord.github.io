@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import anime from 'animejs';
 import { personalInfo, stats } from '@/data/portfolioData';
 import { ChevronDown, Download } from 'lucide-react';
@@ -6,10 +6,18 @@ import ComputerModel from './ComputerModel';
 import TerrainLines from '@/components/ui/terrain-lines';
 import resumePdf from '@/data/Resume.pdf';
 
+// The game only loads once someone clicks the computer.
+const RetroMonitorPopup = lazy(() => import('./infra-ops/RetroMonitorPopup'));
+
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
+  const [gameOpen, setGameOpen] = useState(false);
+  const [gameLoaded, setGameLoaded] = useState(false);
+  const bootGame = useCallback(() => { setGameLoaded(true); setGameOpen(true); }, []);
+  const getScreenRect = useCallback(() => screenRef.current?.getBoundingClientRect() ?? null, []);
 
   useEffect(() => {
     const timeline = anime.timeline({
@@ -195,7 +203,12 @@ const Hero = () => {
               {/* Glow effect behind computer model */}
               <div className="absolute inset-0 bg-[radial-gradient(circle,hsla(0,0%,100%,0.08),transparent_65%)] blur-2xl rounded-full" />
               
-              <ComputerModel />
+              <ComputerModel onBoot={bootGame} screenRef={screenRef} />
+
+              <p className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-2 font-mono text-xs text-muted-foreground whitespace-nowrap pointer-events-none" aria-hidden="true">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4EC456] shadow-[0_0_6px_#4EC456]" />
+                Click the computer to play Infra Ops
+              </p>
               
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 border border-border/20 rounded-full opacity-60" />
@@ -213,6 +226,11 @@ const Hero = () => {
         <span className="font-mono text-xs tracking-wider">Scroll</span>
         <ChevronDown className="w-5 h-5" />
       </button>
+      {gameLoaded && (
+        <Suspense fallback={null}>
+          <RetroMonitorPopup open={gameOpen} onClose={() => setGameOpen(false)} getOriginRect={getScreenRect} />
+        </Suspense>
+      )}
     </section>
   );
 };
