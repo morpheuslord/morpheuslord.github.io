@@ -1,23 +1,175 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type RefObject } from 'react';
-import './computerModel.css';
+import { useEffect, useRef, type KeyboardEvent, type MutableRefObject } from 'react';
+import '@/lib/anatomy/iso.css';
+import './computer/computer.css';
 
 interface ComputerModelProps {
   /** Called on a plain click (not a drag-to-rotate) or Enter/Space. */
   onBoot?: () => void;
-  /** Attached to the monitor's screen so a popup can grow out of it. */
-  screenRef?: RefObject<HTMLDivElement>;
+  /** Set to the monitor's screen so a popup can grow out of it. */
+  screenRef?: MutableRefObject<Element | null>;
 }
 
 // Pointer travel (px) beyond which a press counts as a rotate-drag, not a click.
 const DRAG_THRESHOLD = 6;
+// Degrees of turn per pixel of horizontal drag.
+const DRAG_GAIN = 0.55;
+// Exponential follow rate (1/s) of the drawn angle toward the target.
+const FOLLOW = 9;
+// The idle tour: a slow sway around the rest pose once nobody has touched it for a while.
+const TOUR_AMPLITUDE = 22;
+const TOUR_PERIOD = 14;
+const TOUR_DELAY = 3600;
 
+/**
+ * The hero computer: a beige desktop PC, CRT, keyboard and mouse drawn with the
+ * anatomy kit's 3D turn mode (geometry in scripts/build-computer.mjs). Drag to spin
+ * it, click it to boot Infra Ops.
+ */
 const ComputerModel = ({ onBoot, screenRef }: ComputerModelProps) => {
-  const computerRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
   const pressStart = useRef<{ x: number; y: number } | null>(null);
+  const keyTurn = useRef<(by: number) => void>(() => {});
 
-  const handleClick = (e: ReactMouseEvent) => {
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    let cancelled = false;
+    let cleanup = () => {};
+
+    Promise.all([import('./computer/computer.gen.json'), import('@/lib/anatomy/turn.mjs')]).then(([genModule, { TURN }]) => {
+      if (cancelled) return;
+      const gen = genModule.default;
+      stage.innerHTML = `<style>${gen.css}</style>${gen.stage}`;
+      const controller = TURN.mount(stage, gen.turn);
+      if (screenRef) screenRef.current = stage.querySelector('[data-screen]');
+
+      const still = matchMedia('(prefers-reduced-motion: reduce)');
+      let angle = 0;
+      let target = 0;
+      let velocity = 0;
+      let drawn = NaN;
+      let frame = 0;
+      let last = 0;
+      let visible = true;
+      let touring = !still.matches;
+      let tourClock = 0;
+      let tourBase = 0;
+      let idle = 0;
+      let drag: { x: number; from: number; t: number; lastX: number } | null = null;
+
+      const hold = () => {
+        touring = false;
+        window.clearTimeout(idle);
+        idle = window.setTimeout(() => {
+          if (still.matches) return;
+          touring = true;
+          tourClock = 0;
+          tourBase = target;
+          run();
+        }, TOUR_DELAY);
+      };
+
+      const tick = (now: number) => {
+        const dt = Math.min(0.05, last ? (now - last) / 1000 : 0);
+        last = now;
+        if (touring) {
+          tourClock += dt;
+          // Ease the sway in from zero so the tour never jumps.
+          const ramp = Math.min(1, tourClock / 2.5);
+          target = tourBase + TOUR_AMPLITUDE * ramp * Math.sin((tourClock / TOUR_PERIOD) * Math.PI * 2);
+        } else if (!drag && Math.abs(velocity) > 0.5) {
+          // A flick coasts and settles.
+          target += velocity * dt;
+          velocity *= Math.exp(-dt * 3.2);
+        }
+        angle += (target - angle) * (1 - Math.exp(-FOLLOW * dt));
+        if (Math.abs(angle - drawn) > 0.01) {
+          controller.set({ pc: angle });
+          drawn = angle;
+        }
+        const moving = touring || drag || Math.abs(target - angle) > 0.02 || Math.abs(velocity) > 0.5;
+        frame = visible && moving ? requestAnimationFrame(tick) : 0;
+      };
+      const run = () => {
+        if (!frame && visible) {
+          last = 0;
+          frame = requestAnimationFrame(tick);
+        }
+      };
+
+      const onDown = (e: PointerEvent) => {
+        if (e.button !== 0) return;
+        hold();
+        velocity = 0;
+        drag = { x: e.clientX, from: target, t: performance.now(), lastX: e.clientX };
+        run();
+      };
+      const onMove = (e: PointerEvent) => {
+        if (!drag) return;
+        const now = performance.now();
+        const dtMove = Math.max(1, now - drag.t) / 1000;
+        velocity = ((e.clientX - drag.lastX) * DRAG_GAIN) / dtMove;
+        drag.t = now;
+        drag.lastX = e.clientX;
+        target = drag.from + (e.clientX - drag.x) * DRAG_GAIN;
+        run();
+      };
+      const onUp = () => {
+        if (!drag) return;
+        if (performance.now() - drag.t > 80) velocity = 0;
+        drag = null;
+        hold();
+        run();
+      };
+      keyTurn.current = (by: number) => {
+        hold();
+        velocity = 0;
+        target += by;
+        run();
+      };
+
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) run();
+      });
+      observer.observe(stage);
+      const onMotion = () => {
+        touring = !still.matches;
+        run();
+      };
+      still.addEventListener('change', onMotion);
+      stage.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      run();
+
+      cleanup = () => {
+        cancelAnimationFrame(frame);
+        window.clearTimeout(idle);
+        observer.disconnect();
+        still.removeEventListener('change', onMotion);
+        stage.removeEventListener('pointerdown', onDown);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        controller.destroy();
+        if (screenRef) screenRef.current = null;
+        keyTurn.current = () => {};
+      };
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [screenRef]);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pressStart.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
     const start = pressStart.current;
     pressStart.current = null;
     if (!onBoot) return;
@@ -26,386 +178,33 @@ const ComputerModel = ({ onBoot, screenRef }: ComputerModelProps) => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      keyTurn.current(e.key === 'ArrowLeft' ? -15 : 15);
+      return;
+    }
     if (!onBoot || (e.key !== 'Enter' && e.key !== ' ')) return;
     e.preventDefault();
     onBoot();
   };
 
-  useEffect(() => {
-    const computerElement = computerRef.current;
-    const container = containerRef.current;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !container || !computerElement) return;
-
-      const rect = container.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      // Calculate rotation based on mouse position relative to center
-      const deltaX = e.clientX - centerX;
-      const deltaY = e.clientY - centerY;
-
-      // Convert to rotation values (adjust sensitivity)
-      const rotationY = (deltaX / rect.width) * 180;
-      const rotationX = -(deltaY / rect.height) * 180;
-
-      // Clamp values to reasonable ranges
-      const clampedX = Math.max(-90, Math.min(90, rotationX));
-      const clampedY = Math.max(-180, Math.min(180, rotationY));
-
-      computerElement.style.transform = `rotatex(${clampedX}deg) rotatey(${clampedY}deg)`;
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      pressStart.current = { x: e.clientX, y: e.clientY };
-      setIsDragging(true);
-      handleMouseMove(e);
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    // Add event listeners
-    if (container) {
-      container.addEventListener("mousedown", handleMouseDown);
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener("mousedown", handleMouseDown);
-      }
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging]);
-
   return (
-    <div
-      ref={containerRef}
-      className={onBoot ? 'computer-stage' : undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role={onBoot ? 'button' : undefined}
-      tabIndex={onBoot ? 0 : undefined}
-      aria-label={onBoot ? 'Boot the computer and play Infra Ops, a cloud security game' : undefined}
-      style={{
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: isDragging ? 'grabbing' : 'grab'
-    }}>
-
-      <div className="computer" ref={computerRef}>
-        <div className="screen">
-          <div className="front square"></div>
-          <div className="back square"></div>
-          <div className="top square"></div>
-          <div className="left square">
-            {/* Enhanced Screen Content */}
-            <div ref={screenRef} style={{
-              position: 'absolute',
-              top: '12%',
-              left: '8%',
-              width: '84%',
-              height: '76%',
-              background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)',
-              borderRadius: '2px',
-              overflow: 'hidden',
-              boxShadow: 'inset 0 0 20px rgba(0, 255, 136, 0.08)'
-            }}>
-              {/* Terminal Lines */}
-              <div style={{
-                position: 'absolute',
-                top: '15%',
-                left: '10%',
-                width: '80%',
-                fontSize: '4px',
-                fontFamily: 'monospace',
-                color: '#4EC456',
-                textShadow: '0 0 3px rgba(78, 196, 86, 0.5)',
-                lineHeight: '1.8'
-              }}>
-                <div style={{ opacity: 0.9 }}>$ npm run dev</div>
-                <div style={{ opacity: 0.7 }}>✓ Ready in 1.2s</div>
-                <div style={{ opacity: 0.8, marginTop: '2px' }}>
-                  <span style={{ color: '#00d9ff' }}>→</span> Local: <span style={{ color: '#fff' }}>localhost</span>
-                </div>
-              </div>
-              {/* Blinking Cursor */}
-              <div style={{
-                position: 'absolute',
-                bottom: '20%',
-                left: '10%',
-                width: '3px',
-                height: '6px',
-                background: '#4EC456',
-                boxShadow: '0 0 4px #4EC456',
-                animation: 'cursorBlink 1s step-end infinite'
-              }}></div>
-              {/* Scanlines Overlay */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 3px)',
-                pointerEvents: 'none'
-              }}></div>
-              {/* Screen Glare */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%, transparent 100%)',
-                pointerEvents: 'none'
-              }}></div>
-            </div>
-            <div className="progressbar"></div>
-          </div>
-          <div className="right square">
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-            <div className="intake"></div>
-          </div>
-          <div className="left1 square"></div>
-          <div className="back1 square"></div>
-          <div className="front1 square"></div>
-          <div className="bottom1 square"></div>
-          <div className="top1 square"></div>
-        </div>
-        <div className="screenbottom">
-          <div className="front2 square">
-            {/* Front Panel Details */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '60%',
-              height: '3px',
-              background: 'linear-gradient(90deg, #b8a898, #d4c7b8, #b8a898)',
-              borderRadius: '1px'
-            }}></div>
-          </div>
-          <div className="top2 square"></div>
-          <div className="left2 square">
-            <div className="brownpart">
-              <div className="disc"></div>
-              {/* Power LED */}
-              <div style={{
-                position: 'absolute',
-                right: '15px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '4px',
-                height: '4px',
-                background: '#4EC456',
-                borderRadius: '50%',
-                boxShadow: '0 0 4px #4EC456, 0 0 8px rgba(78, 196, 86, 0.5)',
-                animation: 'discPulse 2s ease-in-out infinite'
-              }}></div>
-              {/* Secondary LED */}
-              <div style={{
-                position: 'absolute',
-                right: '25px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '3px',
-                height: '3px',
-                background: '#ff6b35',
-                borderRadius: '50%',
-                boxShadow: '0 0 3px #ff6b35',
-                opacity: 0.8
-              }}></div>
-            </div>
-            {/* Drive Button */}
-            <div style={{
-              position: 'absolute',
-              right: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '8px',
-              height: '8px',
-              background: 'linear-gradient(180deg, #a09080 0%, #8a7a6a 100%)',
-              borderRadius: '2px',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)'
-            }}></div>
-          </div>
-          <div className="right2 square"></div>
-          <div className="back2 square"></div>
-          <div className="bottom2 square"></div>
-        </div>
-        <div className="screenbottombottom">
-          <div className="front3 square">
-            {/* Brand Label */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '3px',
-              fontFamily: 'monospace',
-              color: '#8a7a6a',
-              letterSpacing: '1px',
-              fontWeight: 'bold'
-            }}>RETRO</div>
-          </div>
-          <div className="left3 square"></div>
-          <div className="right3 square"></div>
-          <div className="bottom3 square"></div>
-          <div className="back3 square"></div>
-        </div>
-        <div className="keyboard">
-          <div className="front4 square"></div>
-          <div className="back4 square"></div>
-          <div className="top4 square">
-            {/* Keyboard Keys Grid */}
-            <div style={{
-              position: 'absolute',
-              top: '15%',
-              left: '5%',
-              width: '90%',
-              height: '70%',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(10, 1fr)',
-              gridTemplateRows: 'repeat(4, 1fr)',
-              gap: '1px'
-            }}>
-              {Array.from({ length: 40 }).map((_, i) => (
-                <div key={i} style={{
-                  background: 'linear-gradient(180deg, #7a6a5a 0%, #5d4d3d 100%)',
-                  borderRadius: '0.5px',
-                  boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.15)'
-                }}></div>
-              ))}
-            </div>
-          </div>
-          <div className="left4 square"></div>
-          <div className="right4 square"></div>
-          <div className="bottom4 square"></div>
-        </div>
-        <div className="keyboardkeys">
-          <div className="front5 square"></div>
-          <div className="back5 square"></div>
-          <div className="top5 square">
-            {/* Function Keys */}
-            <div style={{
-              position: 'absolute',
-              top: '20%',
-              left: '8%',
-              width: '84%',
-              height: '60%',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(6, 1fr)',
-              gridTemplateRows: 'repeat(2, 1fr)',
-              gap: '1px'
-            }}>
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} style={{
-                  background: 'linear-gradient(180deg, #8a7a6a 0%, #6a5a4a 100%)',
-                  borderRadius: '0.5px',
-                  boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.1)'
-                }}></div>
-              ))}
-            </div>
-          </div>
-          <div className="left5 square"></div>
-          <div className="right5 square"></div>
-          <div className="bottom5 square"></div>
-        </div>
-        <div className="numpad">
-          <div className="front6 square"></div>
-          <div className="back6 square"></div>
-          <div className="top6 square">
-            {/* Numpad Keys */}
-            <div style={{
-              position: 'absolute',
-              top: '15%',
-              left: '10%',
-              width: '80%',
-              height: '70%',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gridTemplateRows: 'repeat(3, 1fr)',
-              gap: '1px'
-            }}>
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} style={{
-                  background: 'linear-gradient(180deg, #8a7a6a 0%, #6a5a4a 100%)',
-                  borderRadius: '0.5px',
-                  boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.12)'
-                }}></div>
-              ))}
-            </div>
-          </div>
-          <div className="left6 square"></div>
-          <div className="right6 square"></div>
-          <div className="bottom6 square"></div>
-        </div>
-
-        {/* Mouse - New Addition */}
-        <div style={{
-          position: 'absolute',
-          width: '20px',
-          height: '12px',
-          transformStyle: 'preserve-3d',
-          transform: 'translateY(175px) translateX(50px) translateZ(30px)'
-        }}>
-          {/* Mouse Top */}
-          <div style={{
-            position: 'absolute',
-            width: '20px',
-            height: '30px',
-            background: 'linear-gradient(180deg, #e8ddd0 0%, #d4c7b8 100%)',
-            transform: 'rotatex(90deg) translatez(6px)',
-            borderRadius: '10px 10px 5px 5px'
-          }}></div>
-          {/* Mouse Button */}
-          <div style={{
-            position: 'absolute',
-            width: '8px',
-            height: '12px',
-            background: '#c6b5a4',
-            transform: 'rotatex(90deg) translatez(6px) translateY(-5px) translateX(6px)',
-            borderRadius: '2px 2px 0 0'
-          }}></div>
-          {/* Mouse Cable */}
-          <div style={{
-            position: 'absolute',
-            width: '2px',
-            height: '25px',
-            background: 'linear-gradient(90deg, #4a4a4a, #5a5a5a, #4a4a4a)',
-            transform: 'rotatex(90deg) translatez(6px) translateY(-25px) translateX(9px)',
-            borderRadius: '1px'
-          }}></div>
-        </div>
-      </div>
-
-      {/* CSS for cursor blink animation */}
-      <style>{`
-        @keyframes cursorBlink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
+    <div className="iso pc-figure absolute inset-0 flex items-center justify-center" data-theme="dark">
+      <div
+        ref={stageRef}
+        className="iso-stage iso-turn pc-stage w-full max-w-[560px] aspect-[56/50] cursor-grab active:cursor-grabbing select-none"
+        onPointerDown={handlePointerDown}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role={onBoot ? 'button' : 'img'}
+        tabIndex={0}
+        aria-label={
+          onBoot
+            ? 'A beige retro desktop computer. Drag or use the arrow keys to turn it; press Enter to boot Infra Ops, a cloud security game'
+            : 'A beige retro desktop computer with a CRT monitor, keyboard and mouse'
         }
-      `}</style>
-    </div >
+      />
+    </div>
   );
 };
 

@@ -13,7 +13,7 @@ const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
-  const screenRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<Element | null>(null);
   const [gameOpen, setGameOpen] = useState(false);
   const [gameLoaded, setGameLoaded] = useState(false);
   const bootGame = useCallback(() => { setGameLoaded(true); setGameOpen(true); }, []);

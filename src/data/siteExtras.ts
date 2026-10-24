@@ -74,6 +74,47 @@ export const homelab = {
       detail: "My own serial console for the headless boxes. I built it because a node dropped off the network and I got tired of walking over with a keyboard.",
     },
   ],
+  /**
+   * What is physically in and around the rack, top down. `read` is the rack
+   * figure's read-out for that machine; `at` is where in the figure's 400 × 320
+   * viewBox a pointer picks it, so hovering a row can point the figure at it.
+   */
+  rack: [
+    { read: "router", at: [229, 79], side: "right", role: "uplink, on the roof", name: "Router", detail: "The uplink, sitting on the roof. One cable down to the 2.5 GbE switch, and nothing in the lab is published past it." },
+    { read: "tiny 1", at: [224, 129], side: "left", role: "Proxmox node", name: "ThinkCentre Tiny", detail: "Proxmox node, on the top shelf." },
+    { read: "tiny 2", at: [220, 151], side: "left", role: "Proxmox node", name: "ThinkCentre Tiny", detail: "Proxmox node, on the shelf under it." },
+    { read: "2.5g sw", at: [198, 173], side: "left", role: "backbone + patch panel", name: "2.5 GbE switch", detail: "Grandstream, patched down into its panel. The backbone: every node, the 1 GbE switch and both laptops hang off it." },
+    { read: "1g sw", at: [200, 197], side: "left", role: "management + patch panel", name: "1 GbE switch", detail: "Patched into the second panel. The management side: the Pis, the access point and the four PicoTTY nodes." },
+    { read: "raspis", at: [206, 224], side: "left", role: "screens + PicoTTY hub", name: "Raspberry Pis", detail: "The bottom shelf: the two Pis with screens on the front, and the Pi Zero 2 W that is PicoTTY's hub." },
+    { read: "tiny 3", at: [273, 193], side: "right", role: "Proxmox node, side mount", name: "ThinkCentre Tiny", detail: "Proxmox node, bolted to the side of the rack." },
+    { read: "pico", at: null, side: "right", role: "PicoTTY, on every node", name: "Pico in a USB port", detail: "One on every node: a Raspberry Pi Pico with a W5100S Ethernet HAT, so the node can be reached even when it is off the network." },
+    { read: "sff", at: [136, 134], side: "left", role: "Proxmox node", name: "ThinkCentre SFF", detail: "Proxmox node, standing beside the rack." },
+  ],
+  /** The network as it is wired, from the lab's own topology map. */
+  topology: {
+    cluster: [
+      // TODO(names): guest names cut short in the topology map are marked with … until the full names are in.
+      { name: "Homelab-Main", guests: ["Node-01-M…", "Node-01-Bak", "Node-01-A…", "Node-01-Vpn"] },
+      { name: "Homelab-IC2", guests: ["Node-02-DB", "Node-02-Use…", "Node-02-Sec"] },
+      { name: "Homelab-IC3", guests: ["Node-03-AI", "Node-03-Cl…", "Node-02-T…"] },
+      { name: "Homelab-PBS", guests: [] as string[], note: "Proxmox Backup Server" },
+    ],
+    management: ["mon-pi-kvm", "mon-pi-1", "mon-pi-2", "Access point"],
+    picotty: ["Main", "IC2", "IC3", "PBS"],
+    work: ["Personal laptop", "Work laptop"],
+  },
+  /** PicoTTY, from its writeup. */
+  picotty: {
+    summary:
+      "A KVM without the V or the M. Each node is a Raspberry Pi Pico with a WIZnet W5100S Ethernet HAT, plugged into its machine over USB, where it shows up as a serial console and a keyboard. The Ethernet chip talks to the Pico over SPI, so its one USB port stays free for the machine it looks after.",
+    facts: [
+      { k: "Nodes", v: "4 × Pico + W5100S, one per Proxmox box, powered from its USB port" },
+      { k: "Hub", v: "Pi Zero 2 W with a Waveshare Ethernet HAT; nodes dial it on TCP 9000" },
+      { k: "Network", v: "An isolated management VLAN; the dashboard is only reachable through Twingate" },
+      { k: "Liveness", v: "A heartbeat every 5 s; a node silent for about 15 s is marked offline" },
+      { k: "Cost", v: "₹8,400 for all four nodes and the hub, against ₹22,634 for one JetKVM" },
+    ],
+  },
   writeups: [
     {
       title: "Inside My $1,000 Homelab: How I Rebuilt Big Tech Services in a Tiny Rack",
