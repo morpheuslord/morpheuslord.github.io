@@ -25,3 +25,13 @@ resume/
 *.njsproj
 *.sln
 *.sw?
+
+# anatomy skill build kit: only scripts/build-computer.mjs uses these. Copy them
+# from ~/.claude/skills/anatomy/kit/ to rebuild the hero computer. The runtime
+# files the site imports (turn.mjs, iso.css) stay tracked.
+src/lib/anatomy/iso-kit.mjs
+src/lib/anatomy/lathe.mjs
+src/lib/anatomy/audit.mjs
+src/lib/anatomy/tube.mjs
+src/lib/anatomy/turn-build.mjs
+src/lib/anatomy/turn-audit.mjs
