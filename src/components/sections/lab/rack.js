@@ -103,7 +103,7 @@ function mount({ stage, svg, read }, value) {
     p.ledEls = (p.leds ?? []).map((_, i) => mk("circle", { r: 0.8, class: i % 3 === 1 ? "dot off" : "dot m" }, p.grp));
     p.dotEls = p.dots ? p.dots(P).map(() => mk("circle", { r: 0.55, class: "dot off" }, p.grp)) : [];
     p.picoEl = p.pico ? mk("circle", { r: 0.8, class: "dot off" }, p.grp) : null;
-    p.rest = p.name === "raspis" ? 16 : 0;
+    p.rest = 0; // everything sits flush until the pointer picks it
     p.pull = tween(p.rest); p.drawn = NaN;
   };
 
