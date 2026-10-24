@@ -29,8 +29,8 @@ const LabViewer = () => {
   const [, setFrame] = useState(0);
   const flight = useRef<anime.AnimeInstance | null>(null);
 
-  const gutter = size.w >= 1000 ? LABEL_W + 40 : size.w >= 700 ? 150 : 12;
-  const annotated = size.w >= 1000;
+  const gutter = size.w >= 940 ? LABEL_W + 36 : size.w >= 700 ? 150 : 12;
+  const annotated = size.w >= 940; // lg is 1024 wide, 976 inside the section padding
   const fitZoom = size.w ? Math.min((size.w - 2 * gutter) / (BOX.x1 - BOX.x0), (size.h - 24) / (BOX.y1 - BOX.y0)) : 1;
 
   const clampView = useCallback((v: View): View => {

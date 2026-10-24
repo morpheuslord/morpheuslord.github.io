@@ -90,26 +90,13 @@ export const homelab = {
     { read: "pico", at: null, side: "right", role: "PicoTTY, on every node", name: "Pico in a USB port", detail: "One on every node: a Raspberry Pi Pico with a W5100S Ethernet HAT, so the node can be reached even when it is off the network." },
     { read: "sff", at: [136, 134], side: "left", role: "Proxmox node", name: "ThinkCentre SFF", detail: "Proxmox node, standing beside the rack." },
   ],
-  /** The network as it is wired, from the lab's own topology map. */
-  topology: {
-    cluster: [
-      // TODO(names): guest names cut short in the topology map are marked with … until the full names are in.
-      { name: "Homelab-Main", guests: ["Node-01-M…", "Node-01-Bak", "Node-01-A…", "Node-01-Vpn"] },
-      { name: "Homelab-IC2", guests: ["Node-02-DB", "Node-02-Use…", "Node-02-Sec"] },
-      { name: "Homelab-IC3", guests: ["Node-03-AI", "Node-03-Cl…", "Node-02-T…"] },
-      { name: "Homelab-PBS", guests: [] as string[], note: "Proxmox Backup Server" },
-    ],
-    management: ["mon-pi-kvm", "mon-pi-1", "mon-pi-2", "Access point"],
-    picotty: ["Main", "IC2", "IC3", "PBS"],
-    work: ["Personal laptop", "Work laptop"],
-  },
   /** PicoTTY, from its writeup. */
   picotty: {
     summary:
       "A KVM without the V or the M. Each node is a Raspberry Pi Pico with a WIZnet W5100S Ethernet HAT, plugged into its machine over USB, where it shows up as a serial console and a keyboard. The Ethernet chip talks to the Pico over SPI, so its one USB port stays free for the machine it looks after.",
     facts: [
       { k: "Nodes", v: "4 × Pico + W5100S, one per Proxmox box, powered from its USB port" },
-      { k: "Hub", v: "Pi Zero 2 W with a Waveshare Ethernet HAT; nodes dial it on TCP 9000" },
+      { k: "Hub", v: "Pi Zero 2 W with a Waveshare Ethernet HAT; every node keeps a connection open to it" },
       { k: "Network", v: "An isolated management VLAN; the dashboard is only reachable through Twingate" },
       { k: "Liveness", v: "A heartbeat every 5 s; a node silent for about 15 s is marked offline" },
       { k: "Cost", v: "₹8,400 for all four nodes and the hub, against ₹22,634 for one JetKVM" },

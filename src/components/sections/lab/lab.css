@@ -13,34 +13,6 @@
 .lab-row:hover { border-color: hsl(var(--foreground) / .15); }
 .lab-row:focus-visible { outline: 1px solid hsl(var(--foreground) / .45); outline-offset: 2px; }
 
-/* The wiring map */
-.lab-map { position: relative; }
-.lab-node {
-  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px;
-  padding: .5rem .75rem; border: 1px solid hsl(var(--border) / .8); border-radius: .5rem;
-  background: hsl(var(--background));
-}
-.lab-node-dim { border-style: dashed; }
-.lab-drop { display: block; width: 1px; height: 1.5rem; background: hsl(var(--border)); position: relative; overflow: hidden; }
-.lab-drop::after {
-  content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%;
-  background: linear-gradient(to bottom, transparent, hsl(var(--foreground) / .7), transparent);
-  animation: lab-flow 2.4s linear infinite;
-}
-.lab-branches { position: relative; padding-top: 1.5rem; }
-.lab-branches::before { content: ""; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: hsl(var(--border)); }
-.lab-group { position: relative; border: 1px dashed hsl(var(--border)); border-radius: .875rem; padding: 1rem; }
-.lab-group::before { content: ""; position: absolute; left: 50%; top: -1.5rem; width: 1px; height: 1.5rem; background: hsl(var(--border)); }
-.lab-group-title { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: hsl(var(--foreground) / .85); margin-bottom: .75rem; }
-.lab-group-title span { color: hsl(var(--muted-foreground)); text-transform: none; letter-spacing: .02em; }
-.lab-host { border: 1px solid hsl(var(--border) / .8); border-radius: .625rem; padding: .75rem; background: hsl(var(--background)); }
-.lab-guest { font-family: ui-monospace, monospace; font-size: 10px; color: hsl(var(--muted-foreground)); border: 1px solid hsl(var(--border) / .7); border-radius: 999px; padding: .1rem .5rem; }
-@media (max-width: 1023px) {
-  .lab-branches::before { display: none; }
-  .lab-group::before { display: none; }
-  .lab-branches { padding-top: 0; }
-}
-
 /* PicoTTY star */
 .lab-pico { border: 1px dashed hsl(var(--border)); border-radius: 1rem; padding: 1.25rem; }
 .pico-link { stroke: hsl(var(--border)); stroke-width: 1; stroke-dasharray: 2 4; }
@@ -50,12 +22,11 @@
 .pico-text { fill: hsl(var(--muted-foreground)); font: 9.5px ui-monospace, "JetBrains Mono", monospace; }
 .pico-strong { fill: hsl(var(--foreground)); font-size: 11px; }
 
-@keyframes lab-flow { to { top: 100%; } }
 /* A heartbeat runs node → hub along each link, once every 5 s. */
 @keyframes pico-beat { 0% { stroke-dashoffset: 8; opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 36%, 100% { stroke-dashoffset: -150; opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .lab-drop::after, .pico-beat { animation: none; opacity: 0; }
+  .pico-beat { animation: none; opacity: 0; }
 }
 
 /* The lab viewer: the rack drawing, zoomable, with leader-line annotations. */

@@ -5,20 +5,13 @@ import { ExternalLink } from 'lucide-react';
 import LabViewer from './lab/LabViewer';
 import './lab/lab.css';
 
-const { rack, topology, picotty } = homelab;
+const { rack, picotty } = homelab;
 
-/** A device in the wiring map. */
-const Node = ({ name, sub, dim = false }: { name: string; sub?: string; dim?: boolean }) => (
-  <div className={`lab-node ${dim ? 'lab-node-dim' : ''}`}>
-    <span className="font-mono text-xs text-foreground">{name}</span>
-    {sub && <span className="font-mono text-[10px] text-muted-foreground">{sub}</span>}
-  </div>
-);
-
-/** PicoTTY as a star: the hub in the middle, one Pico node per Proxmox box, a heartbeat on each link every 5 s. */
+/** PicoTTY as a star: the hub in the middle, one Pico node per Proxmox box, a heartbeat on each link every 5 s.
+ * Nodes are numbered, not named: the site shows how PicoTTY works, not what the lab's machines are called. */
 const PicoStar = () => {
   const W = 360, Hh = 230, hub = [W / 2, Hh / 2];
-  const nodes = topology.picotty.map((name, i) => ({ name, x: i % 2 ? W - 62 : 62, y: i < 2 ? 46 : Hh - 46 }));
+  const nodes = [1, 2, 3, 4].map((n, i) => ({ name: `node ${n}`, x: i % 2 ? W - 62 : 62, y: i < 2 ? 46 : Hh - 46 }));
   return (
     <svg viewBox={`0 0 ${W} ${Hh}`} className="w-full h-auto" role="img" aria-label="PicoTTY: a hub in the middle, wired to a Pico node on each of the four Proxmox boxes">
       {nodes.map((n, i) => (
@@ -29,7 +22,7 @@ const PicoStar = () => {
       ))}
       <rect x={hub[0] - 70} y={hub[1] - 21} width="140" height="42" rx="8" className="pico-box pico-hub" />
       <text x={hub[0]} y={hub[1] - 3} className="pico-text pico-strong" textAnchor="middle">hub</text>
-      <text x={hub[0]} y={hub[1] + 11} className="pico-text" textAnchor="middle">Pi Zero 2 W · :8080</text>
+      <text x={hub[0]} y={hub[1] + 11} className="pico-text" textAnchor="middle">Pi Zero 2 W</text>
       {nodes.map((n) => (
         <g key={n.name}>
           <rect x={n.x - 46} y={n.y - 17} width="92" height="34" rx="7" className="pico-box" />
@@ -94,56 +87,6 @@ const Homelab = () => {
             </li>
           ))}
         </ul>
-
-        {/* How it is wired */}
-        <div className="mt-24">
-          <p className="homelab-item opacity-0 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8 text-center">How it is wired</p>
-          <div className="homelab-item opacity-0 lab-map">
-            <div className="flex flex-col items-center">
-              <Node name="Router" sub="uplink" />
-              <span className="lab-drop" />
-              <Node name="2.5 GbE switch" sub="backbone" />
-              <span className="lab-drop" />
-            </div>
-            <div className="lab-branches grid gap-5 lg:grid-cols-[2.1fr_1.15fr_0.75fr]">
-              <div className="lab-group">
-                <p className="lab-group-title">Proxmox cluster <span>· 4 nodes</span></p>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {topology.cluster.map((n) => (
-                    <div key={n.name} className="lab-host">
-                      <p className="font-mono text-xs text-foreground mb-2">{n.name}</p>
-                      {n.guests.length ? (
-                        <ul className="flex flex-wrap gap-1.5">
-                          {n.guests.map((g) => (
-                            <li key={g} className="lab-guest">{g}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="font-mono text-[10px] text-muted-foreground">{n.note}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="lab-group">
-                <p className="lab-group-title">Management <span>· 1 GbE</span></p>
-                <div className="grid grid-cols-2 gap-2">
-                  {topology.management.map((m) => <Node key={m} name={m} />)}
-                </div>
-                <p className="lab-group-title mt-4">PicoTTY nodes <span>· serial + keyboard</span></p>
-                <div className="grid grid-cols-2 gap-2">
-                  {topology.picotty.map((p) => <Node key={p} name={`pico → ${p}`} dim />)}
-                </div>
-              </div>
-              <div className="lab-group">
-                <p className="lab-group-title">Work net</p>
-                <div className="grid gap-2">
-                  {topology.work.map((w) => <Node key={w} name={w} />)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* PicoTTY */}
         <div className="mt-24 grid lg:grid-cols-[1fr_1.05fr] gap-10 items-center">
