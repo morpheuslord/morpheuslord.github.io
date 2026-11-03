@@ -632,6 +632,15 @@ export const projects: Array<{
 }> = [
   // --- AI security and LLM research (ordered by stars) ---
   {
+    id: 12,
+    title: "Argus Council",
+    description:
+      "Self-hosted platform where a council of LLM agents plans, argues over the work, votes and delivers research, code and reports. Each seat gets the model best suited to its role weighed against token cost, every thought passes a guarded thought bus with overseer agents, and risky tool calls wait for human approval. Co-built with lordprime.",
+    github: "https://github.com/lordprime/Argus-Council",
+    tags: ["Python", "FastAPI", "Multi-Agent", "LLMs", "MCP"],
+    cluster: "ai-security",
+  },
+  {
     id: 1,
     title: "GPT-Vuln-Analyzer",
     description:
