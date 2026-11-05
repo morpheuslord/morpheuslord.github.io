@@ -125,7 +125,10 @@
     z-index: 100;
     pointer-events: none;
     opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* Sized tile: without width/height the SVG stretches to the viewport and the grain blurs into blotches. */
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    background-repeat: repeat;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -278,7 +281,8 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
     opacity: 0.03;
     pointer-events: none;
     z-index: 1;
@@ -495,9 +499,14 @@
 
   /* ---------- Hero backdrop ---------- */
 
+  /* Sized off the viewport so it stays a soft corner light on any screen, not a fixed-size smudge. */
   .hero-glow {
     @apply absolute pointer-events-none rounded-full;
-    background: radial-gradient(circle, hsla(0, 0%, 100%, 0.07), transparent 65%);
+    width: clamp(480px, 55vw, 1100px);
+    aspect-ratio: 1;
+    top: calc(clamp(480px, 55vw, 1100px) * -0.4);
+    left: calc(clamp(480px, 55vw, 1100px) * -0.3);
+    background: radial-gradient(circle closest-side, hsla(0, 0%, 100%, 0.06), hsla(0, 0%, 100%, 0.02) 55%, transparent);
   }
 
   /* Surname set as an outline that fills in on hover. */

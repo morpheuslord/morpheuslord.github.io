@@ -108,7 +108,7 @@ const Hero = () => {
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/10" />
 
-      <div className="hero-glow w-[720px] h-[720px] -top-64 -left-48" aria-hidden="true" />
+      <div className="hero-glow" aria-hidden="true" />
 
       {/* Terrain accent along the bottom edge; rises a little under the cursor */}
       <TerrainLines className="absolute inset-x-0 bottom-0 h-[220px] md:h-[300px]" amplitude={64} />
