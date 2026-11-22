@@ -118,19 +118,6 @@
     font-family: var(--font-mono);
   }
   
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0.035;
-    /* Sized tile: without width/height the SVG stretches to the viewport and the grain blurs into blotches. */
-    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
-    background-repeat: repeat;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -270,22 +257,6 @@
       linear-gradient(hsla(0, 0%, 100%, 0.02) 1px, transparent 1px),
       linear-gradient(90deg, hsla(0, 0%, 100%, 0.02) 1px, transparent 1px);
     background-size: 50px 50px;
-  }
-  
-  /* Noise Texture Overlay */
-  .noise-overlay {
-    position: relative;
-  }
-  
-  .noise-overlay::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 1;
   }
   
   /* Animated Border */
